@@ -34,12 +34,14 @@
     color: penConfig.player1.color, accent: penConfig.player1.accent,
     trailColor: penConfig.player1.trail, glow: !!penConfig.player1.glow,
     mass: penConfig.player1.mass || 1, friction: penConfig.player1.friction || 1,
+    assetKey: penConfig.player1.assetKey || "classic-blue"
   });
   engine.addPen("player2", {
     x: bench.x + bench.w * 0.72, y: bench.y + bench.h / 2, angle: Math.PI,
     color: penConfig.player2.color, accent: penConfig.player2.accent,
     trailColor: penConfig.player2.trail, glow: !!penConfig.player2.glow,
     mass: penConfig.player2.mass || 1, friction: penConfig.player2.friction || 1,
+    assetKey: penConfig.player2.assetKey || "sunset-blaze"
   });
 
   let currentTurn = "player1";

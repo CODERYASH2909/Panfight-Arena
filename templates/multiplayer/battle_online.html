@@ -106,6 +106,7 @@
     power: {{ room.host.profile.equipped_pen.max_power|default:1.0 }},
     color: "{{ room.host.profile.equipped_skin.body_color|default:'#3b82f6' }}", accent: "{{ room.host.profile.equipped_skin.accent_color|default:'#93c5fd' }}",
     trail: "{{ room.host.profile.equipped_skin.trail_color|default:'#60a5fa' }}", glow: {{ room.host.profile.equipped_skin.glow|yesno:"true,false" }},
+    assetKey: "{{ room.host.profile.equipped_skin.asset_key|default:'classic-blue' }}",
     penId: {{ room.host.profile.equipped_pen_id|default:"null" }}, skinId: {{ room.host.profile.equipped_skin_id|default:"null" }}
   };
   window.PF_GUEST_PEN = {
@@ -113,6 +114,7 @@
     power: {{ room.guest.profile.equipped_pen.max_power|default:1.0 }},
     color: "{{ room.guest.profile.equipped_skin.body_color|default:'#f87171' }}", accent: "{{ room.guest.profile.equipped_skin.accent_color|default:'#fecaca' }}",
     trail: "{{ room.guest.profile.equipped_skin.trail_color|default:'#fca5a5' }}", glow: {{ room.guest.profile.equipped_skin.glow|yesno:"true,false" }},
+    assetKey: "{{ room.guest.profile.equipped_skin.asset_key|default:'sunset-blaze' }}",
     penId: {{ room.guest.profile.equipped_pen_id|default:"null" }}, skinId: {{ room.guest.profile.equipped_skin_id|default:"null" }}
   };
 </script>

@@ -1,30 +1,51 @@
 {% extends "base.html" %}
+{% load static %}
+
 {% block title %}My Collection — PenFight Arena{% endblock %}
+
 {% block content %}
 <div class="pf-page-head">
-  <div class="pf-page-title">📦 MY COLLECTION</div>
+  <div class="pf-page-title">📦 MY COSMETIC COLLECTION</div>
   <div class="pf-page-sub">{{ owned_count }} / {{ total_count }} PENS COLLECTED</div>
 </div>
 
-<div class="pf-progress pf-mb-32" style="max-width:400px;">
+<div class="pf-progress pf-mb-32" style="max-width:450px;">
   <div class="pf-progress-fill gold" style="width:{% widthratio owned_count total_count 100 %}%;"></div>
 </div>
 
 <div class="pf-grid pf-grid-4">
   {% for skin in all_skins %}
-  <div class="pf-card {% if skin.id in owned_ids %}pf-card-hover{% endif %}" style="{% if skin.id not in owned_ids %}opacity:0.45; filter:grayscale(0.7);{% endif %}">
-    <div class="pf-flex-between">
-      <span style="font-size:24px;">{{ skin.icon }}</span>
+  <div class="pf-card pen-card-{{ skin.rarity }} {% if skin.id in owned_ids %}pf-card-hover{% else %}pf-muted{% endif %}" style="{% if skin.id not in owned_ids %}opacity:0.4; filter:grayscale(0.6);{% endif %}">
+    <div class="pf-flex-between pf-mb-8">
       <span class="pf-badge pf-badge-{{ skin.rarity }}">{{ skin.get_rarity_display }}</span>
+      {% if skin.id in owned_ids %}
+        <span class="pf-badge pf-badge-common">OWNED</span>
+      {% endif %}
     </div>
-    <div style="font-weight:700; margin-top:10px;">{{ skin.name }}</div>
-    <div class="pf-faint" style="font-size:12px; margin-top:4px;">{{ skin.description|default:"Cosmetic pen skin." }}</div>
+
+    <!-- Vector Pen Visual Hero -->
+    <div class="pen-card-visual pf-mb-8" data-skin-key="{{ skin.asset_key }}"></div>
+
+    <div style="font-weight:800; font-size:16px;">{{ skin.name }}</div>
+    <div class="pf-faint" style="font-size:11px; margin-top:4px; height:30px; overflow:hidden;">{{ skin.description|default:"Cosmetic pen skin." }}</div>
+
     {% if skin.id in owned_ids %}
-      <a href="{% url 'game:my_pen' %}" class="pf-btn pf-btn-ghost pf-btn-sm pf-btn-block pf-mt-16">Equip in My Pen</a>
+      <a href="{% url 'game:my_pen' %}" class="pf-btn pf-btn-blue pf-btn-sm pf-btn-block pf-mt-16">EQUIP LOADOUT</a>
     {% else %}
-      <a href="{% url 'store:home' %}" class="pf-btn pf-btn-primary pf-btn-sm pf-btn-block pf-mt-16">🔒 Unlock in Store</a>
+      <a href="{% url 'store:home' %}" class="pf-btn pf-btn-ghost pf-btn-sm pf-btn-block pf-mt-16">🔒 STORE</a>
     {% endif %}
   </div>
   {% endfor %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.pen-card-visual').forEach(container => {
+      const key = container.dataset.skinKey || 'classic-blue';
+      container.innerHTML = PenVisuals.renderSVG(key, { width: 240, height: 50 });
+    });
+  });
+</script>
 {% endblock %}

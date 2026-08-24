@@ -1,36 +1,80 @@
 {% extends "base.html" %}
+{% load static %}
+
 {% block title %}Pen Store — PenFight Arena{% endblock %}
+
 {% block content %}
+<!-- Page Header -->
 <div class="pf-page-head pf-flex-between">
   <div>
-    <div class="pf-page-title">🛒 PEN STORE</div>
-    <div class="pf-page-sub">Spend your Pen Points on cosmetic skins. Never pay-to-win.</div>
+    <div class="pf-page-title">🛒 PEN COSMETIC STORE</div>
+    <div class="pf-page-sub">Equip & collect authentic premium ball pens. Pure cosmetics — never pay-to-win.</div>
   </div>
-  <div class="pf-pp-chip" style="font-size:16px; padding:10px 20px;">🪙 {{ request.user.profile.pen_points }} PP</div>
+  <div class="pf-pp-chip" style="font-size:17px; padding:12px 24px;">
+    🪙 {{ request.user.profile.pen_points }} PP
+  </div>
 </div>
 
+<!-- Controls & Filter Bar -->
+<div class="pf-glass pf-mb-32" style="padding:16px 24px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px;">
+  <div class="pf-flex pf-gap-8" style="flex-wrap:wrap;" id="rarity-filters">
+    <button class="pf-btn pf-btn-ghost pf-btn-sm active-filter" data-rarity="all">ALL PENS</button>
+    <button class="pf-btn pf-btn-ghost pf-btn-sm" data-rarity="common">COMMON</button>
+    <button class="pf-btn pf-btn-ghost pf-btn-sm" data-rarity="uncommon">UNCOMMON</button>
+    <button class="pf-btn pf-btn-ghost pf-btn-sm" data-rarity="rare">RARE</button>
+    <button class="pf-btn pf-btn-ghost pf-btn-sm" data-rarity="epic">EPIC</button>
+    <button class="pf-btn pf-btn-ghost pf-btn-sm" data-rarity="legendary">LEGENDARY</button>
+    <button class="pf-btn pf-btn-ghost pf-btn-sm" data-rarity="mythic">MYTHIC</button>
+  </div>
+
+  <div class="pf-flex pf-gap-12" style="flex:1; max-width:400px;">
+    <input type="text" id="store-search" placeholder="🔍 Search pens..." class="pf-input" style="padding:8px 14px; font-size:13px;">
+    <select id="store-sort" class="pf-select" style="padding:8px 14px; font-size:13px; width:auto;">
+      <option value="price-asc">Price: Low to High</option>
+      <option value="price-desc">Price: High to Low</option>
+      <option value="name">Name</option>
+    </select>
+  </div>
+</div>
+
+<!-- Featured Pens Section -->
 {% if featured %}
 <div class="pf-mb-32">
-  <div class="pf-section-title">✨ FEATURED PENS</div>
+  <div class="pf-section-title">✨ FEATURED COSMETICS</div>
   <div class="pf-grid pf-grid-3">
     {% for skin in featured %}
-    <div class="pf-card pf-card-hover" style="border-color: rgba(250,204,21,0.35);">
-      <div class="pf-flex-between">
-        <span style="font-size:26px;">{{ skin.icon }}</span>
+    <div class="pf-card pf-card-hover pen-store-card pen-card-{{ skin.rarity }}"
+         data-name="{{ skin.name|lower }}" data-rarity="{{ skin.rarity }}" data-price="{{ skin.price_pp }}" data-key="{{ skin.asset_key }}" data-id="{{ skin.id }}" data-desc="{{ skin.description }}" data-owned="{% if skin.id in owned_ids %}1{% else %}0{% endif %}">
+      <div class="pf-flex-between pf-mb-12">
         <span class="pf-badge pf-badge-{{ skin.rarity }}">{{ skin.get_rarity_display }}</span>
-      </div>
-      <div style="font-weight:700; margin-top:10px; font-size:17px;">{{ skin.name }}</div>
-      <div class="pf-faint" style="font-size:12px; margin-top:4px;">{{ skin.description|default:"Cosmetic pen skin." }}</div>
-      <div class="pf-flex-between pf-mt-16">
-        <span style="font-weight:800; color: var(--neon-gold);">🪙 {{ skin.price_pp }} PP</span>
         {% if skin.id in owned_ids %}
           <span class="pf-badge pf-badge-common">OWNED</span>
-        {% else %}
-          <form method="post" action="{% url 'store:buy_skin' skin.id %}">
-            {% csrf_token %}
-            <button class="pf-btn pf-btn-gold pf-btn-sm" {% if request.user.profile.pen_points < skin.price_pp %}disabled{% endif %}>Buy</button>
-          </form>
         {% endif %}
+      </div>
+
+      <!-- Large Pen Visual Hero Area -->
+      <div class="pen-card-visual pf-mb-16" data-skin-key="{{ skin.asset_key }}">
+        <!-- Injected by PenVisuals script -->
+      </div>
+
+      <div style="font-weight:800; font-size:19px; font-family:var(--font-display);">{{ skin.name }}</div>
+      <div class="pf-faint" style="font-size:12px; margin-top:4px; height:32px; overflow:hidden;">{{ skin.description }}</div>
+
+      <div class="pf-flex-between pf-mt-16">
+        <span style="font-weight:800; font-size:16px; color: var(--neon-gold);">
+          {% if skin.price_pp > 0 %}🪙 {{ skin.price_pp }} PP{% else %}FREE{% endif %}
+        </span>
+        <div class="pf-flex pf-gap-8">
+          <button type="button" class="pf-btn pf-btn-ghost pf-btn-sm btn-preview" onclick="openPreviewModal('{{ skin.asset_key }}', '{{ skin.name|escapejs }}', '{{ skin.rarity }}', '{{ skin.description|escapejs }}', {{ skin.price_pp }}, {{ skin.id }}, {% if skin.id in owned_ids %}true{% else %}false{% endif %})">👁️ PREVIEW</button>
+          {% if skin.id in owned_ids %}
+            <a href="{% url 'game:my_pen' %}" class="pf-btn pf-btn-sm pf-btn-ghost">EQUIP</a>
+          {% else %}
+            <form method="post" action="{% url 'store:buy_skin' skin.id %}">
+              {% csrf_token %}
+              <button class="pf-btn pf-btn-gold pf-btn-sm" {% if request.user.profile.pen_points < skin.price_pp %}disabled{% endif %}>BUY</button>
+            </form>
+          {% endif %}
+        </div>
       </div>
     </div>
     {% endfor %}
@@ -38,29 +82,193 @@
 </div>
 {% endif %}
 
-<div class="pf-section-title">ALL PENS</div>
-<div class="pf-grid pf-grid-4">
+<!-- All Skins Collection Grid -->
+<div class="pf-section-title">ALL PEN COSMETICS</div>
+<div class="pf-grid pf-grid-4" id="store-grid">
   {% for skin in all_skins %}
-  <div class="pf-card pf-card-hover">
-    <div class="pf-flex-between">
-      <span style="font-size:24px;">{{ skin.icon }}</span>
+  <div class="pf-card pf-card-hover pen-store-card pen-card-{{ skin.rarity }}"
+       data-name="{{ skin.name|lower }}" data-rarity="{{ skin.rarity }}" data-price="{{ skin.price_pp }}" data-key="{{ skin.asset_key }}" data-id="{{ skin.id }}" data-desc="{{ skin.description }}" data-owned="{% if skin.id in owned_ids %}1{% else %}0{% endif %}">
+    <div class="pf-flex-between pf-mb-8">
       <span class="pf-badge pf-badge-{{ skin.rarity }}">{{ skin.get_rarity_display }}</span>
-    </div>
-    <div style="font-weight:700; margin-top:10px;">{{ skin.name }}</div>
-    <div class="pf-flex-between pf-mt-16">
-      <span style="font-weight:800; color: var(--neon-gold);">🪙 {{ skin.price_pp }} PP</span>
       {% if skin.id in owned_ids %}
         <span class="pf-badge pf-badge-common">OWNED</span>
-      {% else %}
-        <form method="post" action="{% url 'store:buy_skin' skin.id %}">
-          {% csrf_token %}
-          <button class="pf-btn pf-btn-primary pf-btn-sm" {% if request.user.profile.pen_points < skin.price_pp %}disabled{% endif %}>Buy</button>
-        </form>
       {% endif %}
+    </div>
+
+    <!-- Large Pen Visual Hero Area -->
+    <div class="pen-card-visual pf-mb-12" data-skin-key="{{ skin.asset_key }}">
+      <!-- Injected by PenVisuals script -->
+    </div>
+
+    <div style="font-weight:800; font-size:17px; font-family:var(--font-display);">{{ skin.name }}</div>
+    <div class="pf-faint" style="font-size:12px; margin-top:2px; height:32px; overflow:hidden;">{{ skin.description }}</div>
+
+    <div class="pf-flex-between pf-mt-16">
+      <span style="font-weight:800; font-size:15px; color: var(--neon-gold);">
+        {% if skin.price_pp > 0 %}🪙 {{ skin.price_pp }} PP{% else %}FREE{% endif %}
+      </span>
+      <div class="pf-flex pf-gap-8">
+        <button type="button" class="pf-btn pf-btn-ghost pf-btn-sm btn-preview" onclick="openPreviewModal('{{ skin.asset_key }}', '{{ skin.name|escapejs }}', '{{ skin.rarity }}', '{{ skin.description|escapejs }}', {{ skin.price_pp }}, {{ skin.id }}, {% if skin.id in owned_ids %}true{% else %}false{% endif %})">👁️</button>
+        {% if skin.id in owned_ids %}
+          <a href="{% url 'game:my_pen' %}" class="pf-btn pf-btn-sm pf-btn-ghost">EQUIP</a>
+        {% else %}
+          <form method="post" action="{% url 'store:buy_skin' skin.id %}">
+            {% csrf_token %}
+            <button class="pf-btn pf-btn-primary pf-btn-sm" {% if request.user.profile.pen_points < skin.price_pp %}disabled{% endif %}>BUY</button>
+          </form>
+        {% endif %}
+      </div>
     </div>
   </div>
   {% empty %}
-  <div class="pf-empty"><div class="pf-empty-icon">🛒</div>Store is empty right now.</div>
+  <div class="pf-empty"><div class="pf-empty-icon">🛒</div>Store is currently empty.</div>
   {% endfor %}
 </div>
+
+<!-- Fullscreen Cinematic Preview Modal -->
+<div class="pf-modal-backdrop" id="preview-modal">
+  <div class="pf-modal-box">
+    <button class="pf-modal-close" onclick="closePreviewModal()">✕</button>
+
+    <div class="pf-grid pf-grid-2" style="align-items:center;">
+      <!-- Hero Stage -->
+      <div class="pf-preview-hero-stage">
+        <div id="modal-pen-container" class="pf-rotating-pen" style="width:100%; display:flex; justify-content:center;">
+          <!-- High-res Pen Visual SVG injected dynamically -->
+        </div>
+      </div>
+
+      <!-- Detail Info -->
+      <div style="padding-left:16px;">
+        <div class="pf-flex pf-gap-8 pf-mb-12">
+          <span class="pf-badge" id="modal-rarity-badge">EPIC</span>
+          <span class="pf-faint" style="font-size:12px;">BALL PEN COSMETIC</span>
+        </div>
+
+        <div id="modal-pen-name" style="font-size:32px; font-weight:800; font-family:var(--font-display); margin-bottom:8px;">
+          DRAGON FANG
+        </div>
+
+        <div id="modal-pen-desc" class="pf-muted" style="font-size:14px; margin-bottom:24px; line-height:1.5;">
+          Description goes here...
+        </div>
+
+        <div class="pf-flex-between pf-glass" style="padding:16px 20px; margin-bottom:24px;">
+          <div>
+            <div class="pf-faint" style="font-size:11px; text-transform:uppercase;">PRICE</div>
+            <div id="modal-pen-price" style="font-size:22px; font-weight:800; color:var(--neon-gold);">🪙 7,500 PP</div>
+          </div>
+          <div id="modal-action-container">
+            <!-- Dynamic Form or Equip Button -->
+          </div>
+        </div>
+
+        <button type="button" class="pf-btn pf-btn-ghost pf-btn-block" onclick="closePreviewModal()">CLOSE PREVIEW</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Render Pen Visual SVGs into all store cards on load
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.pen-card-visual').forEach(container => {
+      const key = container.dataset.skinKey || 'classic-blue';
+      container.innerHTML = PenVisuals.renderSVG(key, { width: 280, height: 60 });
+    });
+  });
+
+  // Dynamic Store Search & Filtering
+  const filterBtns = document.querySelectorAll('#rarity-filters button');
+  const searchInput = document.getElementById('store-search');
+  const sortSelect = document.getElementById('store-sort');
+  const storeGrid = document.getElementById('store-grid');
+
+  let currentRarity = 'all';
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active-filter', 'pf-btn-primary'));
+      btn.classList.add('active-filter', 'pf-btn-primary');
+      currentRarity = btn.dataset.rarity;
+      applyFilters();
+    });
+  });
+
+  searchInput.addEventListener('input', applyFilters);
+  sortSelect.addEventListener('change', applySorting);
+
+  function applyFilters() {
+    const query = searchInput.value.toLowerCase().trim();
+    const cards = document.querySelectorAll('.pen-store-card');
+
+    cards.forEach(card => {
+      const name = card.dataset.name;
+      const rarity = card.dataset.rarity;
+
+      const matchesSearch = name.includes(query);
+      const matchesRarity = (currentRarity === 'all' || rarity === currentRarity);
+
+      if (matchesSearch && matchesRarity) {
+        card.style.display = 'block';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+
+  function applySorting() {
+    const val = sortSelect.value;
+    const cards = Array.from(storeGrid.children);
+
+    cards.sort((a, b) => {
+      if (val === 'price-asc') return parseInt(a.dataset.price) - parseInt(b.dataset.price);
+      if (val === 'price-desc') return parseInt(b.dataset.price) - parseInt(a.dataset.price);
+      if (val === 'name') return a.dataset.name.localeCompare(b.dataset.name);
+      return 0;
+    });
+
+    cards.forEach(c => storeGrid.appendChild(c));
+  }
+
+  // Cinematic Preview Modal Logic
+  function openPreviewModal(key, name, rarity, desc, price, skinId, isOwned) {
+    const modal = document.getElementById('preview-modal');
+    const container = document.getElementById('modal-pen-container');
+    const nameEl = document.getElementById('modal-pen-name');
+    const descEl = document.getElementById('modal-pen-desc');
+    const priceEl = document.getElementById('modal-pen-price');
+    const badgeEl = document.getElementById('modal-rarity-badge');
+    const actionEl = document.getElementById('modal-action-container');
+
+    container.innerHTML = PenVisuals.renderSVG(key, { width: 380, height: 110 });
+    nameEl.textContent = name;
+    descEl.textContent = desc || "Authentic ball pen cosmetic skin for PenFight Arena.";
+    priceEl.textContent = price > 0 ? `🪙 ${price} PP` : 'FREE';
+
+    badgeEl.textContent = rarity.toUpperCase();
+    badgeEl.className = `pf-badge pf-badge-${rarity}`;
+
+    if (isOwned) {
+      actionEl.innerHTML = `<a href="{% url 'game:my_pen' %}" class="pf-btn pf-btn-blue">EQUIP IN LOADOUT</a>`;
+    } else {
+      const userPP = {{ request.user.profile.pen_points }};
+      const disabled = userPP < price ? 'disabled' : '';
+      actionEl.innerHTML = `
+        <form method="post" action="/store/buy/${skinId}/">
+          {% csrf_token %}
+          <button class="pf-btn pf-btn-gold" ${disabled}>BUY FOR 🪙 ${price} PP</button>
+        </form>
+      `;
+    }
+
+    modal.classList.add('active');
+  }
+
+  function closePreviewModal() {
+    document.getElementById('preview-modal').classList.remove('active');
+  }
+</script>
 {% endblock %}

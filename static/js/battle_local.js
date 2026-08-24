@@ -29,12 +29,14 @@
     color: config.player1.skin.color, accent: config.player1.skin.accent,
     trailColor: config.player1.skin.trail, glow: !!config.player1.skin.glow,
     mass: config.player1.pen.mass || 1, friction: config.player1.pen.friction || 1,
+    assetKey: config.player1.skin.assetKey || "classic-blue"
   });
   engine.addPen("p2", {
     x: bench.x + bench.w * 0.72, y: bench.y + bench.h / 2, angle: Math.PI,
     color: config.player2.skin.color, accent: config.player2.skin.accent,
     trailColor: config.player2.skin.trail, glow: !!config.player2.skin.glow,
     mass: config.player2.pen.mass || 1, friction: config.player2.pen.friction || 1,
+    assetKey: config.player2.skin.assetKey || "sunset-blaze"
   });
 
   const penOwner = { p1: "player1", p2: "player2" };

@@ -1,29 +1,91 @@
 {% extends "base.html" %}
+{% load static %}
+
 {% block title %}My Pen — PenFight Arena{% endblock %}
+
 {% block extra_css %}
 <style>
-  .pen-preview {
-    height: 220px; border-radius: 20px; display:flex; align-items:center; justify-content:center;
-    background: radial-gradient(circle at 50% 30%, rgba(139,92,246,0.15), transparent 60%), var(--bg-panel-2);
-    border: 1px solid var(--border-soft); position: relative; overflow: hidden;
+  .pen-hero-container {
+    background: radial-gradient(circle at 50% 40%, rgba(139,92,246,0.25), transparent 65%), var(--bg-panel);
+    border: 1px solid var(--border-glow);
+    border-radius: var(--radius-lg);
+    padding: 32px; position: relative; overflow: hidden;
+    box-shadow: var(--shadow-panel), 0 0 50px rgba(139,92,246,0.2);
   }
-  .pen-preview-shape { width: 200px; height: 40px; border-radius: 20px; position: relative; }
-  .skin-option { cursor: pointer; border: 2px solid transparent; }
-  .skin-option.selected { border-color: var(--neon-violet); box-shadow: var(--shadow-glow-violet); }
-  .skin-option.locked { opacity: 0.4; filter: grayscale(0.6); cursor: not-allowed; }
-  .pen-option { cursor: pointer; }
-  .pen-option.selected { border-color: var(--neon-blue); box-shadow: var(--shadow-glow-blue); }
+  .pen-pedestal {
+    height: 240px; border-radius: 20px;
+    background: radial-gradient(ellipse at 50% 70%, rgba(56,189,248,0.2), transparent 70%), var(--bg-panel-2);
+    border: 1px solid var(--border-soft);
+    display: flex; align-items: center; justify-content: center; position: relative;
+  }
+  .skin-card {
+    cursor: pointer; border: 2px solid var(--border-soft); transition: all 0.2s ease;
+  }
+  .skin-card:hover { transform: translateY(-4px); border-color: var(--border-glow); }
+  .skin-card.selected { border-color: var(--neon-violet) !important; box-shadow: var(--shadow-glow-violet) !important; }
+  .skin-card.locked { opacity: 0.5; filter: grayscale(0.5); }
+  .pen-type-card { cursor: pointer; border: 2px solid var(--border-soft); }
+  .pen-type-card.selected { border-color: var(--neon-blue) !important; box-shadow: var(--shadow-glow-blue) !important; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="pf-page-head">
-  <div class="pf-page-title">🖊️ MY PEN</div>
-  <div class="pf-page-sub">Build your loadout. This is what you'll fight with.</div>
+<div class="pf-page-head pf-flex-between">
+  <div>
+    <div class="pf-page-title">🖊️ MY PEN LOADOUT</div>
+    <div class="pf-page-sub">Customize your active ball pen & equipment for battle.</div>
+  </div>
+  <a href="{% url 'store:home' %}" class="pf-btn pf-btn-gold pf-btn-sm">🛒 VISIT STORE</a>
 </div>
 
-<div class="pen-preview pf-mb-24" id="pen-preview">
-  <canvas id="preview-canvas" width="500" height="200" style="width:100%; height:100%;"></canvas>
+<!-- Hero Showcase Panel -->
+<div class="pen-hero-container pf-mb-32">
+  <div class="pf-grid pf-grid-2" style="align-items:center;">
+    <!-- Pedestal Stage -->
+    <div class="pen-pedestal">
+      <canvas id="hero-canvas" width="480" height="200" style="width:100%; height:100%;"></canvas>
+    </div>
+
+    <!-- Equipped Pen Details -->
+    <div style="padding-left:16px;">
+      <div class="pf-flex pf-gap-8 pf-mb-8">
+        <span class="pf-badge" id="hero-rarity-badge">EPIC</span>
+        <span class="pf-faint" style="font-size:12px;">EQUIPPED SKIN</span>
+      </div>
+
+      <div id="hero-skin-name" style="font-size:36px; font-weight:800; font-family:var(--font-display); margin-bottom:8px;">
+        Classic Blue
+      </div>
+
+      <div id="hero-skin-desc" class="pf-muted" style="font-size:14px; margin-bottom:20px;">
+        Everyday blue ball pen. Reliable and balanced.
+      </div>
+
+      <!-- Quick Stats Overview -->
+      <div class="pf-glass pf-mb-24" style="padding:14px 20px; display:flex; justify-content:space-around;">
+        <div class="pf-center">
+          <div class="pf-faint" style="font-size:11px;">MASS</div>
+          <div id="hero-stat-mass" style="font-weight:800; font-size:18px; color:var(--neon-blue);">1.0</div>
+        </div>
+        <div class="pf-center">
+          <div class="pf-faint" style="font-size:11px;">FLICK POWER</div>
+          <div id="hero-stat-power" style="font-weight:800; font-size:18px; color:var(--neon-gold);">1.0</div>
+        </div>
+        <div class="pf-center">
+          <div class="pf-faint" style="font-size:11px;">FRICTION</div>
+          <div id="hero-stat-friction" style="font-weight:800; font-size:18px; color:var(--neon-pink);">1.0</div>
+        </div>
+        <div class="pf-center">
+          <div class="pf-faint" style="font-size:11px;">CONTROL</div>
+          <div id="hero-stat-control" style="font-weight:800; font-size:18px; color:var(--neon-green);">1.0</div>
+        </div>
+      </div>
+
+      <button type="button" onclick="document.getElementById('loadout-form').requestSubmit()" class="pf-btn pf-btn-primary pf-btn-lg pf-btn-block">
+        💾 SAVE EQUIPPED LOADOUT
+      </button>
+    </div>
+  </div>
 </div>
 
 <form method="post" id="loadout-form">
@@ -31,100 +93,133 @@
   <input type="hidden" name="pen_id" id="selected-pen-id" value="{{ profile.equipped_pen_id }}">
   <input type="hidden" name="skin_id" id="selected-skin-id" value="{{ profile.equipped_skin_id }}">
 
-  <div class="pf-section-title">PEN TYPE</div>
-  <div class="pf-grid pf-grid-4 pf-mb-24">
+  <!-- Pen Type Selection -->
+  <div class="pf-section-title">CHOOSE PEN ARCHETYPE (GAMEPLAY TYPE)</div>
+  <div class="pf-grid pf-grid-5 pf-mb-32">
     {% for pen in pens %}
-    <div class="pf-card pf-card-hover pen-option {% if pen.id == profile.equipped_pen_id %}selected{% endif %}"
+    <div class="pf-card pen-type-card {% if pen.id == profile.equipped_pen_id %}selected{% endif %}"
          data-pen-id="{{ pen.id }}"
          data-mass="{{ pen.mass }}" data-power="{{ pen.max_power }}" data-friction="{{ pen.friction }}" data-control="{{ pen.control }}">
       <div style="font-size:26px;">{{ pen.icon }}</div>
-      <div style="font-weight:700; margin-top:8px;">{{ pen.name }}</div>
-      <div class="pf-faint" style="font-size:12px; margin-top:4px;">{{ pen.description }}</div>
-      <div class="pf-flex pf-gap-8 pf-mt-16" style="font-size:11px;">
-        <span class="pf-faint">MASS {{ pen.mass }}</span>
-        <span class="pf-faint">PWR {{ pen.max_power }}</span>
-        <span class="pf-faint">CTRL {{ pen.control }}</span>
+      <div style="font-weight:800; margin-top:6px; font-size:16px;">{{ pen.name }}</div>
+      <div class="pf-faint" style="font-size:11px; margin-top:4px; height:32px; overflow:hidden;">{{ pen.description }}</div>
+      <div class="pf-flex pf-gap-8 pf-mt-12" style="font-size:10px;">
+        <span class="pf-badge pf-badge-common">M:{{ pen.mass }}</span>
+        <span class="pf-badge pf-badge-common">P:{{ pen.max_power }}</span>
       </div>
     </div>
     {% endfor %}
   </div>
 
-  <div class="pf-section-title">PEN SKIN</div>
+  <!-- Pen Skin Collection -->
+  <div class="pf-section-title">CHOOSE PEN COSMETIC SKIN</div>
   <div class="pf-grid pf-grid-4">
     {% for skin in skins %}
-    <div class="pf-card pf-card-hover skin-option {% if skin.id not in owned_skin_ids %}locked{% endif %} {% if skin.id == profile.equipped_skin_id %}selected{% endif %}"
+    <div class="pf-card skin-card pen-card-{{ skin.rarity }} {% if skin.id not in owned_skin_ids %}locked{% endif %} {% if skin.id == profile.equipped_skin_id %}selected{% endif %}"
          data-skin-id="{{ skin.id }}" data-owned="{% if skin.id in owned_skin_ids %}1{% else %}0{% endif %}"
-         data-color="{{ skin.body_color }}" data-accent="{{ skin.accent_color }}" data-ink="{{ skin.ink_color }}" data-glow="{{ skin.glow|yesno:'1,0' }}">
-      <div class="pf-flex-between">
-        <span style="font-size:22px;">{{ skin.icon }}</span>
+         data-key="{{ skin.asset_key }}" data-name="{{ skin.name }}" data-rarity="{{ skin.rarity }}" data-desc="{{ skin.description }}">
+      <div class="pf-flex-between pf-mb-8">
         <span class="pf-badge pf-badge-{{ skin.rarity }}">{{ skin.get_rarity_display }}</span>
+        {% if skin.id not in owned_skin_ids %}
+          <span class="pf-badge pf-badge-common">🔒 STORE</span>
+        {% endif %}
       </div>
-      <div style="font-weight:700; margin-top:10px;">{{ skin.name }}</div>
+
+      <div class="pen-card-visual pf-mb-8" data-skin-key="{{ skin.asset_key }}">
+        <!-- Vector Ball Pen rendered here -->
+      </div>
+
+      <div style="font-weight:800; font-size:16px;">{{ skin.name }}</div>
       {% if skin.id not in owned_skin_ids %}
-        <div class="pf-faint pf-mt-8" style="font-size:12px;">🔒 Locked — visit the store</div>
+        <a href="{% url 'store:home' %}" class="pf-faint pf-mt-8" style="font-size:11px; display:block;">Unlock in Store →</a>
       {% endif %}
     </div>
     {% endfor %}
-  </div>
-
-  <div class="pf-center pf-mt-32">
-    <button type="submit" class="pf-btn pf-btn-primary pf-btn-lg">💾 SAVE LOADOUT</button>
   </div>
 </form>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-  document.querySelectorAll('.pen-option').forEach(el => {
+  let currentSkinKey = 'classic-blue';
+  let angleOffset = 0;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Render all skin cards
+    document.querySelectorAll('.pen-card-visual').forEach(container => {
+      const key = container.dataset.skinKey || 'classic-blue';
+      container.innerHTML = PenVisuals.renderSVG(key, { width: 240, height: 50 });
+    });
+
+    const selectedSkinEl = document.querySelector('.skin-card.selected') || document.querySelector('.skin-card');
+    if (selectedSkinEl) {
+      updateSkinHero(selectedSkinEl);
+    }
+    startHeroAnimation();
+  });
+
+  // Archetype selection
+  document.querySelectorAll('.pen-type-card').forEach(el => {
     el.addEventListener('click', () => {
-      document.querySelectorAll('.pen-option').forEach(e => e.classList.remove('selected'));
+      document.querySelectorAll('.pen-type-card').forEach(c => c.classList.remove('selected'));
       el.classList.add('selected');
       document.getElementById('selected-pen-id').value = el.dataset.penId;
-      renderPreview();
+
+      document.getElementById('hero-stat-mass').textContent = el.dataset.mass;
+      document.getElementById('hero-stat-power').textContent = el.dataset.power;
+      document.getElementById('hero-stat-friction').textContent = el.dataset.friction;
+      document.getElementById('hero-stat-control').textContent = el.dataset.control;
     });
   });
-  document.querySelectorAll('.skin-option').forEach(el => {
+
+  // Skin selection
+  document.querySelectorAll('.skin-card').forEach(el => {
     el.addEventListener('click', () => {
       if (el.dataset.owned !== '1') return;
-      document.querySelectorAll('.skin-option').forEach(e => e.classList.remove('selected'));
+      document.querySelectorAll('.skin-card').forEach(c => c.classList.remove('selected'));
       el.classList.add('selected');
       document.getElementById('selected-skin-id').value = el.dataset.skinId;
-      renderPreview();
+      updateSkinHero(el);
     });
   });
 
-  function renderPreview() {
-    const canvas = document.getElementById('preview-canvas');
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const skinEl = document.querySelector('.skin-option.selected') || document.querySelector('.skin-option');
-    const color = skinEl ? skinEl.dataset.color : '#3b82f6';
-    const accent = skinEl ? skinEl.dataset.accent : '#93c5fd';
-    const glow = skinEl && skinEl.dataset.glow === '1';
+  function updateSkinHero(el) {
+    currentSkinKey = el.dataset.key || 'classic-blue';
+    document.getElementById('hero-skin-name').textContent = el.dataset.name;
+    document.getElementById('hero-skin-desc').textContent = el.dataset.desc || "Authentic ball pen skin.";
 
-    ctx.save();
-    ctx.translate(canvas.width / 2, canvas.height / 2);
-    if (glow) { ctx.shadowColor = color; ctx.shadowBlur = 30; }
-    const grad = ctx.createLinearGradient(-160, 0, 160, 0);
-    grad.addColorStop(0, accent);
-    grad.addColorStop(1, color);
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.roundRect(-160, -22, 280, 44, 22);
-    ctx.fill();
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.moveTo(120, -22); ctx.lineTo(160, 0); ctx.lineTo(120, 22);
-    ctx.closePath(); ctx.fill();
-    ctx.restore();
+    const rarity = el.dataset.rarity || 'common';
+    const badge = document.getElementById('hero-rarity-badge');
+    badge.textContent = rarity.toUpperCase();
+    badge.className = `pf-badge pf-badge-${rarity}`;
   }
-  renderPreview();
 
-  document.getElementById('loadout-form').addEventListener('submit', (e) => {
-    if (!document.getElementById('selected-skin-id').value) {
-      e.preventDefault();
-      alert('Select an owned skin first.');
+  function startHeroAnimation() {
+    const canvas = document.getElementById('hero-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      angleOffset += 0.015;
+
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2 + Math.sin(angleOffset * 2) * 5;
+
+      // Draw Pedestal shadow / aura
+      ctx.save();
+      ctx.fillStyle = "rgba(139,92,246,0.15)";
+      ctx.beginPath();
+      ctx.ellipse(centerX, centerY + 35, 140, 20, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Render the equipped Pen on Canvas
+      PenVisuals.drawPenToCanvas(ctx, currentSkinKey, centerX, centerY, Math.sin(angleOffset) * 0.1, 1.8);
+
+      requestAnimationFrame(animate);
     }
-  });
+    animate();
+  }
 </script>
 {% endblock %}

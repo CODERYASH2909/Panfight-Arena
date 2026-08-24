@@ -55,6 +55,7 @@ class PenSkin(models.Model):
     icon = models.CharField(max_length=10, default="🖊️")
 
     price_pp = models.PositiveIntegerField(default=0)
+    asset_key = models.CharField(max_length=40, default="classic-blue", help_text="Key for vector rendering engine")
     is_starter = models.BooleanField(default=False)
     is_purchasable = models.BooleanField(default=True)
     is_featured = models.BooleanField(default=False)

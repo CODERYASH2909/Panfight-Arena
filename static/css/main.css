@@ -420,11 +420,88 @@ input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focu
 
 /* ---------------------------------------------------------------- footer */
 
-.pf-footer {
-  border-top: 1px solid var(--border-soft); padding: 32px 0; color: var(--text-faint); font-size: 13px;
+/* ---------------------------------------------------------------- pen visual cards & store modal */
+
+.pen-card-visual {
+  height: 140px;
+  background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.06), transparent 75%), var(--bg-panel-2);
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+  padding: 12px;
+}
+.pen-card-visual svg {
+  max-width: 90%; max-height: 85%;
+  filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));
+  transition: transform 0.3s ease;
+}
+.pf-card-hover:hover .pen-card-visual svg {
+  transform: scale(1.08) rotate(-3deg);
 }
 
-@media (max-width: 780px) {
-  .pf-nav-links { display: none; }
-  .pf-hero { padding: 56px 20px; }
+.pen-card-common { border: 1px solid rgba(148,163,184,0.3); }
+.pen-card-uncommon { border: 1px solid rgba(74,222,128,0.4); box-shadow: 0 0 15px rgba(74,222,128,0.15); }
+.pen-card-rare { border: 1px solid rgba(56,189,248,0.5); box-shadow: 0 0 20px rgba(56,189,248,0.25); }
+.pen-card-epic { border: 1px solid rgba(167,139,250,0.6); box-shadow: 0 0 25px rgba(167,139,250,0.35); animation: pf-glow-epic 3s ease-in-out infinite alternate; }
+.pen-card-legendary { border: 1px solid rgba(250,204,21,0.7); box-shadow: 0 0 30px rgba(250,204,21,0.45); animation: pf-glow-legendary 2.5s ease-in-out infinite alternate; }
+.pen-card-mythic {
+  border: 2px solid transparent !important;
+  background-image: linear-gradient(var(--bg-panel), var(--bg-panel)), linear-gradient(135deg, #ec4899, #8b5cf6, #facc15, #ec4899) !important;
+  background-origin: border-box !important; background-clip: padding-box, border-box !important;
+  box-shadow: 0 0 35px rgba(236,72,153,0.5);
+  animation: pf-glow-mythic 3s linear infinite;
 }
+
+@keyframes pf-glow-epic { 0% { box-shadow: 0 0 15px rgba(167,139,250,0.2); } 100% { box-shadow: 0 0 30px rgba(167,139,250,0.5); } }
+@keyframes pf-glow-legendary { 0% { box-shadow: 0 0 20px rgba(250,204,21,0.3); } 100% { box-shadow: 0 0 40px rgba(250,204,21,0.7); } }
+@keyframes pf-glow-mythic { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
+
+/* ---------------------------------------------------------------- cinematic preview modal */
+
+.pf-modal-backdrop {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(4, 4, 8, 0.85);
+  backdrop-filter: blur(16px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+}
+.pf-modal-backdrop.active {
+  opacity: 1; pointer-events: auto;
+}
+.pf-modal-box {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-glow);
+  border-radius: 28px;
+  width: 90%; max-width: 900px; padding: 36px;
+  box-shadow: var(--shadow-panel), 0 0 60px rgba(139, 92, 246, 0.4);
+  position: relative; overflow: hidden;
+  transform: scale(0.92); transition: transform 0.25s cubic-bezier(.2,.9,.3,1);
+}
+.pf-modal-backdrop.active .pf-modal-box {
+  transform: scale(1);
+}
+.pf-modal-close {
+  position: absolute; top: 20px; right: 20px;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,0.08); border: 1px solid var(--border-soft);
+  color: var(--text-primary); font-size: 18px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+.pf-modal-close:hover { background: rgba(255,255,255,0.2); }
+
+.pf-preview-hero-stage {
+  height: 260px; border-radius: 20px;
+  background: radial-gradient(circle at 50% 50%, rgba(139,92,246,0.2), transparent 70%), var(--bg-panel-2);
+  border: 1px solid var(--border-soft);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.pf-rotating-pen {
+  animation: pf-pen-rotate-float 6s ease-in-out infinite;
+}
+@keyframes pf-pen-rotate-float {
+  0% { transform: translateY(0px) rotate(-5deg) scale(1); }
+  50% { transform: translateY(-12px) rotate(5deg) scale(1.04); }
+  100% { transform: translateY(0px) rotate(-5deg) scale(1); }
+}
+

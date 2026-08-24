@@ -40,12 +40,12 @@ class PenFightEngine {
     this.EDGE_MARGIN = 6;        // how far past bench edge counts as "fallen"
   }
 
-  addPen(id, { x, y, angle = 0, color = "#3b82f6", accent = "#93c5fd", trailColor = "#60a5fa", glow = false, mass = 1, friction = 1, icon = "" }) {
+  addPen(id, { x, y, angle = 0, color = "#3b82f6", accent = "#93c5fd", trailColor = "#60a5fa", glow = false, mass = 1, friction = 1, icon = "", assetKey = "classic-blue" }) {
     this.pens[id] = {
       id, x, y, angle,
       vx: 0, vy: 0, angularVel: 0,
       mass, frictionMult: friction,
-      color, accent, trailColor, glow, icon,
+      color, accent, trailColor, glow, icon, assetKey,
       alive: true, falling: false, fallProgress: 0,
       trail: [],
     };
@@ -303,48 +303,25 @@ class PenFightEngine {
 
   _drawPen(p) {
     const ctx = this.ctx;
-    const alpha = p.falling ? Math.max(0, 1 - p.fallProgress / 1.4) : 1;
-    const scale = p.falling ? Math.max(0.3, 1 - p.fallProgress * 0.5) : 1;
+    const alpha = p.falling ? Math.max(0, 1 - p.fallProgress / 1.6) : 1;
+    const scale = p.falling ? Math.max(0.2, 1 - p.fallProgress * 0.55) : 1;
 
     ctx.save();
     ctx.globalAlpha = alpha;
     ctx.translate(p.x, p.y);
     ctx.rotate(p.angle);
-    ctx.scale(scale, scale);
 
-    if (p.glow) {
-      ctx.shadowColor = p.color;
-      ctx.shadowBlur = 22;
+    if (window.PenVisuals) {
+      window.PenVisuals.drawPenToCanvas(ctx, p.assetKey || "classic-blue", 0, 0, 0, scale);
+    } else {
+      // Fallback
+      if (p.glow) { ctx.shadowColor = p.color; ctx.shadowBlur = 22; }
+      const L = this.PEN_LENGTH, Wd = this.PEN_WIDTH;
+      ctx.fillStyle = p.color;
+      this._roundRect(ctx, -L / 2, -Wd / 2, L, Wd, Wd / 2);
+      ctx.fill();
     }
 
-    const L = this.PEN_LENGTH, Wd = this.PEN_WIDTH;
-
-    // body
-    const bodyGrad = ctx.createLinearGradient(-L / 2, 0, L / 2, 0);
-    bodyGrad.addColorStop(0, p.accent);
-    bodyGrad.addColorStop(1, p.color);
-    ctx.fillStyle = bodyGrad;
-    this._roundRect(ctx, -L / 2, -Wd / 2, L * 0.78, Wd, Wd / 2);
-    ctx.fill();
-
-    // cap / tip
-    ctx.fillStyle = p.color;
-    ctx.beginPath();
-    ctx.moveTo(L * 0.28, -Wd / 2);
-    ctx.lineTo(L / 2, 0);
-    ctx.lineTo(L * 0.28, Wd / 2);
-    ctx.closePath();
-    ctx.fill();
-
-    // grip
-    ctx.fillStyle = "rgba(0,0,0,0.25)";
-    ctx.fillRect(-L * 0.1, -Wd / 2, L * 0.18, Wd);
-
-    // clip
-    ctx.fillStyle = "rgba(255,255,255,0.6)";
-    ctx.fillRect(-L / 2 + 4, -Wd / 2 - 3, 3, Wd * 0.6);
-
-    ctx.shadowBlur = 0;
     ctx.restore();
   }
 

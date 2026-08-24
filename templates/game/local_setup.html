@@ -23,7 +23,7 @@
     <div class="pf-field">
       <label class="pf-label">Skin</label>
       <select class="pf-select" id="p1-skin">
-        {% for skin in skins %}<option value="{{ skin.id }}" data-color="{{ skin.body_color }}" data-accent="{{ skin.accent_color }}" data-trail="{{ skin.trail_color }}" data-glow="{{ skin.glow|yesno:'1,0' }}">{{ skin.icon }} {{ skin.name }}</option>{% endfor %}
+        {% for skin in skins %}<option value="{{ skin.id }}" data-asset="{{ skin.asset_key }}" data-color="{{ skin.body_color }}" data-accent="{{ skin.accent_color }}" data-trail="{{ skin.trail_color }}" data-glow="{{ skin.glow|yesno:'1,0' }}">{{ skin.icon }} {{ skin.name }}</option>{% endfor %}
       </select>
     </div>
   </div>
@@ -43,7 +43,7 @@
     <div class="pf-field">
       <label class="pf-label">Skin</label>
       <select class="pf-select" id="p2-skin">
-        {% for skin in skins %}<option value="{{ skin.id }}" data-color="{{ skin.body_color }}" data-accent="{{ skin.accent_color }}" data-trail="{{ skin.trail_color }}" data-glow="{{ skin.glow|yesno:'1,0' }}" {% if forloop.counter == 5 %}selected{% endif %}>{{ skin.icon }} {{ skin.name }}</option>{% endfor %}
+        {% for skin in skins %}<option value="{{ skin.id }}" data-asset="{{ skin.asset_key }}" data-color="{{ skin.body_color }}" data-accent="{{ skin.accent_color }}" data-trail="{{ skin.trail_color }}" data-glow="{{ skin.glow|yesno:'1,0' }}" {% if forloop.counter == 5 %}selected{% endif %}>{{ skin.icon }} {{ skin.name }}</option>{% endfor %}
       </select>
     </div>
   </div>
@@ -81,7 +81,7 @@
 
   function readSkin(id) {
     const opt = document.getElementById(id).selectedOptions[0];
-    return { id: opt.value, color: opt.dataset.color, accent: opt.dataset.accent, trail: opt.dataset.trail, glow: opt.dataset.glow === '1' };
+    return { id: opt.value, assetKey: opt.dataset.asset || 'classic-blue', color: opt.dataset.color, accent: opt.dataset.accent, trail: opt.dataset.trail, glow: opt.dataset.glow === '1' };
   }
   function readPen(id) {
     const opt = document.getElementById(id).selectedOptions[0];
