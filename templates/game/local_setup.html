@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Local Battle Setup — PenFight Arena{% endblock %}
+
+{% block content %}
+<div class="pf-page-head">
+  <div class="pf-page-title">🖥️ LOCAL BATTLE</div>
+  <div class="pf-page-sub">Two players, one device. Set your loadouts and pick a bench.</div>
+</div>
+
+<div class="pf-grid pf-grid-2">
+  <div class="pf-card" style="border-color: rgba(59,130,246,0.4);">
+    <div class="pf-section-title" style="color:#60a5fa;">PLAYER 1 (YOU)</div>
+    <div class="pf-field">
+      <label class="pf-label">Name</label>
+      <input class="pf-input" id="p1-name" value="{{ request.user.username }}" maxlength="16">
+    </div>
+    <div class="pf-field">
+      <label class="pf-label">Pen</label>
+      <select class="pf-select" id="p1-pen">
+        {% for pen in pens %}<option value="{{ pen.id }}" data-mass="{{ pen.mass }}" data-friction="{{ pen.friction }}" data-power="{{ pen.max_power }}">{{ pen.icon }} {{ pen.name }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="pf-field">
+      <label class="pf-label">Skin</label>
+      <select class="pf-select" id="p1-skin">
+        {% for skin in skins %}<option value="{{ skin.id }}" data-color="{{ skin.body_color }}" data-accent="{{ skin.accent_color }}" data-trail="{{ skin.trail_color }}" data-glow="{{ skin.glow|yesno:'1,0' }}">{{ skin.icon }} {{ skin.name }}</option>{% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="pf-card" style="border-color: rgba(248,113,113,0.4);">
+    <div class="pf-section-title" style="color:#f87171;">PLAYER 2</div>
+    <div class="pf-field">
+      <label class="pf-label">Name</label>
+      <input class="pf-input" id="p2-name" value="Player 2" maxlength="16">
+    </div>
+    <div class="pf-field">
+      <label class="pf-label">Pen</label>
+      <select class="pf-select" id="p2-pen">
+        {% for pen in pens %}<option value="{{ pen.id }}" data-mass="{{ pen.mass }}" data-friction="{{ pen.friction }}" data-power="{{ pen.max_power }}">{{ pen.icon }} {{ pen.name }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="pf-field">
+      <label class="pf-label">Skin</label>
+      <select class="pf-select" id="p2-skin">
+        {% for skin in skins %}<option value="{{ skin.id }}" data-color="{{ skin.body_color }}" data-accent="{{ skin.accent_color }}" data-trail="{{ skin.trail_color }}" data-glow="{{ skin.glow|yesno:'1,0' }}" {% if forloop.counter == 5 %}selected{% endif %}>{{ skin.icon }} {{ skin.name }}</option>{% endfor %}
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="pf-mt-32">
+  <div class="pf-section-title">CHOOSE YOUR ARENA</div>
+  <div class="pf-grid pf-grid-4" id="arena-grid">
+    {% for arena in arenas %}
+    <div class="pf-card pf-card-hover arena-choice" data-slug="{{ arena.slug }}"
+         style="cursor:pointer; background: linear-gradient(135deg, {{ arena.bg_gradient_from }}, {{ arena.bg_gradient_to }}); {% if forloop.first %}outline: 2px solid {{ arena.accent_color }};{% endif %}">
+      <div style="font-size:26px;">🏟️</div>
+      <div style="font-weight:700; margin-top:8px;">{{ arena.name }}</div>
+      <div class="pf-faint" style="font-size:12px; margin-top:4px;">{{ arena.description }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="pf-center pf-mt-32">
+  <button class="pf-btn pf-btn-primary pf-btn-lg" id="start-btn">⚔️ START PENFIGHT</button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  let selectedArena = document.querySelector('.arena-choice').dataset.slug;
+  document.querySelectorAll('.arena-choice').forEach(el => {
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.arena-choice').forEach(e => e.style.outline = 'none');
+      el.style.outline = `2px solid ${el.style.background.match(/#\w+/g)?.[1] || '#8b5cf6'}`;
+      selectedArena = el.dataset.slug;
+    });
+  });
+
+  function readSkin(id) {
+    const opt = document.getElementById(id).selectedOptions[0];
+    return { id: opt.value, color: opt.dataset.color, accent: opt.dataset.accent, trail: opt.dataset.trail, glow: opt.dataset.glow === '1' };
+  }
+  function readPen(id) {
+    const opt = document.getElementById(id).selectedOptions[0];
+    return { id: opt.value, mass: parseFloat(opt.dataset.mass), friction: parseFloat(opt.dataset.friction), power: parseFloat(opt.dataset.power) };
+  }
+
+  document.getElementById('start-btn').addEventListener('click', () => {
+    const config = {
+      player1: { name: document.getElementById('p1-name').value || 'Player 1', pen: readPen('p1-pen'), skin: readSkin('p1-skin') },
+      player2: { name: document.getElementById('p2-name').value || 'Player 2', pen: readPen('p2-pen'), skin: readSkin('p2-skin') },
+      arena: selectedArena,
+    };
+    sessionStorage.setItem('pf_local_config', JSON.stringify(config));
+    window.location.href = "{% url 'game:local_play' %}?arena=" + selectedArena;
+  });
+</script>
+{% endblock %}

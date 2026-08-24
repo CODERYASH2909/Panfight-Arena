@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}{{ profile_user.username }} — PenFight Arena{% endblock %}
+
+{% block content %}
+<div class="pf-glass" style="padding:32px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:20px;">
+  <div class="pf-flex pf-gap-16">
+    <div class="pf-avatar-circle" style="width:76px; height:76px; font-size:30px; background: var(--grad-primary);">
+      {{ profile_user.username|slice:":1"|upper }}
+    </div>
+    <div>
+      <div style="font-size:26px; font-weight:800;">{{ profile_user.username }}</div>
+      <p class="pf-muted">{{ profile.bio|default:"No bio yet." }}</p>
+      <div class="pf-flex pf-gap-8 pf-mt-8">
+        <span class="pf-rank-chip pf-rank-{{ profile.rank_tier }}">{{ profile.get_rank_tier_display }}</span>
+        <span class="pf-badge pf-badge-rare">Lv.{{ profile.level }}</span>
+      </div>
+    </div>
+  </div>
+  <div class="pf-flex pf-gap-12">
+    {% if is_self %}
+      <a href="{% url 'accounts:profile_edit' %}" class="pf-btn pf-btn-ghost">Edit Profile</a>
+    {% elif is_friend %}
+      <form method="post" action="{% url 'multiplayer:challenge_friend' profile_user.username %}">
+        {% csrf_token %}<button class="pf-btn pf-btn-primary">⚔️ Challenge</button>
+      </form>
+      <form method="post" action="{% url 'accounts:remove_friend' profile_user.username %}">
+        {% csrf_token %}<button class="pf-btn pf-btn-ghost">Remove Friend</button>
+      </form>
+    {% else %}
+      <form method="post" action="{% url 'accounts:send_friend_request' profile_user.username %}">
+        {% csrf_token %}<button class="pf-btn pf-btn-primary">+ Add Friend</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="pf-grid pf-grid-4 pf-mt-24">
+  <div class="pf-card pf-stat"><div class="pf-stat-value">{{ profile.wins }}</div><div class="pf-stat-label">Wins</div></div>
+  <div class="pf-card pf-stat"><div class="pf-stat-value">{{ profile.losses }}</div><div class="pf-stat-label">Losses</div></div>
+  <div class="pf-card pf-stat"><div class="pf-stat-value">{{ profile.win_rate }}%</div><div class="pf-stat-label">Win Rate</div></div>
+  <div class="pf-card pf-stat"><div class="pf-stat-value">{{ profile.best_win_streak }}</div><div class="pf-stat-label">Best Streak</div></div>
+</div>
+
+<div class="pf-grid pf-grid-2 pf-mt-24">
+  <div class="pf-card">
+    <div class="pf-section-title">MATCH HISTORY</div>
+    {% if matches %}
+      {% for mp in matches %}
+      <div class="pf-flex-between" style="padding:10px 0; border-bottom:1px solid var(--border-soft);">
+        <div class="pf-flex pf-gap-12">
+          <span style="font-size:18px;">{{ mp.is_winner|yesno:"🏆,💀" }}</span>
+          <div>
+            <div style="font-weight:700; font-size:14px;">{{ mp.match.get_match_type_display }} · {{ mp.match.arena.name|default:"—" }}</div>
+            <div class="pf-faint" style="font-size:12px;">{{ mp.pen.name|default:"" }} / {{ mp.skin.name|default:"" }}</div>
+          </div>
+        </div>
+        <span class="pf-faint" style="font-size:12px;">{{ mp.match.created_at|timesince }} ago</span>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="pf-empty"><div class="pf-empty-icon">📜</div>No match history yet.</div>
+    {% endif %}
+  </div>
+
+  <div class="pf-card">
+    <div class="pf-section-title">ACHIEVEMENTS</div>
+    {% if achievements %}
+      <div class="pf-grid pf-grid-2">
+        {% for ua in achievements %}
+        <div class="pf-badge pf-badge-legendary" style="padding:10px 14px;">{{ ua.achievement.icon }} {{ ua.achievement.name }}</div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="pf-empty"><div class="pf-empty-icon">🏆</div>No achievements unlocked yet.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

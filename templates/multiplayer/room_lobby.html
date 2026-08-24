@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Room {{ room.code }} — PenFight Arena{% endblock %}
+{% block content %}
+<div class="pf-page-head pf-center">
+  <div class="pf-page-title">🔒 PRIVATE PENFIGHT</div>
+  <div class="pf-mt-16">
+    <span class="pf-badge pf-badge-epic" style="font-size:22px; padding:10px 24px; letter-spacing:0.1em;">{{ room.code }}</span>
+  </div>
+  <p class="pf-muted pf-mt-16">Share this code with your friend so they can join.</p>
+</div>
+
+<div class="pf-flex" style="justify-content:center; gap:40px; margin-top:40px; flex-wrap:wrap;">
+  <div class="pf-card pf-center" style="width:220px;">
+    <div class="pf-avatar-circle" style="width:56px;height:56px;font-size:22px;margin:0 auto;background:var(--grad-blue);">{{ room.host.username|slice:":1"|upper }}</div>
+    <div style="font-weight:800; margin-top:12px;">{{ room.host.username }}</div>
+    <div class="pf-faint" style="font-size:12px;">HOST</div>
+  </div>
+  <div class="pf-duel-vs" style="position:static; font-size:40px;">VS</div>
+  <div class="pf-card pf-center" style="width:220px;">
+    {% if room.guest %}
+      <div class="pf-avatar-circle" style="width:56px;height:56px;font-size:22px;margin:0 auto;background:var(--grad-primary);">{{ room.guest.username|slice:":1"|upper }}</div>
+      <div style="font-weight:800; margin-top:12px;">{{ room.guest.username }}</div>
+      <div class="pf-faint" style="font-size:12px;">CHALLENGER</div>
+    {% else %}
+      <div class="pf-avatar-circle" style="width:56px;height:56px;font-size:22px;margin:0 auto;background:var(--bg-panel-2); border:1px dashed var(--border-soft);">?</div>
+      <div class="pf-faint pf-mt-16">Waiting for opponent...</div>
+    {% endif %}
+  </div>
+</div>
+
+{% if room.host == request.user %}
+<div class="pf-mt-32">
+  <div class="pf-section-title pf-center">CHOOSE ARENA</div>
+  <div class="pf-grid pf-grid-4">
+    {% for arena in arenas %}
+    <form method="post" action="{% url 'multiplayer:room_set_arena' room.code %}">
+      {% csrf_token %}
+      <input type="hidden" name="arena_id" value="{{ arena.id }}">
+      <button type="submit" class="pf-card pf-card-hover pf-btn-block" style="cursor:pointer; text-align:left; {% if room.arena_id == arena.id %}outline:2px solid {{ arena.accent_color }};{% endif %} background: linear-gradient(135deg, {{ arena.bg_gradient_from }}, {{ arena.bg_gradient_to }});">
+        <div style="font-weight:700;">{{ arena.name }}</div>
+        <div class="pf-faint" style="font-size:12px;">{{ arena.description }}</div>
+      </button>
+    </form>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="pf-center pf-mt-32">
+  <form method="post" action="{% url 'multiplayer:room_start' room.code %}">
+    {% csrf_token %}
+    <button class="pf-btn pf-btn-primary pf-btn-lg" {% if not room.guest %}disabled{% endif %}>⚔️ START PENFIGHT</button>
+  </form>
+  {% if not room.guest %}<p class="pf-faint pf-mt-16">Waiting for an opponent to join before you can start.</p>{% endif %}
+</div>
+{% else %}
+<div class="pf-center pf-mt-32">
+  <p class="pf-muted">Waiting for {{ room.host.username }} to start the match...</p>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+{% if room.host != request.user %}
+<script>
+  // Guests poll for the host starting the match, then auto-redirect.
+  const statusUrl = "{% url 'multiplayer:room_status' room.code %}";
+  const battleUrl = "{% url 'multiplayer:online_battle' room.code %}";
+  setInterval(() => {
+    fetch(statusUrl).then(r => r.json()).then(data => {
+      if (data.status === "in_progress") window.location.href = battleUrl;
+    }).catch(() => {});
+  }, 2500);
+</script>
+{% endif %}
+{% endblock %}

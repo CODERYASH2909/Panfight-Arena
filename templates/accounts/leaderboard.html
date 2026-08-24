@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Leaderboard — PenFight Arena{% endblock %}
+{% block content %}
+<div class="pf-page-head">
+  <div class="pf-page-title">🏆 LEADERBOARD</div>
+  <div class="pf-page-sub">The best PenFighters in the arena.</div>
+</div>
+
+<div class="pf-flex pf-gap-8 pf-mb-24">
+  <a href="?tab=global" class="pf-btn {% if tab == 'global' %}pf-btn-primary{% else %}pf-btn-ghost{% endif %} pf-btn-sm">Global</a>
+  <a href="?tab=friends" class="pf-btn {% if tab == 'friends' %}pf-btn-primary{% else %}pf-btn-ghost{% endif %} pf-btn-sm">Friends</a>
+  <a href="?tab=weekly" class="pf-btn {% if tab == 'weekly' %}pf-btn-primary{% else %}pf-btn-ghost{% endif %} pf-btn-sm">Weekly</a>
+  <a href="?tab=monthly" class="pf-btn {% if tab == 'monthly' %}pf-btn-primary{% else %}pf-btn-ghost{% endif %} pf-btn-sm">Monthly</a>
+</div>
+
+<div class="pf-card">
+  <div class="pf-flex-between pf-faint" style="font-size:12px; text-transform:uppercase; letter-spacing:0.08em; padding:0 8px 12px; border-bottom:1px solid var(--border-soft);">
+    <span style="width:60px;">Rank</span>
+    <span style="flex:1;">Player</span>
+    <span style="width:100px;">Rating</span>
+    <span style="width:80px;">Wins</span>
+    <span style="width:100px;">Win Rate</span>
+  </div>
+  {% for p in profiles %}
+  <div class="pf-flex-between" style="padding:14px 8px; border-bottom:1px solid var(--border-soft); {% if p.user_id == request.user.id %}background:rgba(139,92,246,0.08); border-radius:10px;{% endif %}">
+    <span style="width:60px; font-weight:800; font-family:var(--font-display);">
+      {% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% elif forloop.counter == 3 %}🥉{% else %}#{{ forloop.counter }}{% endif %}
+    </span>
+    <span style="flex:1;" class="pf-flex pf-gap-8">
+      <span class="pf-avatar-circle">{{ p.user.username|slice:":1"|upper }}</span>
+      <a href="{% url 'accounts:profile' p.user.username %}" style="font-weight:700;">{{ p.user.username }}</a>
+      <span class="pf-rank-chip pf-rank-{{ p.rank_tier }}" style="font-size:10px;">{{ p.get_rank_tier_display }}</span>
+    </span>
+    <span style="width:100px; font-weight:700;">{{ p.rating }}</span>
+    <span style="width:80px;">{{ p.wins }}</span>
+    <span style="width:100px;">{{ p.win_rate }}%</span>
+  </div>
+  {% empty %}
+  <div class="pf-empty"><div class="pf-empty-icon">🏆</div>No fighters ranked yet.</div>
+  {% endfor %}
+</div>
+
+{% if user_rank %}
+<p class="pf-center pf-muted pf-mt-16">Your current position: <strong>#{{ user_rank }}</strong></p>
+{% endif %}
+{% endblock %}

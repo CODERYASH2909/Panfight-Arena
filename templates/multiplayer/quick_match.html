@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Quick Match — PenFight Arena{% endblock %}
+{% block extra_css %}
+<style>
+  .qm-wrap { max-width: 480px; margin: 60px auto; text-align: center; }
+  .qm-radar { width: 180px; height: 180px; margin: 0 auto 32px; border-radius: 50%; position: relative; }
+  .qm-radar-ring {
+    position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--neon-violet);
+    animation: qm-ping 1.8s cubic-bezier(0,0.5,0.5,1) infinite; opacity: 0;
+  }
+  .qm-radar-ring:nth-child(2) { animation-delay: 0.6s; }
+  .qm-radar-ring:nth-child(3) { animation-delay: 1.2s; }
+  @keyframes qm-ping { 0% { transform: scale(0.3); opacity: 0.8; } 100% { transform: scale(1.6); opacity: 0; } }
+  .qm-center { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:44px; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="qm-wrap">
+  <h2>⚡ QUICK MATCH</h2>
+  <p class="pf-muted pf-mt-8" id="qm-status">Ready to find an opponent near your rank.</p>
+
+  <div class="qm-radar" id="qm-radar" style="display:none;">
+    <div class="qm-radar-ring"></div>
+    <div class="qm-radar-ring"></div>
+    <div class="qm-radar-ring"></div>
+    <div class="qm-center">🖊️</div>
+  </div>
+
+  <button class="pf-btn pf-btn-primary pf-btn-lg pf-mt-24" id="qm-start-btn">SEARCH FOR OPPONENT</button>
+  <button class="pf-btn pf-btn-ghost pf-btn-lg pf-mt-24" id="qm-cancel-btn" style="display:none;">CANCEL SEARCH</button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const startBtn = document.getElementById('qm-start-btn');
+  const cancelBtn = document.getElementById('qm-cancel-btn');
+  const radar = document.getElementById('qm-radar');
+  const status = document.getElementById('qm-status');
+  let pollTimer = null;
+
+  function csrf() {
+    return document.cookie.split('; ').find(r => r.startsWith('csrftoken='))?.split('=')[1] || '{{ csrf_token }}';
+  }
+
+  startBtn.addEventListener('click', () => {
+    startBtn.style.display = 'none';
+    cancelBtn.style.display = 'inline-flex';
+    radar.style.display = 'block';
+    status.textContent = 'SEARCHING FOR OPPONENT...';
+
+    fetch("{% url 'multiplayer:quick_match_start' %}", { method: 'POST', headers: { 'X-CSRFToken': csrf() } })
+      .then(r => r.json()).then(handleResult);
+
+    pollTimer = setInterval(() => {
+      fetch("{% url 'multiplayer:quick_match_poll' %}").then(r => r.json()).then(handleResult);
+    }, 2000);
+  });
+
+  function handleResult(data) {
+    if (data.matched) {
+      clearInterval(pollTimer);
+      status.textContent = 'OPPONENT FOUND!';
+      setTimeout(() => { window.location.href = `/arena/room/${data.room_code}/`; }, 800);
+    }
+  }
+
+  cancelBtn.addEventListener('click', () => {
+    clearInterval(pollTimer);
+    fetch("{% url 'multiplayer:quick_match_cancel' %}", { method: 'POST', headers: { 'X-CSRFToken': csrf() } });
+    startBtn.style.display = 'inline-flex';
+    cancelBtn.style.display = 'none';
+    radar.style.display = 'none';
+    status.textContent = 'Ready to find an opponent near your rank.';
+  });
+</script>
+{% endblock %}

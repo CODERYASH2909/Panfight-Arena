@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Pen Store — PenFight Arena{% endblock %}
+{% block content %}
+<div class="pf-page-head pf-flex-between">
+  <div>
+    <div class="pf-page-title">🛒 PEN STORE</div>
+    <div class="pf-page-sub">Spend your Pen Points on cosmetic skins. Never pay-to-win.</div>
+  </div>
+  <div class="pf-pp-chip" style="font-size:16px; padding:10px 20px;">🪙 {{ request.user.profile.pen_points }} PP</div>
+</div>
+
+{% if featured %}
+<div class="pf-mb-32">
+  <div class="pf-section-title">✨ FEATURED PENS</div>
+  <div class="pf-grid pf-grid-3">
+    {% for skin in featured %}
+    <div class="pf-card pf-card-hover" style="border-color: rgba(250,204,21,0.35);">
+      <div class="pf-flex-between">
+        <span style="font-size:26px;">{{ skin.icon }}</span>
+        <span class="pf-badge pf-badge-{{ skin.rarity }}">{{ skin.get_rarity_display }}</span>
+      </div>
+      <div style="font-weight:700; margin-top:10px; font-size:17px;">{{ skin.name }}</div>
+      <div class="pf-faint" style="font-size:12px; margin-top:4px;">{{ skin.description|default:"Cosmetic pen skin." }}</div>
+      <div class="pf-flex-between pf-mt-16">
+        <span style="font-weight:800; color: var(--neon-gold);">🪙 {{ skin.price_pp }} PP</span>
+        {% if skin.id in owned_ids %}
+          <span class="pf-badge pf-badge-common">OWNED</span>
+        {% else %}
+          <form method="post" action="{% url 'store:buy_skin' skin.id %}">
+            {% csrf_token %}
+            <button class="pf-btn pf-btn-gold pf-btn-sm" {% if request.user.profile.pen_points < skin.price_pp %}disabled{% endif %}>Buy</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<div class="pf-section-title">ALL PENS</div>
+<div class="pf-grid pf-grid-4">
+  {% for skin in all_skins %}
+  <div class="pf-card pf-card-hover">
+    <div class="pf-flex-between">
+      <span style="font-size:24px;">{{ skin.icon }}</span>
+      <span class="pf-badge pf-badge-{{ skin.rarity }}">{{ skin.get_rarity_display }}</span>
+    </div>
+    <div style="font-weight:700; margin-top:10px;">{{ skin.name }}</div>
+    <div class="pf-flex-between pf-mt-16">
+      <span style="font-weight:800; color: var(--neon-gold);">🪙 {{ skin.price_pp }} PP</span>
+      {% if skin.id in owned_ids %}
+        <span class="pf-badge pf-badge-common">OWNED</span>
+      {% else %}
+        <form method="post" action="{% url 'store:buy_skin' skin.id %}">
+          {% csrf_token %}
+          <button class="pf-btn pf-btn-primary pf-btn-sm" {% if request.user.profile.pen_points < skin.price_pp %}disabled{% endif %}>Buy</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+  {% empty %}
+  <div class="pf-empty"><div class="pf-empty-icon">🛒</div>Store is empty right now.</div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — PenFight Arena{% endblock %}
+
+{% block content %}
+<div class="pf-glass" style="padding:32px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:24px;">
+  <div class="pf-flex pf-gap-16">
+    <div class="pf-avatar-circle" style="width:64px; height:64px; font-size:26px; background: var(--grad-primary);">
+      {{ request.user.username|slice:":1"|upper }}
+    </div>
+    <div>
+      <div style="font-size:22px; font-weight:800;">Welcome back, {{ request.user.username }}</div>
+      <div class="pf-flex pf-gap-8 pf-mt-8">
+        <span class="pf-rank-chip pf-rank-{{ profile.rank_tier }}">{{ profile.get_rank_tier_display }}</span>
+        <span class="pf-faint" style="font-size:13px;">Rating {{ profile.rating }}</span>
+      </div>
+    </div>
+  </div>
+  <div style="min-width:220px;">
+    <div class="pf-flex-between" style="font-size:12px;">
+      <span class="pf-faint">LEVEL {{ profile.level }}</span>
+      <span class="pf-faint">{{ profile.xp }} / {{ profile.xp_to_next_level }} XP</span>
+    </div>
+    <div class="pf-progress pf-mt-8"><div class="pf-progress-fill" style="width:{% widthratio profile.xp profile.xp_to_next_level 100 %}%;"></div></div>
+  </div>
+</div>
+
+<div class="pf-mt-32">
+  <div class="pf-section-title">GAME MODES</div>
+  <div class="pf-grid pf-grid-3">
+    <a href="{% url 'game:local_setup' %}" class="pf-mode-card pf-card-hover">
+      <div class="pf-mode-icon">🖥️</div>
+      <h3>Local Battle</h3>
+      <p class="pf-muted pf-mt-8">Hotseat play — two players, one screen.</p>
+    </a>
+    <a href="{% url 'multiplayer:quick_match' %}" class="pf-mode-card pf-card-hover">
+      <div class="pf-mode-icon">⚡</div>
+      <h3>Quick Match</h3>
+      <p class="pf-muted pf-mt-8">Find a similarly-ranked opponent instantly.</p>
+    </a>
+    <a href="{% url 'multiplayer:room_create' %}" class="pf-mode-card pf-card-hover">
+      <div class="pf-mode-icon">🔒</div>
+      <h3>Private Room</h3>
+      <p class="pf-muted pf-mt-8">Create a room and share the code with a friend.</p>
+    </a>
+    <a href="{% url 'multiplayer:room_join' %}" class="pf-mode-card pf-card-hover">
+      <div class="pf-mode-icon">🔑</div>
+      <h3>Join Room</h3>
+      <p class="pf-muted pf-mt-8">Got a code? Jump straight into a friend's room.</p>
+    </a>
+    <a href="{% url 'game:my_pen' %}" class="pf-mode-card pf-card-hover">
+      <div class="pf-mode-icon">🖊️</div>
+      <h3>My Pen</h3>
+      <p class="pf-muted pf-mt-8">Customize your loadout before the next fight.</p>
+    </a>
+    <a href="{% url 'store:home' %}" class="pf-mode-card pf-card-hover">
+      <div class="pf-mode-icon">🛒</div>
+      <h3>Pen Store</h3>
+      <p class="pf-muted pf-mt-8">Spend your Pen Points on new cosmetics.</p>
+    </a>
+  </div>
+</div>
+
+<div class="pf-grid pf-grid-3 pf-mt-32">
+  <div class="pf-card pf-stat">
+    <div class="pf-stat-value">{{ profile.wins }}</div>
+    <div class="pf-stat-label">Wins</div>
+  </div>
+  <div class="pf-card pf-stat">
+    <div class="pf-stat-value">{{ profile.win_rate }}%</div>
+    <div class="pf-stat-label">Win Rate</div>
+  </div>
+  <div class="pf-card pf-stat">
+    <div class="pf-stat-value">{{ achievements_unlocked }}/{{ achievements_total }}</div>
+    <div class="pf-stat-label">Achievements</div>
+  </div>
+</div>
+
+<div class="pf-grid pf-grid-2 pf-mt-32">
+  <div class="pf-card">
+    <div class="pf-flex-between pf-mb-16">
+      <div class="pf-section-title" style="margin-bottom:0;">RECENT MATCHES</div>
+      <a href="{% url 'accounts:profile' request.user.username %}" class="pf-faint" style="font-size:12px;">View all →</a>
+    </div>
+    {% if recent_matches %}
+      {% for mp in recent_matches %}
+      <div class="pf-flex-between" style="padding:10px 0; border-bottom:1px solid var(--border-soft);">
+        <div class="pf-flex pf-gap-12">
+          <span style="font-size:20px;">{{ mp.is_winner|yesno:"🏆,💀" }}</span>
+          <div>
+            <div style="font-weight:700; font-size:14px;">{{ mp.match.get_match_type_display }}</div>
+            <div class="pf-faint" style="font-size:12px;">{{ mp.match.arena.name|default:"—" }}</div>
+          </div>
+        </div>
+        <span class="pf-faint" style="font-size:12px;">{{ mp.match.created_at|timesince }} ago</span>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="pf-empty"><div class="pf-empty-icon">⚔️</div>No matches yet — start your first PenFight!</div>
+    {% endif %}
+  </div>
+
+  <div class="pf-card">
+    <div class="pf-flex-between pf-mb-16">
+      <div class="pf-section-title" style="margin-bottom:0;">FRIENDS</div>
+      <a href="{% url 'accounts:friends' %}" class="pf-faint" style="font-size:12px;">Manage →</a>
+    </div>
+    {% if incoming_requests %}
+      {% for fr in incoming_requests %}
+      <div class="pf-flex-between pf-mt-8">
+        <span>🔥 {{ fr.from_user.username }} wants to be friends</span>
+        <form method="post" action="{% url 'accounts:respond_friend_request' fr.id 'accept' %}">
+          {% csrf_token %}<button class="pf-btn pf-btn-primary pf-btn-sm">Accept</button>
+        </form>
+      </div>
+      {% endfor %}
+    {% endif %}
+    {% if friends %}
+      {% for f in friends %}
+      <div class="pf-flex-between" style="padding:10px 0; border-bottom:1px solid var(--border-soft);">
+        <a href="{% url 'accounts:profile' f.username %}" class="pf-flex pf-gap-8">
+          <span class="pf-avatar-circle">{{ f.username|slice:":1"|upper }}</span> {{ f.username }}
+        </a>
+        <form method="post" action="{% url 'multiplayer:challenge_friend' f.username %}">
+          {% csrf_token %}<button class="pf-btn pf-btn-ghost pf-btn-sm">Challenge</button>
+        </form>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="pf-empty"><div class="pf-empty-icon">🤝</div>No friends yet — find some fighters!</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

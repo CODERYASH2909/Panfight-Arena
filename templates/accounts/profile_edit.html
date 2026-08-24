@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Edit Profile — PenFight Arena{% endblock %}
+{% block content %}
+<div style="max-width:480px; margin:0 auto;">
+  <div class="pf-card">
+    <div class="pf-section-title">EDIT PROFILE</div>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="pf-field">
+        <label class="pf-label">Avatar</label>
+        {{ form.avatar }}
+      </div>
+      <div class="pf-field">
+        <label class="pf-label">Bio</label>
+        {{ form.bio }}
+      </div>
+      <button type="submit" class="pf-btn pf-btn-primary pf-btn-block">Save Changes</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

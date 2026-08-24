@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Achievements — PenFight Arena{% endblock %}
+{% block content %}
+<div class="pf-page-head">
+  <div class="pf-page-title">🏆 ACHIEVEMENTS</div>
+  <div class="pf-page-sub">{{ unlocked_ids|length }} / {{ achievements|length }} unlocked</div>
+</div>
+
+<div class="pf-grid pf-grid-3">
+  {% for a in achievements %}
+  <div class="pf-card {% if a.id in unlocked_ids %}pf-card-hover{% endif %}" style="{% if a.id not in unlocked_ids %}opacity:0.5;{% endif %}">
+    <div style="font-size:30px;">{{ a.icon }}</div>
+    <div style="font-weight:700; margin-top:10px;">{{ a.name }}</div>
+    <div class="pf-faint" style="font-size:13px; margin-top:6px;">{{ a.description }}</div>
+    <div class="pf-flex pf-gap-8 pf-mt-16">
+      <span class="pf-badge pf-badge-rare">🪙 {{ a.reward_pp }} PP</span>
+      <span class="pf-badge pf-badge-epic">⭐ {{ a.reward_xp }} XP</span>
+    </div>
+    {% if a.id in unlocked_ids %}
+      <div class="pf-badge pf-badge-legendary pf-mt-16">✔ UNLOCKED</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

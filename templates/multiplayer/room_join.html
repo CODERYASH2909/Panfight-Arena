@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Join Room — PenFight Arena{% endblock %}
+{% block content %}
+<div style="max-width:420px; margin:40px auto;">
+  <div class="pf-glass" style="padding:36px;">
+    <div class="pf-center pf-mb-24">
+      <div style="font-size:40px;">🔑</div>
+      <h2 class="pf-mt-8">Join a Private Room</h2>
+      <p class="pf-muted pf-mt-8">Enter the code your friend shared with you.</p>
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="pf-field">
+        <label class="pf-label">Room Code</label>
+        <input class="pf-input" type="text" name="code" placeholder="PF-XXXX" style="text-align:center; font-size:22px; letter-spacing:0.1em; text-transform:uppercase;" maxlength="10" required>
+      </div>
+      <button type="submit" class="pf-btn pf-btn-primary pf-btn-block pf-btn-lg">JOIN ROOM</button>
+    </form>
+    <p class="pf-center pf-muted pf-mt-24">
+      Don't have a code? <a href="{% url 'multiplayer:room_create' %}" style="color:var(--neon-blue); font-weight:700;">Create your own room</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

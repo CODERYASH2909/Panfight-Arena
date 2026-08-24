@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}PenFight Arena — Your Pen. Your Bench. Your Fight.{% endblock %}
+
+{% block content %}
+<section class="pf-hero">
+  <div class="pf-particles" id="pf-particles"></div>
+  <div class="pf-badge pf-badge-epic" style="margin-bottom:20px;">🏆 THE CLASSROOM CLASSIC, REIMAGINED</div>
+  <h1 class="pf-hero-title">PENFIGHT<br>ARENA</h1>
+  <p class="pf-hero-tagline">Your Pen. Your Bench. Your Fight.</p>
+
+  <div class="pf-hero-actions">
+    <a href="{% url 'accounts:signup' %}" class="pf-btn pf-btn-primary pf-btn-lg">⚔️ PLAY NOW</a>
+    <a href="{% url 'game:how_it_works' %}" class="pf-btn pf-btn-ghost pf-btn-lg">▶ WATCH HOW IT WORKS</a>
+  </div>
+
+  <div class="pf-duel-stage">
+    <div class="pf-duel-vs">VS</div>
+    <div class="pf-duel-pen left"></div>
+    <div class="pf-duel-pen right"></div>
+    <div class="pf-duel-spark"></div>
+    <div class="pf-duel-bench"></div>
+  </div>
+</section>
+
+<section class="pf-mt-32">
+  <div class="pf-section-title">GAME MODES</div>
+  <div class="pf-grid pf-grid-3">
+    <div class="pf-mode-card pf-card-hover">
+      <div class="pf-mode-icon">🖥️</div>
+      <h3>Local Battle</h3>
+      <p class="pf-muted pf-mt-8">Two players, one device. Pass the desk and fight it out on the same bench.</p>
+    </div>
+    <div class="pf-mode-card pf-card-hover">
+      <div class="pf-mode-icon">🌐</div>
+      <h3>Online Battle</h3>
+      <p class="pf-muted pf-mt-8">Take the fight to the internet. Real-time flicks, real-time reactions.</p>
+    </div>
+    <div class="pf-mode-card pf-card-hover">
+      <div class="pf-mode-icon">🤝</div>
+      <h3>Friend Battle</h3>
+      <p class="pf-muted pf-mt-8">Challenge a friend directly and settle the score.</p>
+    </div>
+    <div class="pf-mode-card pf-card-hover">
+      <div class="pf-mode-icon">⚡</div>
+      <h3>Quick Match</h3>
+      <p class="pf-muted pf-mt-8">Jump straight into a fair fight — we'll find you an opponent.</p>
+    </div>
+    <div class="pf-mode-card pf-card-hover">
+      <div class="pf-mode-icon">🔒</div>
+      <h3>Private Room</h3>
+      <p class="pf-muted pf-mt-8">Create a room, share the code, and fight in private.</p>
+    </div>
+    <div class="pf-mode-card pf-card-hover">
+      <div class="pf-mode-icon">🏟️</div>
+      <h3>7 Arenas</h3>
+      <p class="pf-muted pf-mt-8">From the Classic Classroom to the futuristic Neon Arena.</p>
+    </div>
+  </div>
+</section>
+
+<section class="pf-mt-32">
+  <div class="pf-glass" style="padding:40px; text-align:center;">
+    <h2 style="font-size:28px;">Knock. Their. Pen. Off.</h2>
+    <p class="pf-muted pf-mt-8" style="max-width:560px; margin:8px auto 0;">
+      Aim your flick, dial in the power, and send your opponent's pen sliding off the edge of the bench.
+      Real physics. Real momentum. Real bragging rights.
+    </p>
+    <a href="{% url 'accounts:signup' %}" class="pf-btn pf-btn-primary pf-btn-lg pf-mt-24">Create Your Fighter</a>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const field = document.getElementById('pf-particles');
+  for (let i = 0; i < 26; i++) {
+    const p = document.createElement('div');
+    p.className = 'pf-particle';
+    const size = 2 + Math.random() * 4;
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (6 + Math.random() * 8) + 's';
+    p.style.animationDelay = (Math.random() * 8) + 's';
+    field.appendChild(p);
+  }
+</script>
+{% endblock %}

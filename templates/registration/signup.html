@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Create Your Fighter — PenFight Arena{% endblock %}
+{% block content %}
+<div style="max-width:440px; margin:40px auto;">
+  <div class="pf-glass" style="padding:36px;">
+    <div class="pf-center pf-mb-24">
+      <div style="font-size:40px;">⚔️</div>
+      <h2 class="pf-mt-8">Create Your Fighter</h2>
+      <p class="pf-muted pf-mt-8">A free Classic Ball Pen and Classic Blue skin are waiting.</p>
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="pf-field">
+        <label class="pf-label">Username</label>
+        {{ form.username }}
+        {% for e in form.username.errors %}<p style="color:#f87171; font-size:12px; margin-top:4px;">{{ e }}</p>{% endfor %}
+      </div>
+      <div class="pf-field">
+        <label class="pf-label">Email</label>
+        {{ form.email }}
+        {% for e in form.email.errors %}<p style="color:#f87171; font-size:12px; margin-top:4px;">{{ e }}</p>{% endfor %}
+      </div>
+      <div class="pf-field">
+        <label class="pf-label">Password</label>
+        {{ form.password1 }}
+        {% for e in form.password1.errors %}<p style="color:#f87171; font-size:12px; margin-top:4px;">{{ e }}</p>{% endfor %}
+      </div>
+      <div class="pf-field">
+        <label class="pf-label">Confirm Password</label>
+        {{ form.password2 }}
+        {% for e in form.password2.errors %}<p style="color:#f87171; font-size:12px; margin-top:4px;">{{ e }}</p>{% endfor %}
+      </div>
+      <button type="submit" class="pf-btn pf-btn-primary pf-btn-block pf-btn-lg">🖊️ START MY PENFIGHT JOURNEY</button>
+    </form>
+    <p class="pf-center pf-muted pf-mt-24" style="font-size:14px;">
+      Already have an account? <a href="{% url 'accounts:login' %}" style="color:var(--neon-blue); font-weight:700;">Log in</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

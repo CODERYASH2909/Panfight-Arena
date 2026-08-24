@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}How It Works — PenFight Arena{% endblock %}
+{% block content %}
+<div class="pf-page-head">
+  <div class="pf-page-title">▶ HOW IT WORKS</div>
+  <div class="pf-page-sub">The classic classroom pen fight, rebuilt with real physics.</div>
+</div>
+
+<div class="pf-grid pf-grid-3">
+  <div class="pf-card">
+    <div style="font-size:28px;">1️⃣</div>
+    <h3 class="pf-mt-8">Place Your Pen</h3>
+    <p class="pf-muted pf-mt-8">Both pens start on opposite ends of the bench. A 3-2-1-FIGHT countdown kicks things off.</p>
+  </div>
+  <div class="pf-card">
+    <div style="font-size:28px;">2️⃣</div>
+    <h3 class="pf-mt-8">Aim & Flick</h3>
+    <p class="pf-muted pf-mt-8">Drag back from your pen to aim, release to flick. Power, direction, mass, and friction all matter.</p>
+  </div>
+  <div class="pf-card">
+    <div style="font-size:28px;">3️⃣</div>
+    <h3 class="pf-mt-8">Knock Them Off</h3>
+    <p class="pf-muted pf-mt-8">Collide with your opponent's pen and send it sliding off the bench edge. Last pen standing wins.</p>
+  </div>
+</div>
+
+<div class="pf-glass pf-mt-32" style="padding:36px;">
+  <h3>Turn-Based Physics Combat</h3>
+  <p class="pf-muted pf-mt-16">
+    PenFight Arena uses real momentum: mass, friction, and collision physics decide what happens after every flick.
+    Players alternate turns — once your pen (and your opponent's) comes to a complete stop, the turn passes.
+    Different pen types (Heavy, Speed, Precision, Balanced) offer small, fair trade-offs — never a pay-to-win advantage.
+    Pen Skins are purely cosmetic: colors, glow, and trail effects, nothing that changes gameplay.
+  </p>
+  <a href="{% url 'accounts:signup' %}" class="pf-btn pf-btn-primary pf-btn-lg pf-mt-24">⚔️ PLAY NOW</a>
+</div>
+{% endblock %}

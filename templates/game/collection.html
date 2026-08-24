@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}My Collection — PenFight Arena{% endblock %}
+{% block content %}
+<div class="pf-page-head">
+  <div class="pf-page-title">📦 MY COLLECTION</div>
+  <div class="pf-page-sub">{{ owned_count }} / {{ total_count }} PENS COLLECTED</div>
+</div>
+
+<div class="pf-progress pf-mb-32" style="max-width:400px;">
+  <div class="pf-progress-fill gold" style="width:{% widthratio owned_count total_count 100 %}%;"></div>
+</div>
+
+<div class="pf-grid pf-grid-4">
+  {% for skin in all_skins %}
+  <div class="pf-card {% if skin.id in owned_ids %}pf-card-hover{% endif %}" style="{% if skin.id not in owned_ids %}opacity:0.45; filter:grayscale(0.7);{% endif %}">
+    <div class="pf-flex-between">
+      <span style="font-size:24px;">{{ skin.icon }}</span>
+      <span class="pf-badge pf-badge-{{ skin.rarity }}">{{ skin.get_rarity_display }}</span>
+    </div>
+    <div style="font-weight:700; margin-top:10px;">{{ skin.name }}</div>
+    <div class="pf-faint" style="font-size:12px; margin-top:4px;">{{ skin.description|default:"Cosmetic pen skin." }}</div>
+    {% if skin.id in owned_ids %}
+      <a href="{% url 'game:my_pen' %}" class="pf-btn pf-btn-ghost pf-btn-sm pf-btn-block pf-mt-16">Equip in My Pen</a>
+    {% else %}
+      <a href="{% url 'store:home' %}" class="pf-btn pf-btn-primary pf-btn-sm pf-btn-block pf-mt-16">🔒 Unlock in Store</a>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

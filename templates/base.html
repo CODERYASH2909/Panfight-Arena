@@ -1,0 +1,101 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}PenFight Arena{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+  <div class="pf-shell">
+    <nav class="pf-nav">
+      <div class="pf-nav-inner">
+        <a href="{% url 'game:landing' %}" class="pf-logo">
+          <span class="pf-logo-mark">🖊️</span> PENFIGHT ARENA
+        </a>
+        {% if user.is_authenticated %}
+        <div class="pf-nav-links">
+          <a class="pf-nav-link" href="{% url 'accounts:dashboard' %}">Home</a>
+          <a class="pf-nav-link" href="{% url 'game:local_setup' %}">Play</a>
+          <a class="pf-nav-link" href="{% url 'game:my_pen' %}">My Pen</a>
+          <a class="pf-nav-link" href="{% url 'store:home' %}">Store</a>
+          <a class="pf-nav-link" href="{% url 'game:collection' %}">Collection</a>
+          <a class="pf-nav-link" href="{% url 'accounts:leaderboard' %}">Leaderboard</a>
+          <a class="pf-nav-link" href="{% url 'accounts:friends' %}">Friends</a>
+        </div>
+        <div class="pf-nav-right">
+          <div class="pf-pp-chip">🪙 {{ user.profile.pen_points }} PP</div>
+
+          <div class="pf-nav-wrap">
+            <button class="pf-bell" onclick="document.getElementById('pf-notif-dd').classList.toggle('open')" type="button">
+              🔔
+              {% if nav_notifications_count %}<span class="pf-bell-dot">{{ nav_notifications_count }}</span>{% endif %}
+            </button>
+            <div class="pf-dropdown" id="pf-notif-dd">
+              {% if nav_notifications %}
+                {% for n in nav_notifications %}
+                <form method="post" action="{% url 'accounts:mark_notification_read' n.id %}" class="pf-dropdown-item">
+                  {% csrf_token %}
+                  <div>{{ n.message }}</div>
+                  <button type="submit" class="pf-btn pf-btn-ghost pf-btn-sm pf-mt-8">Mark read</button>
+                </form>
+                {% endfor %}
+                <form method="post" action="{% url 'accounts:mark_all_notifications_read' %}" style="padding:10px 16px;">
+                  {% csrf_token %}
+                  <button type="submit" class="pf-btn pf-btn-ghost pf-btn-sm pf-btn-block">Mark all read</button>
+                </form>
+              {% else %}
+                <div class="pf-dropdown-item pf-muted">You're all caught up.</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <a href="{% url 'accounts:profile' user.username %}" class="pf-avatar-btn">
+            <span class="pf-avatar-circle">{{ user.username|slice:":1"|upper }}</span>
+            <span style="font-size:13px; font-weight:700;">Lv.{{ user.profile.level }}</span>
+          </a>
+          <form method="post" action="{% url 'accounts:logout' %}">
+            {% csrf_token %}
+            <button class="pf-btn pf-btn-ghost pf-btn-sm" type="submit">Logout</button>
+          </form>
+        </div>
+        {% else %}
+        <div class="pf-nav-links"></div>
+        <div class="pf-nav-right">
+          <a href="{% url 'accounts:login' %}" class="pf-btn pf-btn-ghost pf-btn-sm">Log In</a>
+          <a href="{% url 'accounts:signup' %}" class="pf-btn pf-btn-primary pf-btn-sm">Play Now</a>
+        </div>
+        {% endif %}
+      </div>
+    </nav>
+
+    <main class="pf-main">
+      <div class="pf-container">
+        {% if messages %}
+        <div class="pf-messages" id="pf-toasts">
+          {% for message in messages %}
+          <div class="pf-toast {{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+        <script>
+          setTimeout(() => { const t = document.getElementById('pf-toasts'); if (t) t.style.display = 'none'; }, 4500);
+        </script>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+
+    <footer class="pf-footer">
+      <div class="pf-container pf-flex-between">
+        <span>PenFight Arena — Your Pen. Your Bench. Your Fight.</span>
+        <span>Built with Django + Channels</span>
+      </div>
+    </footer>
+  </div>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
