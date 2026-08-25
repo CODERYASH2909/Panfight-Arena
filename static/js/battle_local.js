@@ -1,4 +1,4 @@
-/* PenFight Arena — Local Battle Controller */
+/* PenFight Arena — Local Battle Controller (Best-of-3 System) */
 (() => {
   const canvas = document.getElementById("battle-canvas");
   const config = JSON.parse(sessionStorage.getItem("pf_local_config") || "null") || {
@@ -9,48 +9,89 @@
   document.getElementById("hud-p1-name").textContent = config.player1.name;
   document.getElementById("hud-p2-name").textContent = config.player2.name;
 
+  canvas.width = 960;
+  canvas.height = 520;
   canvas.style.background = `linear-gradient(135deg, ${window.PF_ARENA.fromColor}, ${window.PF_ARENA.toColor})`;
 
-  const bench = { x: 140, y: 130, w: 620, h: 160 };
   const engine = new PenFightEngine(canvas, {
-    bench,
     onSettle: handleSettle,
     onFall: handleFall,
     onCollision: (a, b, strength) => {
       pfAudio.collision(strength);
       engine.screenShake(4 + strength * 10);
     },
+    onBumperHit: (bmp, strength) => {
+      pfAudio.bumperHit(bmp.type, strength);
+      engine.screenShake(2 + strength * 6);
+    },
   });
   engine.benchColorLight = shade(window.PF_ARENA.benchColor, 24);
   engine.benchColorDark = shade(window.PF_ARENA.benchColor, -30);
 
-  engine.addPen("p1", {
-    x: bench.x + bench.w * 0.28, y: bench.y + bench.h / 2, angle: 0,
-    color: config.player1.skin.color, accent: config.player1.skin.accent,
-    trailColor: config.player1.skin.trail, glow: !!config.player1.skin.glow,
-    mass: config.player1.pen.mass || 1, friction: config.player1.pen.friction || 1,
-    assetKey: config.player1.skin.assetKey || "classic-blue"
-  });
-  engine.addPen("p2", {
-    x: bench.x + bench.w * 0.72, y: bench.y + bench.h / 2, angle: Math.PI,
-    color: config.player2.skin.color, accent: config.player2.skin.accent,
-    trailColor: config.player2.skin.trail, glow: !!config.player2.skin.glow,
-    mass: config.player2.pen.mass || 1, friction: config.player2.pen.friction || 1,
-    assetKey: config.player2.skin.assetKey || "sunset-blaze"
-  });
+  // Authoritative tabletop bounds (occupying ~94% of canvas area)
+  const bench = engine.bench;
 
   const penOwner = { p1: "player1", p2: "player2" };
   const penPowerStat = { p1: config.player1.pen.power || 1, p2: config.player2.pen.power || 1 };
 
+  // Best-of-3 Match State Machine
+  let currentRound = 1;
+  let p1RoundWins = 0;
+  let p2RoundWins = 0;
+
   let currentTurn = "p1";
-  let gameOver = false;
+  let roundOver = false;
+  let matchOver = false;
+  let isTransitioningRound = false;
   let waitingForSettle = false;
-  let dragging = null; // {penId, anchorX, anchorY, mouseX, mouseY}
+  let dragging = null;
 
   const turnBanner = document.getElementById("turn-banner");
+  const roundBanner = document.getElementById("round-banner");
   const powerFill = document.getElementById("power-fill");
   const powerLabel = document.getElementById("power-label");
+  const p1WinsDot = document.getElementById("p1-wins-dots");
+  const p2WinsDot = document.getElementById("p2-wins-dots");
   const MAX_PULL = 95;
+
+  function updateScoreHUD() {
+    p1WinsDot.textContent = "●".repeat(p1RoundWins) + "○".repeat(2 - p1RoundWins);
+    p2WinsDot.textContent = "●".repeat(p2RoundWins) + "○".repeat(2 - p2RoundWins);
+    if (p1RoundWins === 1 && p2RoundWins === 1) {
+      roundBanner.textContent = "FINAL ROUND (1 — 1)";
+      roundBanner.style.color = "var(--gold)";
+    } else {
+      roundBanner.textContent = `ROUND ${currentRound}`;
+      roundBanner.style.color = "var(--text-secondary)";
+    }
+  }
+
+  function setupRound() {
+    roundOver = false;
+    waitingForSettle = false;
+    currentTurn = (currentRound % 2 === 1) ? "p1" : "p2";
+
+    // Pens start 15% and 85% from left edge of 912px table (~638px distance apart)
+    engine.addPen("p1", {
+      x: bench.x + bench.w * 0.15, y: bench.y + bench.h / 2, angle: 0,
+      color: config.player1.skin.color, accent: config.player1.skin.accent,
+      trailColor: config.player1.skin.trail, glow: !!config.player1.skin.glow,
+      mass: config.player1.pen.mass || 1, friction: config.player1.pen.friction || 1,
+      assetKey: config.player1.skin.assetKey || "classic-blue"
+    });
+    engine.addPen("p2", {
+      x: bench.x + bench.w * 0.85, y: bench.y + bench.h / 2, angle: Math.PI,
+      color: config.player2.skin.color, accent: config.player2.skin.accent,
+      trailColor: config.player2.skin.trail, glow: !!config.player2.skin.glow,
+      mass: config.player2.pen.mass || 1, friction: config.player2.pen.friction || 1,
+      assetKey: config.player2.skin.assetKey || "sunset-blaze"
+    });
+
+    // Generate fresh procedural bumpers for round
+    engine.generateBumpers(`local_r${currentRound}_${Date.now()}`);
+    updateScoreHUD();
+    updateTurnUI();
+  }
 
   function updateTurnUI() {
     document.getElementById("hud-p1").classList.toggle("active-turn", currentTurn === "p1");
@@ -70,12 +111,12 @@
   }
 
   function startDrag(evt) {
-    if (gameOver || waitingForSettle || engine.anyPenMoving()) return;
+    if (matchOver || roundOver || isTransitioningRound || waitingForSettle || engine.anyPenMoving()) return;
     const pos = canvasPos(evt);
     const pen = engine.pens[currentTurn];
     if (!pen) return;
     const dist = Math.hypot(pos.x - pen.x, pos.y - pen.y);
-    if (dist > 70) return; // must grab near your own pen
+    if (dist > 75) return;
     dragging = { penId: currentTurn, anchorX: pen.x, anchorY: pen.y, mouseX: pos.x, mouseY: pos.y };
     pfAudio.click();
   }
@@ -83,8 +124,7 @@
   function moveDrag(evt) {
     if (!dragging) return;
     const pos = canvasPos(evt);
-    dragging.mouseX = pos.x;
-    dragging.mouseY = pos.y;
+    dragging.mouseX = pos.x; dragging.mouseY = pos.y;
     const dx = dragging.mouseX - dragging.anchorX, dy = dragging.mouseY - dragging.anchorY;
     const pull = Math.min(MAX_PULL, Math.hypot(dx, dy));
     const power = pull / MAX_PULL;
@@ -98,7 +138,7 @@
     const pull = Math.min(MAX_PULL, Math.hypot(dx, dy));
     const power = pull / MAX_PULL;
     if (power > 0.08) {
-      const angle = Math.atan2(-dy, -dx); // flick away from the pull direction
+      const angle = Math.atan2(-dy, -dx);
       engine.flick(dragging.penId, angle, power * (penPowerStat[dragging.penId] || 1));
       pfAudio.flick();
       waitingForSettle = true;
@@ -115,7 +155,6 @@
   canvas.addEventListener("touchmove", (e) => { moveDrag(e); e.preventDefault(); }, { passive: false });
   canvas.addEventListener("touchend", endDrag);
 
-  // draw the aim/pull line on top of the engine's own render loop
   function drawAimOverlay() {
     if (dragging) {
       const ctx = canvas.getContext("2d");
@@ -124,27 +163,20 @@
       ctx.strokeStyle = "rgba(250, 204, 21, 0.85)";
       ctx.lineWidth = 3;
       ctx.setLineDash([6, 6]);
-      ctx.beginPath();
-      ctx.moveTo(anchorX, anchorY);
-      ctx.lineTo(mouseX, mouseY);
-      ctx.stroke();
-      // arrow showing flick direction (opposite of pull)
+      ctx.beginPath(); ctx.moveTo(anchorX, anchorY); ctx.lineTo(mouseX, mouseY); ctx.stroke();
       const fx = anchorX - (mouseX - anchorX), fy = anchorY - (mouseY - anchorY);
       ctx.setLineDash([]);
       ctx.strokeStyle = "rgba(52, 211, 153, 0.9)";
-      ctx.beginPath();
-      ctx.moveTo(anchorX, anchorY);
-      ctx.lineTo(fx, fy);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(anchorX, anchorY); ctx.lineTo(fx, fy); ctx.stroke();
       ctx.restore();
     }
     requestAnimationFrame(drawAimOverlay);
   }
 
-  // ---------------------------------------------------------------- turns
+  // ---------------------------------------------------------------- turns & round logic
 
   function handleSettle() {
-    if (gameOver) return;
+    if (matchOver || roundOver || isTransitioningRound) return;
     if (!engine.anyPenMoving() && waitingForSettle) {
       waitingForSettle = false;
       currentTurn = currentTurn === "p1" ? "p2" : "p1";
@@ -152,10 +184,8 @@
     }
   }
 
-  // Fallback poll in case the last-settled pen doesn't trigger onSettle
-  // (e.g. it was already stationary and only the other pen was moving).
   setInterval(() => {
-    if (!gameOver && waitingForSettle && !engine.anyPenMoving()) {
+    if (!matchOver && !roundOver && !isTransitioningRound && waitingForSettle && !engine.anyPenMoving()) {
       waitingForSettle = false;
       currentTurn = currentTurn === "p1" ? "p2" : "p1";
       updateTurnUI();
@@ -163,13 +193,54 @@
   }, 200);
 
   function handleFall(penId) {
-    if (gameOver) return;
-    gameOver = true;
+    if (roundOver || matchOver || isTransitioningRound) return;
+    roundOver = true;
+    isTransitioningRound = true;
     pfAudio.fall();
     engine.screenShake(14);
+
     const loserSlot = penOwner[penId];
     const winnerSlot = loserSlot === "player1" ? "player2" : "player1";
-    showVictory(winnerSlot);
+    if (winnerSlot === "player1") p1RoundWins++; else p2RoundWins++;
+    updateScoreHUD();
+
+    const winnerName = winnerSlot === "player1" ? config.player1.name : config.player2.name;
+
+    // First to 2 round wins claims MATCH VICTORY!
+    if (p1RoundWins >= 2 || p2RoundWins >= 2) {
+      matchOver = true;
+      showVictory(winnerSlot);
+    } else {
+      // 2.5s Round Result Toast, then transition to Round 2 or Round 3!
+      showRoundToast(winnerName, currentRound, p1RoundWins, p2RoundWins, () => {
+        currentRound++;
+        isTransitioningRound = false;
+        setupRound();
+        runCountdown();
+      });
+    }
+  }
+
+  function showRoundToast(winnerName, roundNum, score1, score2, onComplete) {
+    const toast = document.createElement("div");
+    toast.className = "pf-overlay";
+    const isFinalNext = (score1 === 1 && score2 === 1);
+    toast.innerHTML = `
+      <div class="pf-center">
+        <div class="pf-faint" style="letter-spacing:0.18em; font-size:14px; text-transform:uppercase;">ROUND ${roundNum} RESULT</div>
+        <div style="font-family:var(--font-display); font-size:52px; font-weight:900; color:var(--gold); margin-top:8px;">${winnerName.toUpperCase()} WINS ROUND ${roundNum}</div>
+        <div style="font-family:var(--font-display); font-size:32px; font-weight:800; margin-top:12px; color:white;">
+          ${score1}  —  ${score2}
+        </div>
+        ${isFinalNext ? `<div class="pf-badge pf-badge-mythic" style="margin-top:16px; font-size:14px; padding:6px 16px;">🔥 FINAL ROUND NEXT!</div>` : ""}
+        <div class="pf-muted pf-mt-24" style="font-size:13px;">Preparing next round...</div>
+      </div>
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+      document.body.removeChild(toast);
+      onComplete();
+    }, 2500);
   }
 
   // ---------------------------------------------------------------- flow
@@ -186,6 +257,7 @@
   function runCountdown() {
     const overlay = document.getElementById("countdown-overlay");
     const text = document.getElementById("countdown-text");
+    overlay.style.display = "flex";
     const seq = ["3", "2", "1", "FIGHT!"];
     let i = 0;
     const step = () => {
@@ -194,14 +266,17 @@
       else { pfAudio.countdownTick(); }
       i++;
       if (i < seq.length) {
-        setTimeout(step, 700);
+        setTimeout(step, 600);
       } else {
         setTimeout(() => {
           overlay.style.display = "none";
-          engine.start();
-          drawAimOverlay();
+          text.style.color = "#ffffff";
+          if (!engine.running) {
+            engine.start();
+            drawAimOverlay();
+          }
           updateTurnUI();
-        }, 500);
+        }, 400);
       }
     };
     step();
@@ -209,7 +284,7 @@
 
   function showVictory(winnerSlot) {
     const name = winnerSlot === "player1" ? config.player1.name : config.player2.name;
-    document.getElementById("victory-winner").textContent = `${name.toUpperCase()} WINS`;
+    document.getElementById("victory-winner").textContent = `${name.toUpperCase()} WINS MATCH (${p1RoundWins} - ${p2RoundWins})`;
     if (winnerSlot === "player1") pfAudio.victory(); else pfAudio.defeat();
 
     fetch(window.PF_LOCAL_RESULT_URL, {
@@ -237,7 +312,7 @@
 
     setTimeout(() => {
       document.getElementById("victory-overlay").style.display = "flex";
-    }, 300);
+    }, 400);
   }
 
   document.getElementById("rematch-btn").addEventListener("click", () => window.location.reload());
@@ -248,5 +323,6 @@
     sfxToggle.textContent = pfAudio.sfxOn ? "🔊 SFX" : "🔇 SFX";
   });
 
+  setupRound();
   runCountdown();
 })();

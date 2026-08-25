@@ -4,25 +4,31 @@
 
 {% block extra_css %}
 <style>
-  .battle-wrap { display:flex; flex-direction:column; align-items:center; gap:18px; }
-  .battle-hud { display:flex; align-items:center; justify-content:space-between; width:100%; max-width:900px; }
-  .battle-player-card { display:flex; align-items:center; gap:10px; padding:10px 18px; border-radius:14px; background:var(--bg-panel); border:1px solid var(--border-soft); min-width:220px; transition: all 0.2s; }
-  .battle-player-card.active-turn { border-color: var(--neon-gold); box-shadow: 0 0 24px rgba(250,204,21,0.35); }
+  .battle-wrap { display:flex; flex-direction:column; align-items:center; gap:14px; width:100%; }
+  .battle-hud { display:flex; align-items:center; justify-content:space-between; width:100%; max-width:960px; }
+  .battle-player-card { display:flex; align-items:center; gap:10px; padding:10px 18px; border-radius:14px; background:var(--bg-surface); border:1px solid var(--border); min-width:220px; transition: all 0.2s; }
+  .battle-player-card.active-turn { border-color: var(--gold); box-shadow: 0 0 24px rgba(244,201,93,0.35); }
   .battle-player-card.p2 { flex-direction: row-reverse; text-align: right; }
+  .battle-center-hud { display:flex; flex-direction:column; align-items:center; gap:4px; }
   .battle-turn-banner {
-    font-family: var(--font-display); font-weight: 800; font-size: 22px; letter-spacing: 0.05em;
-    padding: 10px 26px; border-radius: 999px; background: var(--bg-panel-2); border: 1px solid var(--border-soft);
+    font-family: var(--font-display); font-weight: 800; font-size: 18px; letter-spacing: 0.05em;
+    padding: 6px 22px; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border);
   }
-  #battle-canvas { border-radius: 24px; box-shadow: var(--shadow-panel); background: #05050a; touch-action: none; }
-  .power-meter-wrap { width: 100%; max-width: 900px; }
-  .power-meter { height: 22px; border-radius: 999px; background: rgba(255,255,255,0.06); overflow: hidden; border: 1px solid var(--border-soft); position: relative; }
+  .battle-round-banner {
+    font-family: var(--font-display); font-weight: 800; font-size: 13px; letter-spacing: 0.14em;
+    color: var(--gold); text-transform: uppercase;
+  }
+  .battle-score-dots { font-size: 16px; letter-spacing: 4px; color: var(--gold); margin-top: 2px; }
+  #battle-canvas { border-radius: 20px; box-shadow: var(--shadow-lg), 0 0 50px rgba(0,0,0,0.7); background: #05050a; touch-action: none; max-width:100%; }
+  .power-meter-wrap { width: 100%; max-width: 960px; }
+  .power-meter { height: 20px; border-radius: 999px; background: rgba(255,255,255,0.06); overflow: hidden; border: 1px solid var(--border); position: relative; }
   .power-meter-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #34d399, #facc15, #f87171); transition: width 0.05s linear; }
   .pf-overlay {
-    position: fixed; inset: 0; background: rgba(4,4,10,0.86); backdrop-filter: blur(6px);
+    position: fixed; inset: 0; background: rgba(4,4,10,0.88); backdrop-filter: blur(8px);
     display: flex; align-items: center; justify-content: center; z-index: 500; flex-direction: column; gap: 18px;
   }
-  .countdown-text { font-family: var(--font-display); font-size: 140px; font-weight: 900; color: white; text-shadow: 0 0 60px rgba(139,92,246,0.7); }
-  .victory-title { font-family: var(--font-display); font-size: 56px; font-weight: 900; background: var(--grad-gold); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .countdown-text { font-family: var(--font-display); font-size: 130px; font-weight: 900; color: white; text-shadow: 0 0 60px rgba(139,92,246,0.7); }
+  .victory-title { font-family: var(--font-display); font-size: 56px; font-weight: 900; background: linear-gradient(135deg, var(--gold), var(--violet-bright)); -webkit-background-clip:text; background-clip:text; color:transparent; }
   .conn-pill { padding:6px 14px; border-radius:999px; font-size:12px; font-weight:700; }
   .conn-pill.ok { background:rgba(52,211,153,0.15); color:#34d399; }
   .conn-pill.bad { background:rgba(248,113,113,0.15); color:#f87171; }
@@ -37,31 +43,32 @@
       <div class="pf-avatar-circle" style="background:#3b82f6;">{{ room.host.username|slice:":1"|upper }}</div>
       <div>
         <div style="font-weight:800;">{{ room.host.username }}{% if room.host == request.user %} (you){% endif %}</div>
-        <div class="pf-faint" style="font-size:12px;">On the bench</div>
+        <div class="battle-score-dots" id="p1-wins-dots">○○</div>
       </div>
     </div>
-    <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+    <div class="battle-center-hud">
+      <div class="battle-round-banner" id="round-banner">ROUND 1</div>
       <div class="battle-turn-banner" id="turn-banner">{{ room.host.username|upper }}'S TURN</div>
-      <button class="pf-btn pf-btn-ghost pf-btn-sm" id="sfx-toggle" type="button" title="Toggle sound effects">🔊 SFX</button>
+      <button class="pf-btn pf-btn-ghost pf-btn-sm" id="sfx-toggle" type="button" title="Toggle sound effects" style="margin-top:2px;">🔊 SFX</button>
     </div>
     <div class="battle-player-card p2" id="hud-p2">
       <div>
         <div style="font-weight:800;">{{ room.guest.username }}{% if room.guest == request.user %} (you){% endif %}</div>
-        <div class="pf-faint" style="font-size:12px;">On the bench</div>
+        <div class="battle-score-dots" id="p2-wins-dots">○○</div>
       </div>
       <div class="pf-avatar-circle" style="background:#f87171;">{{ room.guest.username|slice:":1"|upper }}</div>
     </div>
   </div>
 
-  <canvas id="battle-canvas" width="900" height="420"></canvas>
+  <canvas id="battle-canvas" width="960" height="520"></canvas>
 
   <div class="power-meter-wrap">
     <div class="pf-flex-between pf-mb-8">
-      <span class="pf-faint" style="font-size:12px; text-transform:uppercase; letter-spacing:0.08em;">Power</span>
+      <span class="pf-faint" style="font-size:12px; text-transform:uppercase; letter-spacing:0.08em;">Power Meter</span>
       <span class="pf-faint" style="font-size:12px;" id="power-label">LOW</span>
     </div>
     <div class="power-meter"><div class="power-meter-fill" id="power-fill"></div></div>
-    <div class="pf-center pf-muted pf-mt-8" style="font-size:13px;" id="hint-text">Click and drag your pen backward, then release to flick — only on your turn.</div>
+    <div class="pf-center pf-muted pf-mt-8" style="font-size:13px;" id="hint-text">Drag pen backward to aim, release to flick — Best of 3 Rounds. (Press 'D' for debug info)</div>
   </div>
 </div>
 
@@ -71,8 +78,8 @@
 
 <div class="pf-overlay" id="victory-overlay" style="display:none;">
   <div class="pf-center">
-    <div class="pf-faint" style="letter-spacing:0.2em; font-size:14px;">PEN FALLS OFF THE BENCH</div>
-    <div class="victory-title pf-mt-8" id="victory-title">VICTORY!</div>
+    <div class="pf-faint" style="letter-spacing:0.2em; font-size:14px;">PENFALL KNOCKOUT MATCH</div>
+    <div class="victory-title pf-mt-8" id="victory-title">MATCH VICTORY!</div>
     <div style="font-size:22px; font-weight:700; margin-top:6px;" id="victory-winner">PLAYER WINS</div>
     <div class="pf-flex pf-gap-16" style="justify-content:center; margin-top:20px;" id="victory-rewards"></div>
     <div class="pf-flex pf-gap-16" style="justify-content:center; margin-top:32px;">

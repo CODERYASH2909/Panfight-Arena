@@ -57,6 +57,17 @@ class PenFightAudio {
   click() { this._tone(600, 0.05, "square", 0.08); }
   flick() { this._tone(340, 0.16, "sawtooth", 0.16, 120); }
   collision(strength = 0.6) { this._noise(0.12, 0.12 + strength * 0.2); this._tone(180, 0.08, "square", 0.1); }
+  bumperHit(type = "wood", strength = 0.6) {
+    if (!this.sfxOn) return;
+    if (type === "metal") {
+      this._tone(1200, 0.08, "sine", 0.15 + strength * 0.1, 400);
+    } else if (type === "rubber") {
+      this._tone(220, 0.12, "triangle", 0.2 + strength * 0.15, 90);
+    } else {
+      this._noise(0.08, 0.1 + strength * 0.15);
+      this._tone(320, 0.07, "square", 0.12, 140);
+    }
+  }
   fall() { this._tone(500, 0.5, "sine", 0.15, 60); this._noise(0.4, 0.08); }
   countdownTick() { this._tone(440, 0.12, "sine", 0.15); }
   fight() { this._tone(880, 0.25, "square", 0.2, 660); }
