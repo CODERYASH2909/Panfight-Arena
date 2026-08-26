@@ -1,9 +1,11 @@
 /* =========================================================================
-   PENFIGHT ARENA — Physics & Rendering Engine v7
-   - Internal 960x520 Physics Coordinates 100% UNTOUCHED
-   - Dedicated 100vw x 100vh Responsive Canvas Viewport Scaling
-   - Classroom Environment Backdrop & Hero Wooden Desk Surface
-   - Visual Pen Scale 1.15x (rendering only, physics bounding box unchanged)
+   PENFIGHT ARENA — Physics & Rendering Engine v8
+   - Balanced Composition: Hero Wooden Desk occupies ~76% Width x ~70% Height
+   - Multi-Layered Classroom Environment (Daylight Window, Chalkboard, Clock, Bookshelves)
+   - Internal Physics Coordinates & Constants 100% UNTOUCHED
+   - Heavy Pen Baseline Physics (NORMAL = 2.5, HEAVY = 4.0)
+   - Soft Quadratic Power Curve (Exp 2.0) & low velocity cap (75 px/s)
+   - Fixed 60Hz timestep sub-stepping
    ========================================================================= */
 
 const PHYSICS = {
@@ -54,17 +56,15 @@ class PenFightEngine {
     });
   }
 
+  /** Sized tabletop occupying 76% width x 70% height, centered in viewport */
   getPlayableTableBounds() {
     const W = this.canvas.width || 960;
     const H = this.canvas.height || 520;
-    const marginX = Math.round(W * 0.025); // ~24px
-    const marginY = Math.round(H * 0.03);  // ~15px
-    return {
-      x: marginX,
-      y: marginY,
-      w: W - marginX * 2, // ~912px
-      h: H - marginY * 2, // ~490px
-    };
+    const w = Math.round(W * 0.76); // 730px tabletop width
+    const h = Math.round(H * 0.70); // 364px tabletop height
+    const x = Math.round((W - w) / 2); // 115px margin left & right
+    const y = Math.round((H - h) / 2); // 78px margin top & bottom
+    return { x, y, w, h };
   }
 
   reset() {
@@ -103,14 +103,14 @@ class PenFightEngine {
     };
 
     const count = 3 + Math.floor(rand() * 3);
-    const safetyRadius = 140;
-    const edgeMargin = 65;
+    const safetyRadius = 130;
+    const edgeMargin = 55;
 
     for (let attempts = 0; attempts < 60 && this.bumpers.length < count; attempts++) {
       const type = types[Math.floor(rand() * types.length)];
       const isCircle = type === "stationery";
-      const bw = isCircle ? 36 : 44 + Math.floor(rand() * 24);
-      const bh = isCircle ? 36 : 22 + Math.floor(rand() * 12);
+      const bw = isCircle ? 34 : 42 + Math.floor(rand() * 20);
+      const bh = isCircle ? 34 : 20 + Math.floor(rand() * 10);
       const angle = isCircle ? 0 : (rand() - 0.5) * 0.7;
 
       const bx = b.x + edgeMargin + rand() * (b.w - edgeMargin * 2 - bw);
@@ -119,12 +119,12 @@ class PenFightEngine {
       const nearPen = penList.some((p) => Math.hypot(p.x - bx, p.y - by) < safetyRadius);
       if (nearPen) continue;
 
-      const nearBumper = this.bumpers.some((other) => Math.hypot(other.x - bx, other.y - by) < 100);
+      const nearBumper = this.bumpers.some((other) => Math.hypot(other.x - bx, other.y - by) < 95);
       if (nearBumper) continue;
 
       const centerDistY = Math.abs(by - (b.y + b.h / 2));
       const centerDistX = Math.abs(bx - (b.x + b.w / 2));
-      if (centerDistY < 35 && centerDistX < 160) continue;
+      if (centerDistY < 30 && centerDistX < 140) continue;
 
       this.bumpers.push({ id: `bmp_${this.bumpers.length}`, type, x: bx, y: by, w: bw, h: bh, isCircle, angle });
     }
@@ -384,10 +384,10 @@ class PenFightEngine {
     const ctx = this.ctx, b = this.bench, W = this.canvas.width, H = this.canvas.height;
     ctx.clearRect(0, 0, W, H);
 
-    // 1. Realistic Classroom Environment Background Scene
+    // 1. Multi-layered Classroom Background Scene
     this._renderClassroomEnvironment(ctx, W, H, b);
 
-    // 2. Authoritative Hero Wooden Desk Surface (~93.5% Viewport area)
+    // 2. Hero Wooden Desk Surface (~76% Width x ~70% Height)
     this._renderHeroWoodenDesk(ctx, b);
 
     // 3. Procedural Bumpers
@@ -425,41 +425,97 @@ class PenFightEngine {
 
   _renderClassroomEnvironment(ctx, W, H, b) {
     ctx.save();
-    // Ambient Wall Background
-    ctx.fillStyle = "#1e293b";
+    // Warm Classroom Wall Gradient Background
+    const wallGrad = ctx.createLinearGradient(0, 0, 0, H);
+    wallGrad.addColorStop(0, "#1e293b");
+    wallGrad.addColorStop(1, "#0f172a");
+    ctx.fillStyle = wallGrad;
     ctx.fillRect(0, 0, W, H);
 
-    // Window Light Gradient on Left
-    const windowGrad = ctx.createRadialGradient(40, 60, 10, 40, 60, 260);
-    windowGrad.addColorStop(0, "rgba(255, 255, 255, 0.22)");
-    windowGrad.addColorStop(1, "rgba(255, 255, 255, 0)");
-    ctx.fillStyle = windowGrad;
-    ctx.fillRect(0, 0, 300, 200);
-
-    // Dark Classroom Blackboard
-    ctx.fillStyle = "#0f172a";
+    // 1. Arched Window on Left with Soft Daylight Rays
+    ctx.fillStyle = "rgba(14, 116, 144, 0.4)";
     ctx.strokeStyle = "#475569";
-    ctx.lineWidth = 4;
-    ctx.fillRect(W * 0.28, 6, W * 0.44, 45);
-    ctx.strokeRect(W * 0.28, 6, W * 0.44, 45);
-
-    // Faint Chalk Diagram on Blackboard
-    ctx.globalAlpha = 0.25;
-    ctx.strokeStyle = "#ffffff";
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.arc(W * 0.5, 26, 12, 0, Math.PI * 2);
+    ctx.arc(48, 45, 28, Math.PI, 0, false);
+    ctx.rect(20, 45, 56, 95);
+    ctx.fill();
+    ctx.stroke();
+
+    const sunRay = ctx.createRadialGradient(48, 45, 5, 120, 160, 240);
+    sunRay.addColorStop(0, "rgba(254, 240, 138, 0.28)");
+    sunRay.addColorStop(1, "rgba(254, 240, 138, 0)");
+    ctx.fillStyle = sunRay;
+    ctx.fillRect(0, 0, 320, 260);
+
+    // 2. Classroom Slate Blackboard in Center
+    ctx.fillStyle = "#064e3b";
+    ctx.strokeStyle = "#78350f";
+    ctx.lineWidth = 6;
+    const boardX = W * 0.22, boardY = 8, boardW = W * 0.56, boardH = 58;
+    ctx.fillRect(boardX, boardY, boardW, boardH);
+    ctx.strokeRect(boardX, boardY, boardW, boardH);
+
+    // Chalk Tray at bottom of Blackboard
+    ctx.fillStyle = "#b45309";
+    ctx.fillRect(boardX - 4, boardY + boardH, boardW + 8, 4);
+
+    // Chalk Diagrams & Text
+    ctx.globalAlpha = 0.32;
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.arc(boardX + 45, boardY + 28, 14, 0, Math.PI * 2);
     ctx.stroke();
     ctx.fillStyle = "#ffffff";
-    ctx.font = "9px sans-serif";
-    ctx.fillText("E = mc²", W * 0.32, 28);
-    ctx.fillText("PENFIGHT", W * 0.61, 28);
+    ctx.font = "10px sans-serif";
+    ctx.fillText("E = mc²", boardX + 75, boardY + 25);
+    ctx.fillText("PENFIGHT ARENA", boardX + boardW - 130, boardY + 25);
     ctx.globalAlpha = 1.0;
 
-    // Wooden Desk Legs extending underneath desk
+    // 3. Wall Clock on Right (3:15 time)
+    const clockX = W - 45, clockY = 32, clockR = 20;
+    ctx.fillStyle = "#f8fafc";
+    ctx.strokeStyle = "#334155";
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(clockX, clockY, clockR, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(clockX, clockY); ctx.lineTo(clockX + 11, clockY); ctx.stroke(); // Minute hand
+    ctx.beginPath(); ctx.moveTo(clockX, clockY); ctx.lineTo(clockX, clockY - 8); ctx.stroke(); // Hour hand
+
+    // 4. Cork Notice Board on Right
+    ctx.fillStyle = "#92400e";
+    ctx.strokeStyle = "#78350f";
+    ctx.lineWidth = 3;
+    ctx.fillRect(W - 165, 8, 95, 52);
+    ctx.strokeRect(W - 165, 8, 95, 52);
+    ctx.fillStyle = "#fef08a"; ctx.fillRect(W - 155, 16, 26, 30); // Pinned note 1
+    ctx.fillStyle = "#bae6fd"; ctx.fillRect(W - 120, 20, 30, 24); // Pinned note 2
+
+    // 5. Bookshelves & Books on Right Side
+    ctx.fillStyle = "#451a03";
+    ctx.fillRect(W - 85, 230, 80, 270);
+    // Shelf Dividers & Colorful Book Spines
+    ctx.fillStyle = "#78350f"; ctx.fillRect(W - 85, 310, 80, 6); ctx.fillRect(W - 85, 390, 80, 6);
+    const bookColors = ["#ef4444", "#3b82f6", "#facc15", "#10b981", "#a855f7"];
+    for (let k = 0; k < 7; k++) {
+      ctx.fillStyle = bookColors[k % bookColors.length];
+      ctx.fillRect(W - 80 + k * 10, 265, 8, 45);
+      ctx.fillRect(W - 80 + k * 10, 345, 8, 45);
+    }
+
+    // 6. Midground Student Desks & Chairs in Soft Blurred Perspective
+    ctx.globalAlpha = 0.45;
     ctx.fillStyle = "#334155";
-    ctx.fillRect(b.x + 35, b.y + b.h + 2, 14, H - (b.y + b.h));
-    ctx.fillRect(b.x + b.w - 49, b.y + b.h + 2, 14, H - (b.y + b.h));
+    ctx.fillRect(15, b.y + 20, b.x - 30, 16); // Left desk surface
+    ctx.fillRect(b.x + b.w + 15, b.y + 20, W - (b.x + b.w) - 30, 16); // Right desk surface
+
+    // Desk Legs for Main Hero Desk
+    ctx.globalAlpha = 1.0;
+    ctx.fillStyle = "#1e293b";
+    ctx.fillRect(b.x + 25, b.y + b.h, 16, H - (b.y + b.h));
+    ctx.fillRect(b.x + b.w - 41, b.y + b.h, 16, H - (b.y + b.h));
+
     ctx.restore();
   }
 
@@ -467,13 +523,13 @@ class PenFightEngine {
     ctx.save();
 
     // Tabletop Floor Drop Shadow
-    ctx.fillStyle = "rgba(0, 0, 0, 0.70)";
-    this._roundRect(ctx, b.x + 4, b.y + 8, b.w, b.h + 8, 16);
+    ctx.fillStyle = "rgba(0, 0, 0, 0.78)";
+    this._roundRect(ctx, b.x + 6, b.y + 12, b.w, b.h + 12, 18);
     ctx.fill();
 
     // Tabletop 3D Front Wooden Lip
     ctx.fillStyle = this.benchColorDark || "#381e0b";
-    this._roundRect(ctx, b.x, b.y + 6, b.w, b.h + 6, 16);
+    this._roundRect(ctx, b.x, b.y + 8, b.w, b.h + 8, 18);
     ctx.fill();
 
     // Tabletop Surface Rich Wood Texture
@@ -481,36 +537,36 @@ class PenFightEngine {
     grad.addColorStop(0, this.benchColorLight || "#8b5e3c");
     grad.addColorStop(1, this.benchColorDark || "#4a2d17");
     ctx.fillStyle = grad;
-    this._roundRect(ctx, b.x, b.y, b.w, b.h, 16);
+    this._roundRect(ctx, b.x, b.y, b.w, b.h, 18);
     ctx.fill();
 
     // Wood Grain & Classroom Scratch Doodles
-    ctx.globalAlpha = 0.12;
+    ctx.globalAlpha = 0.14;
     ctx.strokeStyle = "#000000";
     ctx.lineWidth = 1.5;
 
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 10; i++) {
       ctx.beginPath();
-      const yPos = b.y + 16 + (i * (b.h - 32)) / 11;
+      const yPos = b.y + 14 + (i * (b.h - 28)) / 9;
       ctx.moveTo(b.x + 12, yPos);
-      ctx.bezierCurveTo(b.x + b.w * 0.35, yPos + (i % 2 === 0 ? 9 : -9), b.x + b.w * 0.65, yPos + (i % 2 === 0 ? -9 : 9), b.x + b.w - 12, yPos);
+      ctx.bezierCurveTo(b.x + b.w * 0.35, yPos + (i % 2 === 0 ? 8 : -8), b.x + b.w * 0.65, yPos + (i % 2 === 0 ? -8 : 8), b.x + b.w - 12, yPos);
       ctx.stroke();
     }
 
     // Scratch doodles (star, compass lines, pencil marks)
-    ctx.globalAlpha = 0.16;
+    ctx.globalAlpha = 0.18;
     ctx.beginPath();
-    ctx.arc(b.x + 80, b.y + 70, 16, 0, Math.PI * 2);
-    ctx.moveTo(b.x + b.w - 90, b.y + 75); ctx.lineTo(b.x + b.w - 60, b.y + 105);
-    ctx.moveTo(b.x + 140, b.y + b.h - 60); ctx.lineTo(b.x + 180, b.y + b.h - 40);
+    ctx.arc(b.x + 75, b.y + 65, 14, 0, Math.PI * 2);
+    ctx.moveTo(b.x + b.w - 85, b.y + 60); ctx.lineTo(b.x + b.w - 55, b.y + 90);
+    ctx.moveTo(b.x + 130, b.y + b.h - 50); ctx.lineTo(b.x + 165, b.y + b.h - 35);
     ctx.stroke();
     ctx.restore();
 
     // Tabletop Edge Bevel Highlight
     ctx.save();
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.24)";
-    ctx.lineWidth = 2;
-    this._roundRect(ctx, b.x, b.y, b.w, b.h, 16);
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.28)";
+    ctx.lineWidth = 2.5;
+    this._roundRect(ctx, b.x, b.y, b.w, b.h, 18);
     ctx.stroke();
     ctx.restore();
   }
@@ -573,7 +629,6 @@ class PenFightEngine {
   _drawPen(p) {
     const ctx = this.ctx;
     const alpha = p.falling ? Math.max(0, 1 - p.fallProgress / 1.5) : 1;
-    // Render pen 1.15x larger visually for high contrast against table
     const scale = (p.falling ? Math.max(0.2, 1 - p.fallProgress * 0.5) : 1) * 1.15;
 
     ctx.save();

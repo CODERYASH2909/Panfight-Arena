@@ -59,7 +59,7 @@
   /* 4. Top-Left & Top-Right HUD Cards */
   .pf-ref-hud-card {
     position: absolute;
-    top: 18px;
+    top: 14px;
     z-index: 20;
     background: rgba(14, 18, 26, 0.92);
     backdrop-filter: blur(12px);
@@ -73,8 +73,8 @@
     flex-direction: column;
     gap: 6px;
   }
-  .pf-ref-hud-card.p1 { left: 20px; }
-  .pf-ref-hud-card.p2 { right: 20px; }
+  .pf-ref-hud-card.p1 { left: 18px; }
+  .pf-ref-hud-card.p2 { right: 18px; }
 
   .pf-ref-player-header {
     display: flex;
@@ -144,7 +144,7 @@
   /* 5. Top-Center Score Box */
   .pf-ref-hud-center {
     position: absolute;
-    top: 14px;
+    top: 10px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 20;
@@ -195,22 +195,22 @@
   /* 6. Bottom Angle + Power Floating Control Bar */
   .pf-ref-bottom-bar {
     position: absolute;
-    bottom: 18px;
+    bottom: 12px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 20;
-    width: 90%;
-    max-width: 720px;
+    width: 88%;
+    max-width: 680px;
     background: rgba(14, 18, 26, 0.94);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 16px;
-    padding: 12px 24px;
+    padding: 10px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 24px;
+    gap: 20px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
   }
 
@@ -278,7 +278,7 @@
     .pf-ref-hud-card { min-width: 130px; padding: 6px 8px; top: 10px; }
     .pf-ref-name { font-size: 12px; }
     .pf-ref-score { font-size: 22px; }
-    .pf-ref-bottom-bar { padding: 8px 12px; gap: 10px; bottom: 10px; }
+    .pf-ref-bottom-bar { padding: 8px 12px; gap: 10px; bottom: 8px; }
     .pf-ref-sublabel { display: none; }
   }
 </style>
@@ -380,7 +380,7 @@
   window.PF_LOCAL_RESULT_URL = "{% url 'game:local_result' %}";
   window.PF_CSRF = "{{ csrf_token }}";
 </script>
-<script src="{% static 'js/engine.js' %}?v=12.0"></script>
-<script src="{% static 'js/audio.js' %}?v=12.0"></script>
-<script src="{% static 'js/battle_local.js' %}?v=12.0"></script>
+<script src="{% static 'js/engine.js' %}?v=15.0"></script>
+<script src="{% static 'js/audio.js' %}?v=15.0"></script>
+<script src="{% static 'js/battle_local.js' %}?v=15.0"></script>
 {% endblock %}
