@@ -6,7 +6,7 @@
   <title>{% block title %}PenFight Arena{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  <link rel="stylesheet" href="{% static 'css/main.css' %}?v=6.0">
   {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -175,7 +175,7 @@
       </footer>
     </div>
   </div>
-  <script src="{% static 'js/pen_visuals.js' %}"></script>
+  <script src="{% static 'js/pen_visuals.js' %}?v=6.0"></script>
   {% block extra_js %}{% endblock %}
 </body>
 </html>

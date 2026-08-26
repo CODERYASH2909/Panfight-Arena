@@ -67,8 +67,11 @@
   }
 
   function setupRound() {
+    engine.reset();
     roundOver = false;
+    isTransitioningRound = false;
     waitingForSettle = false;
+    dragging = null;
     currentTurn = (currentRound % 2 === 1) ? "p1" : "p2";
 
     // Pens start 15% and 85% from left edge of 912px table (~638px distance apart)

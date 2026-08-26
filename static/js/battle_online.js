@@ -72,8 +72,11 @@
   }
 
   function setupRound() {
+    engine.reset();
     roundOver = false;
+    isTransitioningRound = false;
     waitingForSettle = false;
+    dragging = null;
     currentTurn = (currentRound % 2 === 1) ? "player1" : "player2";
 
     engine.addPen("player1", {

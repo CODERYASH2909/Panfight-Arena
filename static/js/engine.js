@@ -80,7 +80,17 @@ class PenFightEngine {
     };
   }
 
+  /** Reset all engine state for new rounds */
+  reset() {
+    this.pens = {};
+    this.bumpers = [];
+    this.particles = [];
+    this.settledPending.clear();
+    this._accumulator = 0;
+  }
+
   addPen(id, { x, y, angle = 0, color = "#3b82f6", accent = "#93c5fd", trailColor = "#60a5fa", glow = false, mass = 1, friction = 1, icon = "", assetKey = "classic-blue" }) {
+    this.settledPending.delete(id);
     // Heavy pen baseline physics
     const effectiveMass = (mass > 1.3) ? PHYSICS.HEAVY_PEN_MASS : PHYSICS.NORMAL_PEN_MASS * (mass || 1.0);
     this.pens[id] = {

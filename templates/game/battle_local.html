@@ -95,7 +95,7 @@
   window.PF_LOCAL_RESULT_URL = "{% url 'game:local_result' %}";
   window.PF_CSRF = "{{ csrf_token }}";
 </script>
-<script src="{% static 'js/engine.js' %}"></script>
-<script src="{% static 'js/audio.js' %}"></script>
-<script src="{% static 'js/battle_local.js' %}"></script>
+<script src="{% static 'js/engine.js' %}?v=6.0"></script>
+<script src="{% static 'js/audio.js' %}?v=6.0"></script>
+<script src="{% static 'js/battle_local.js' %}?v=6.0"></script>
 {% endblock %}
