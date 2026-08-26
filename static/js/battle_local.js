@@ -1,17 +1,24 @@
-/* PenFight Arena — Local Battle Controller (Best-of-3 System) */
+/* PenFight Arena — Local Battle Controller (Reference Image UI & Dual Aiming) */
 (() => {
   const canvas = document.getElementById("battle-canvas");
   const config = JSON.parse(sessionStorage.getItem("pf_local_config") || "null") || {
-    player1: { name: "Player 1", pen: { mass: 1, friction: 1, power: 1 }, skin: { color: "#3b82f6", accent: "#93c5fd", trail: "#60a5fa", glow: false } },
-    player2: { name: "Player 2", pen: { mass: 1, friction: 1, power: 1 }, skin: { color: "#f87171", accent: "#fecaca", trail: "#fca5a5", glow: false } },
+    player1: { name: "YASH", rank: "ROOKIE", pen: { mass: 1, friction: 1, power: 1 }, skin: { color: "#3b82f6", accent: "#93c5fd", trail: "#60a5fa", glow: false } },
+    player2: { name: "PLAYER 2", rank: "APPRENTICE", pen: { mass: 1, friction: 1, power: 1 }, skin: { color: "#f87171", accent: "#fecaca", trail: "#fca5a5", glow: false } },
   };
 
-  document.getElementById("hud-p1-name").textContent = config.player1.name;
-  document.getElementById("hud-p2-name").textContent = config.player2.name;
+  const p1Name = config.player1.name || "YASH";
+  const p2Name = config.player2.name || "PLAYER 2";
+
+  document.getElementById("hud-p1-name").textContent = p1Name.toUpperCase();
+  document.getElementById("hud-p1-avatar").textContent = p1Name.charAt(0).toUpperCase();
+  document.getElementById("hud-p1-rank").textContent = `RANK: ${config.player1.rank || "ROOKIE"}`;
+
+  document.getElementById("hud-p2-name").textContent = p2Name.toUpperCase();
+  document.getElementById("hud-p2-avatar").textContent = p2Name.charAt(0).toUpperCase();
+  document.getElementById("hud-p2-rank").textContent = `RANK: ${config.player2.rank || "APPRENTICE"}`;
 
   canvas.width = 960;
   canvas.height = 520;
-  canvas.style.background = `linear-gradient(135deg, ${window.PF_ARENA.fromColor}, ${window.PF_ARENA.toColor})`;
 
   const engine = new PenFightEngine(canvas, {
     onSettle: handleSettle,
@@ -28,9 +35,7 @@
   engine.benchColorLight = shade(window.PF_ARENA.benchColor, 24);
   engine.benchColorDark = shade(window.PF_ARENA.benchColor, -30);
 
-  // Authoritative tabletop bounds (occupying ~94% of canvas area)
   const bench = engine.bench;
-
   const penOwner = { p1: "player1", p2: "player2" };
   const penPowerStat = { p1: config.player1.pen.power || 1, p2: config.player2.pen.power || 1 };
 
@@ -46,23 +51,39 @@
   let waitingForSettle = false;
   let dragging = null;
 
-  const turnBanner = document.getElementById("turn-banner");
-  const roundBanner = document.getElementById("round-banner");
-  const powerFill = document.getElementById("power-fill");
-  const powerLabel = document.getElementById("power-label");
-  const p1WinsDot = document.getElementById("p1-wins-dots");
-  const p2WinsDot = document.getElementById("p2-wins-dots");
+  // Slider Dual Control Elements
+  const angleSlider = document.getElementById("angle-slider");
+  const powerSlider = document.getElementById("power-slider");
+  const angleValText = document.getElementById("angle-val");
+  const powerValText = document.getElementById("power-val");
+  const powerQualText = document.getElementById("power-qual");
+  const flickBtn = document.getElementById("flick-btn");
+
+  const roundLabel = document.getElementById("round-label");
+  const scoreText = document.getElementById("score-text");
+  const turnPill = document.getElementById("turn-pill");
   const MAX_PULL = 95;
 
   function updateScoreHUD() {
-    p1WinsDot.textContent = "●".repeat(p1RoundWins) + "○".repeat(2 - p1RoundWins);
-    p2WinsDot.textContent = "●".repeat(p2RoundWins) + "○".repeat(2 - p2RoundWins);
+    scoreText.textContent = `${p1RoundWins} — ${p2RoundWins}`;
+
+    // Update Win Dots
+    const dot1P1 = document.getElementById("p1-dot-1");
+    const dot2P1 = document.getElementById("p1-dot-2");
+    if (dot1P1) dot1P1.className = `pf-ref-dot ${p1RoundWins >= 1 ? "win-p1" : ""}`;
+    if (dot2P1) dot2P1.className = `pf-ref-dot ${p1RoundWins >= 2 ? "win-p1" : ""}`;
+
+    const dot1P2 = document.getElementById("p2-dot-1");
+    const dot2P2 = document.getElementById("p2-dot-2");
+    if (dot1P2) dot1P2.className = `pf-ref-dot ${p2RoundWins >= 1 ? "win-p2" : ""}`;
+    if (dot2P2) dot2P2.className = `pf-ref-dot ${p2RoundWins >= 2 ? "win-p2" : ""}`;
+
     if (p1RoundWins === 1 && p2RoundWins === 1) {
-      roundBanner.textContent = "FINAL ROUND (1 — 1)";
-      roundBanner.style.color = "var(--gold)";
+      roundLabel.textContent = "FINAL ROUND";
+      roundLabel.style.color = "var(--gold)";
     } else {
-      roundBanner.textContent = `ROUND ${currentRound}`;
-      roundBanner.style.color = "var(--text-secondary)";
+      roundLabel.textContent = `ROUND ${currentRound}`;
+      roundLabel.style.color = "#94a3b8";
     }
   }
 
@@ -74,7 +95,7 @@
     dragging = null;
     currentTurn = (currentRound % 2 === 1) ? "p1" : "p2";
 
-    // Pens start 15% and 85% from left edge of 912px table (~638px distance apart)
+    // Pens start 15% and 85% from left edge of tabletop (~638px distance apart)
     engine.addPen("p1", {
       x: bench.x + bench.w * 0.15, y: bench.y + bench.h / 2, angle: 0,
       color: config.player1.skin.color, accent: config.player1.skin.accent,
@@ -90,21 +111,53 @@
       assetKey: config.player2.skin.assetKey || "sunset-blaze"
     });
 
-    // Generate fresh procedural bumpers for round
     engine.generateBumpers(`local_r${currentRound}_${Date.now()}`);
     updateScoreHUD();
     updateTurnUI();
   }
 
   function updateTurnUI() {
-    document.getElementById("hud-p1").classList.toggle("active-turn", currentTurn === "p1");
-    document.getElementById("hud-p2").classList.toggle("active-turn", currentTurn === "p2");
-    const name = currentTurn === "p1" ? config.player1.name : config.player2.name;
-    turnBanner.textContent = `${name.toUpperCase()}'S TURN`;
+    const name = currentTurn === "p1" ? p1Name : p2Name;
+    turnPill.textContent = `${name.toUpperCase()}'S TURN`;
+    turnPill.style.borderColor = currentTurn === "p1" ? "rgba(59, 130, 246, 0.5)" : "rgba(239, 68, 68, 0.5)";
+
+    // Default angle slider pointing toward opponent
+    const defaultAngle = currentTurn === "p1" ? 0 : 180;
+    angleSlider.value = defaultAngle;
+    angleValText.textContent = `${defaultAngle}°`;
   }
 
-  // ---------------------------------------------------------------- aiming
+  // ---------------------------------------------------------------- dual aiming
 
+  angleSlider.addEventListener("input", () => {
+    angleValText.textContent = `${angleSlider.value}°`;
+  });
+
+  powerSlider.addEventListener("input", () => {
+    const p = parseInt(powerSlider.value, 10);
+    powerValText.textContent = `${p}%`;
+    if (p < 34) { powerQualText.textContent = "LOW"; powerQualText.style.color = "#34d399"; }
+    else if (p < 70) { powerQualText.textContent = "MEDIUM"; powerQualText.style.color = "#facc15"; }
+    else { powerQualText.textContent = "HIGH"; powerQualText.style.color = "#f87171"; }
+  });
+
+  flickBtn.addEventListener("click", () => {
+    if (matchOver || roundOver || isTransitioningRound || waitingForSettle || engine.anyPenMoving()) return;
+    const powerNorm = parseInt(powerSlider.value, 10) / 100;
+    if (powerNorm <= 0.04) return;
+    const angleRad = (parseInt(angleSlider.value, 10) * Math.PI) / 180;
+
+    engine.flick(currentTurn, angleRad, powerNorm * (penPowerStat[currentTurn] || 1));
+    pfAudio.flick();
+    waitingForSettle = true;
+
+    // Reset slider UI
+    powerSlider.value = 0;
+    powerValText.textContent = "0%";
+    powerQualText.textContent = "LOW";
+  });
+
+  // Canvas Drag Aiming
   function canvasPos(evt) {
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width, scaleY = canvas.height / rect.height;
@@ -130,9 +183,20 @@
     dragging.mouseX = pos.x; dragging.mouseY = pos.y;
     const dx = dragging.mouseX - dragging.anchorX, dy = dragging.mouseY - dragging.anchorY;
     const pull = Math.min(MAX_PULL, Math.hypot(dx, dy));
-    const power = pull / MAX_PULL;
-    powerFill.style.width = `${power * 100}%`;
-    powerLabel.textContent = power < 0.34 ? "LOW" : power < 0.7 ? "MEDIUM" : "HIGH";
+    const powerNorm = pull / MAX_PULL;
+    const angleRad = Math.atan2(-dy, -dx);
+    let deg = Math.round((angleRad * 180) / Math.PI);
+    if (deg < 0) deg += 360;
+
+    // Sync sliders
+    angleSlider.value = deg;
+    angleValText.textContent = `${deg}°`;
+    const powPct = Math.round(powerNorm * 100);
+    powerSlider.value = powPct;
+    powerValText.textContent = `${powPct}%`;
+    if (powPct < 34) { powerQualText.textContent = "LOW"; powerQualText.style.color = "#34d399"; }
+    else if (powPct < 70) { powerQualText.textContent = "MEDIUM"; powerQualText.style.color = "#facc15"; }
+    else { powerQualText.textContent = "HIGH"; powerQualText.style.color = "#f87171"; }
   }
 
   function endDrag() {
@@ -147,8 +211,9 @@
       waitingForSettle = true;
     }
     dragging = null;
-    powerFill.style.width = "0%";
-    powerLabel.textContent = "LOW";
+    powerSlider.value = 0;
+    powerValText.textContent = "0%";
+    powerQualText.textContent = "LOW";
   }
 
   canvas.addEventListener("mousedown", startDrag);
@@ -159,8 +224,26 @@
   canvas.addEventListener("touchend", endDrag);
 
   function drawAimOverlay() {
+    const ctx = canvas.getContext("2d");
+    const pen = engine.pens[currentTurn];
+
+    if (pen && pen.alive && !engine.anyPenMoving() && !waitingForSettle && !roundOver && !matchOver) {
+      const angleRad = (parseInt(angleSlider.value, 10) * Math.PI) / 180;
+      const powerNorm = parseInt(powerSlider.value, 10) / 100;
+      const rayLen = 40 + powerNorm * 120;
+
+      ctx.save();
+      ctx.strokeStyle = "rgba(52, 211, 153, 0.85)";
+      ctx.lineWidth = 3;
+      ctx.setLineDash([6, 6]);
+      ctx.beginPath();
+      ctx.moveTo(pen.x, pen.y);
+      ctx.lineTo(pen.x + Math.cos(angleRad) * rayLen, pen.y + Math.sin(angleRad) * rayLen);
+      ctx.stroke();
+      ctx.restore();
+    }
+
     if (dragging) {
-      const ctx = canvas.getContext("2d");
       const { anchorX, anchorY, mouseX, mouseY } = dragging;
       ctx.save();
       ctx.strokeStyle = "rgba(250, 204, 21, 0.85)";
@@ -173,6 +256,7 @@
       ctx.beginPath(); ctx.moveTo(anchorX, anchorY); ctx.lineTo(fx, fy); ctx.stroke();
       ctx.restore();
     }
+
     requestAnimationFrame(drawAimOverlay);
   }
 
@@ -207,14 +291,12 @@
     if (winnerSlot === "player1") p1RoundWins++; else p2RoundWins++;
     updateScoreHUD();
 
-    const winnerName = winnerSlot === "player1" ? config.player1.name : config.player2.name;
+    const winnerName = winnerSlot === "player1" ? p1Name : p2Name;
 
-    // First to 2 round wins claims MATCH VICTORY!
     if (p1RoundWins >= 2 || p2RoundWins >= 2) {
       matchOver = true;
       showVictory(winnerSlot);
     } else {
-      // 2.5s Round Result Toast, then transition to Round 2 or Round 3!
       showRoundToast(winnerName, currentRound, p1RoundWins, p2RoundWins, () => {
         currentRound++;
         isTransitioningRound = false;
@@ -246,8 +328,6 @@
     }, 2500);
   }
 
-  // ---------------------------------------------------------------- flow
-
   function shade(hex, percent) {
     try {
       const n = parseInt(hex.replace("#", ""), 16);
@@ -265,8 +345,7 @@
     let i = 0;
     const step = () => {
       text.textContent = seq[i];
-      if (seq[i] === "FIGHT!") { pfAudio.fight(); text.style.color = "#34d399"; }
-      else { pfAudio.countdownTick(); }
+      if (seq[i] === "FIGHT!") { pfAudio.fight(); text.style.color = "#34d399"; } else { pfAudio.countdownTick(); }
       i++;
       if (i < seq.length) {
         setTimeout(step, 600);
@@ -286,7 +365,7 @@
   }
 
   function showVictory(winnerSlot) {
-    const name = winnerSlot === "player1" ? config.player1.name : config.player2.name;
+    const name = winnerSlot === "player1" ? p1Name : p2Name;
     document.getElementById("victory-winner").textContent = `${name.toUpperCase()} WINS MATCH (${p1RoundWins} - ${p2RoundWins})`;
     if (winnerSlot === "player1") pfAudio.victory(); else pfAudio.defeat();
 
@@ -294,24 +373,7 @@
       method: "POST",
       headers: { "Content-Type": "application/json", "X-CSRFToken": window.PF_CSRF },
       body: JSON.stringify({ winner: winnerSlot }),
-    })
-      .then((r) => r.json())
-      .then((data) => {
-        const rewards = data.rewards || {};
-        const box = document.getElementById("victory-rewards");
-        box.innerHTML = `
-          <div class="pf-badge pf-badge-legendary">🪙 +${rewards.pp || 0} PP</div>
-          <div class="pf-badge pf-badge-rare">⭐ +${rewards.xp || 0} XP</div>
-          ${rewards.streak_bonus ? `<div class="pf-badge pf-badge-epic">🔥 +${rewards.streak_bonus} Streak Bonus</div>` : ""}
-        `;
-        (data.achievements || []).forEach((a) => {
-          const div = document.createElement("div");
-          div.className = "pf-badge pf-badge-mythic";
-          div.textContent = `${a.icon} ${a.name}`;
-          box.appendChild(div);
-        });
-      })
-      .catch(() => {});
+    }).catch(() => {});
 
     setTimeout(() => {
       document.getElementById("victory-overlay").style.display = "flex";
@@ -323,7 +385,7 @@
   const sfxToggle = document.getElementById("sfx-toggle");
   sfxToggle.addEventListener("click", () => {
     pfAudio.setSfx(!pfAudio.sfxOn);
-    sfxToggle.textContent = pfAudio.sfxOn ? "🔊 SFX" : "🔇 SFX";
+    sfxToggle.textContent = pfAudio.sfxOn ? "🔊" : "🔇";
   });
 
   setupRound();

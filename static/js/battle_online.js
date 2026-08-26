@@ -1,4 +1,4 @@
-/* PenFight Arena — Online Battle Controller (Best-of-3 System) */
+/* PenFight Arena — Online Battle Controller (Reference Image UI & Dual Aiming) */
 (() => {
   const canvas = document.getElementById("battle-canvas");
   const mySlot = window.PF_MY_SLOT;
@@ -14,7 +14,6 @@
 
   canvas.width = 960;
   canvas.height = 520;
-  canvas.style.background = `linear-gradient(135deg, ${window.PF_ARENA.fromColor}, ${window.PF_ARENA.toColor})`;
 
   const engine = new PenFightEngine(canvas, {
     onSettle: handleSettle,
@@ -25,10 +24,8 @@
   engine.benchColorLight = shade(window.PF_ARENA.benchColor, 24);
   engine.benchColorDark = shade(window.PF_ARENA.benchColor, -30);
 
-  // Authoritative tabletop bounds (occupying ~94% of canvas area)
   const bench = engine.bench;
 
-  // Best-of-3 Online Match State Machine
   let currentRound = 1;
   let p1RoundWins = 0;
   let p2RoundWins = 0;
@@ -41,32 +38,46 @@
   let dragging = null;
   let connected = false;
 
-  const turnBanner = document.getElementById("turn-banner");
-  const roundBanner = document.getElementById("round-banner");
-  const powerFill = document.getElementById("power-fill");
-  const powerLabel = document.getElementById("power-label");
-  const hintText = document.getElementById("hint-text");
+  // Slider Dual Control Elements
+  const angleSlider = document.getElementById("angle-slider");
+  const powerSlider = document.getElementById("power-slider");
+  const angleValText = document.getElementById("angle-val");
+  const powerValText = document.getElementById("power-val");
+  const powerQualText = document.getElementById("power-qual");
+  const flickBtn = document.getElementById("flick-btn");
+
+  const roundLabel = document.getElementById("round-label");
+  const scoreText = document.getElementById("score-text");
+  const turnPill = document.getElementById("turn-pill");
   const connPill = document.getElementById("conn-pill");
-  const p1WinsDot = document.getElementById("p1-wins-dots");
-  const p2WinsDot = document.getElementById("p2-wins-dots");
   const MAX_PULL = 95;
 
   const sfxToggle = document.getElementById("sfx-toggle");
   sfxToggle.addEventListener("click", () => {
     pfAudio.setSfx(!pfAudio.sfxOn);
-    sfxToggle.textContent = pfAudio.sfxOn ? "🔊 SFX" : "🔇 SFX";
+    sfxToggle.textContent = pfAudio.sfxOn ? "🔊" : "🔇";
   });
 
   function updateScoreHUD() {
-    if (p1WinsDot) p1WinsDot.textContent = "●".repeat(p1RoundWins) + "○".repeat(2 - p1RoundWins);
-    if (p2WinsDot) p2WinsDot.textContent = "●".repeat(p2RoundWins) + "○".repeat(2 - p2RoundWins);
-    if (roundBanner) {
+    if (scoreText) scoreText.textContent = `${p1RoundWins} — ${p2RoundWins}`;
+
+    const dot1P1 = document.getElementById("p1-dot-1");
+    const dot2P1 = document.getElementById("p1-dot-2");
+    if (dot1P1) dot1P1.className = `pf-ref-dot ${p1RoundWins >= 1 ? "win-p1" : ""}`;
+    if (dot2P1) dot2P1.className = `pf-ref-dot ${p1RoundWins >= 2 ? "win-p1" : ""}`;
+
+    const dot1P2 = document.getElementById("p2-dot-1");
+    const dot2P2 = document.getElementById("p2-dot-2");
+    if (dot1P2) dot1P2.className = `pf-ref-dot ${p2RoundWins >= 1 ? "win-p2" : ""}`;
+    if (dot2P2) dot2P2.className = `pf-ref-dot ${p2RoundWins >= 2 ? "win-p2" : ""}`;
+
+    if (roundLabel) {
       if (p1RoundWins === 1 && p2RoundWins === 1) {
-        roundBanner.textContent = "FINAL ROUND (1 — 1)";
-        roundBanner.style.color = "var(--gold)";
+        roundLabel.textContent = "FINAL ROUND";
+        roundLabel.style.color = "var(--gold)";
       } else {
-        roundBanner.textContent = `ROUND ${currentRound}`;
-        roundBanner.style.color = "var(--text-secondary)";
+        roundLabel.textContent = `ROUND ${currentRound}`;
+        roundLabel.style.color = "#94a3b8";
       }
     }
   }
@@ -94,19 +105,21 @@
       assetKey: penConfig.player2.assetKey || "sunset-blaze"
     });
 
-    // Seed-based procedural bumpers (deterministic for room code + round)
     engine.generateBumpers(`${window.PF_ROOM_CODE}_r${currentRound}`);
     updateScoreHUD();
     updateTurnUI();
   }
 
   function updateTurnUI() {
-    document.getElementById("hud-p1").classList.toggle("active-turn", currentTurn === "player1");
-    document.getElementById("hud-p2").classList.toggle("active-turn", currentTurn === "player2");
-    turnBanner.textContent = `${nameFor[currentTurn].toUpperCase()}'S TURN`;
-    hintText.textContent = currentTurn === mySlot
-      ? "Your turn — drag your pen backward, then release to flick."
-      : `Waiting for ${nameFor[currentTurn]} to flick...`;
+    if (turnPill) {
+      turnPill.textContent = `${nameFor[currentTurn].toUpperCase()}'S TURN`;
+      turnPill.style.borderColor = currentTurn === "player1" ? "rgba(59, 130, 246, 0.5)" : "rgba(239, 68, 68, 0.5)";
+    }
+    const defaultAngle = currentTurn === "player1" ? 0 : 180;
+    if (angleSlider) {
+      angleSlider.value = defaultAngle;
+      angleValText.textContent = `${defaultAngle}°`;
+    }
   }
 
   // ---------------------------------------------------------------- ws
@@ -145,7 +158,36 @@
     if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(payload));
   }
 
-  // ---------------------------------------------------------------- aiming
+  // ---------------------------------------------------------------- dual aiming
+
+  angleSlider.addEventListener("input", () => {
+    angleValText.textContent = `${angleSlider.value}°`;
+  });
+
+  powerSlider.addEventListener("input", () => {
+    const p = parseInt(powerSlider.value, 10);
+    powerValText.textContent = `${p}%`;
+    if (p < 34) { powerQualText.textContent = "LOW"; powerQualText.style.color = "#34d399"; }
+    else if (p < 70) { powerQualText.textContent = "MEDIUM"; powerQualText.style.color = "#facc15"; }
+    else { powerQualText.textContent = "HIGH"; powerQualText.style.color = "#f87171"; }
+  });
+
+  flickBtn.addEventListener("click", () => {
+    if (gameOver || roundOver || isTransitioningRound || waitingForSettle || engine.anyPenMoving() || currentTurn !== mySlot) return;
+    const powerNorm = parseInt(powerSlider.value, 10) / 100;
+    if (powerNorm <= 0.04) return;
+    const angleRad = (parseInt(angleSlider.value, 10) * Math.PI) / 180;
+
+    const scaledPower = powerNorm * (penConfig[mySlot].power || 1);
+    engine.flick(mySlot, angleRad, scaledPower);
+    pfAudio.flick();
+    waitingForSettle = true;
+    send({ kind: "flick", angle: angleRad, power: scaledPower });
+
+    powerSlider.value = 0;
+    powerValText.textContent = "0%";
+    powerQualText.textContent = "LOW";
+  });
 
   function canvasPos(evt) {
     const rect = canvas.getBoundingClientRect();
@@ -172,9 +214,19 @@
     dragging.mouseX = pos.x; dragging.mouseY = pos.y;
     const dx = dragging.mouseX - dragging.anchorX, dy = dragging.mouseY - dragging.anchorY;
     const pull = Math.min(MAX_PULL, Math.hypot(dx, dy));
-    const power = pull / MAX_PULL;
-    powerFill.style.width = `${power * 100}%`;
-    powerLabel.textContent = power < 0.34 ? "LOW" : power < 0.7 ? "MEDIUM" : "HIGH";
+    const powerNorm = pull / MAX_PULL;
+    const angleRad = Math.atan2(-dy, -dx);
+    let deg = Math.round((angleRad * 180) / Math.PI);
+    if (deg < 0) deg += 360;
+
+    angleSlider.value = deg;
+    angleValText.textContent = `${deg}°`;
+    const powPct = Math.round(powerNorm * 100);
+    powerSlider.value = powPct;
+    powerValText.textContent = `${powPct}%`;
+    if (powPct < 34) { powerQualText.textContent = "LOW"; powerQualText.style.color = "#34d399"; }
+    else if (powPct < 70) { powerQualText.textContent = "MEDIUM"; powerQualText.style.color = "#facc15"; }
+    else { powerQualText.textContent = "HIGH"; powerQualText.style.color = "#f87171"; }
   }
 
   function endDrag() {
@@ -191,8 +243,9 @@
       send({ kind: "flick", angle, power: scaledPower });
     }
     dragging = null;
-    powerFill.style.width = "0%";
-    powerLabel.textContent = "LOW";
+    powerSlider.value = 0;
+    powerValText.textContent = "0%";
+    powerQualText.textContent = "LOW";
   }
 
   canvas.addEventListener("mousedown", startDrag);
@@ -203,8 +256,26 @@
   canvas.addEventListener("touchend", endDrag);
 
   function drawAimOverlay() {
+    const ctx = canvas.getContext("2d");
+    const pen = engine.pens[mySlot];
+
+    if (pen && pen.alive && !engine.anyPenMoving() && !waitingForSettle && !roundOver && !gameOver && currentTurn === mySlot) {
+      const angleRad = (parseInt(angleSlider.value, 10) * Math.PI) / 180;
+      const powerNorm = parseInt(powerSlider.value, 10) / 100;
+      const rayLen = 40 + powerNorm * 120;
+
+      ctx.save();
+      ctx.strokeStyle = "rgba(52, 211, 153, 0.85)";
+      ctx.lineWidth = 3;
+      ctx.setLineDash([6, 6]);
+      ctx.beginPath();
+      ctx.moveTo(pen.x, pen.y);
+      ctx.lineTo(pen.x + Math.cos(angleRad) * rayLen, pen.y + Math.sin(angleRad) * rayLen);
+      ctx.stroke();
+      ctx.restore();
+    }
+
     if (dragging) {
-      const ctx = canvas.getContext("2d");
       const { anchorX, anchorY, mouseX, mouseY } = dragging;
       ctx.save();
       ctx.strokeStyle = "rgba(250, 204, 21, 0.85)";
@@ -217,6 +288,7 @@
       ctx.beginPath(); ctx.moveTo(anchorX, anchorY); ctx.lineTo(fx, fy); ctx.stroke();
       ctx.restore();
     }
+
     requestAnimationFrame(drawAimOverlay);
   }
 
@@ -314,8 +386,6 @@
     }
     setTimeout(() => { document.getElementById("victory-overlay").style.display = "flex"; }, 400);
   }
-
-  // ---------------------------------------------------------------- flow
 
   function shade(hex, percent) {
     try {

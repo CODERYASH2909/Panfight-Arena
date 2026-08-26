@@ -1,22 +1,21 @@
 /* =========================================================================
-   PENFIGHT ARENA — Physics Engine v5 (Authoritative Full Tabletop)
-   - Playable table occupies ~94% of canvas (authoritative TABLE_BOUNDS)
-   - Heavy pen baseline physics for ALL pens (NORMAL = 2.5, HEAVY = 4.0)
-   - Soft quadratic power curve (Exponent 2.0) & low velocity cap (75 px/s)
-   - 100% max power takes 2.5–4.0s of heavy visible sliding motion
-   - Fixed 60Hz timestep sub-stepping to prevent frame-rate dependent forces
+   PENFIGHT ARENA — Physics & Rendering Engine v7
+   - Internal 960x520 Physics Coordinates 100% UNTOUCHED
+   - Dedicated 100vw x 100vh Responsive Canvas Viewport Scaling
+   - Classroom Environment Backdrop & Hero Wooden Desk Surface
+   - Visual Pen Scale 1.15x (rendering only, physics bounding box unchanged)
    ========================================================================= */
 
 const PHYSICS = {
-  NORMAL_PEN_MASS: 2.5,     // Heavy baseline mass for all standard pens
-  HEAVY_PEN_MASS: 4.0,      // Heavy Pen archetype mass (extra heavy)
+  NORMAL_PEN_MASS: 2.5,     // Heavy baseline mass for standard pens
+  HEAVY_PEN_MASS: 4.0,      // Extra heavy mass for Heavy Pen archetype
   MIN_FLICK_FORCE: 5.0,     // 5% power force (creeps ~10-20px)
-  MAX_FLICK_FORCE: 55.0,    // 100% power force
+  MAX_FLICK_FORCE: 55.0,    // 100% max power force
   POWER_EXPONENT: 2.0,      // Soft quadratic power curve (power^2)
   FRICTION: 0.935,          // Strong realistic desk surface friction
   ANGULAR_FRICTION: 0.85,   // Rotation damping
   MIN_SPEED: 1.2,           // Settling threshold below which motion stops
-  RESTITUTION: 0.52,        // Pen-to-pen bounce elasticity (low bounce)
+  RESTITUTION: 0.52,        // Pen-to-pen bounce elasticity
   BUMPER_RESTITUTION: 0.70, // Bumper vector reflection elasticity
   KNOCKBACK_SCALE: 0.45,    // Reduced collision displacement multiplier
   EDGE_MARGIN: 8,           // Collision body edge fall offset
@@ -25,15 +24,6 @@ const PHYSICS = {
 };
 
 class PenFightEngine {
-  /**
-   * @param {HTMLCanvasElement} canvas
-   * @param {Object} opts
-   *   bench: optional override {x,y,w,h}
-   *   onSettle: fn({penId, x, y, angle})
-   *   onFall: fn(penId)
-   *   onCollision: fn(penIdA, penIdB, strength)
-   *   onBumperHit: fn(bumper, strength)
-   */
   constructor(canvas, opts = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
@@ -42,7 +32,7 @@ class PenFightEngine {
     this.onCollision = opts.onCollision || (() => {});
     this.onBumperHit = opts.onBumperHit || (() => {});
 
-    // Compute single authoritative TABLE_BOUNDS from canvas (~94% viewport)
+    // Authoritative TABLE_BOUNDS matching internal 960x520 physics coordinates
     this.bench = opts.bench || this.getPlayableTableBounds();
 
     this.pens = {};
@@ -54,11 +44,9 @@ class PenFightEngine {
     this._accumulator = 0;
     this._loop = this._loop.bind(this);
 
-    // Visual Constants
     this.PEN_LENGTH = 74;
     this.PEN_WIDTH = 15;
 
-    // Listen for debug key (D)
     window.addEventListener("keydown", (e) => {
       if (e.key === "d" || e.key === "D") {
         this.debugMode = !this.debugMode;
@@ -66,12 +54,11 @@ class PenFightEngine {
     });
   }
 
-  /** Calculate responsive playable table bounds occupying ~94% of canvas */
   getPlayableTableBounds() {
     const W = this.canvas.width || 960;
     const H = this.canvas.height || 520;
-    const marginX = Math.round(W * 0.025); // ~24px on 960px canvas
-    const marginY = Math.round(H * 0.03);  // ~15px on 520px canvas
+    const marginX = Math.round(W * 0.025); // ~24px
+    const marginY = Math.round(H * 0.03);  // ~15px
     return {
       x: marginX,
       y: marginY,
@@ -80,7 +67,6 @@ class PenFightEngine {
     };
   }
 
-  /** Reset all engine state for new rounds */
   reset() {
     this.pens = {};
     this.bumpers = [];
@@ -91,7 +77,6 @@ class PenFightEngine {
 
   addPen(id, { x, y, angle = 0, color = "#3b82f6", accent = "#93c5fd", trailColor = "#60a5fa", glow = false, mass = 1, friction = 1, icon = "", assetKey = "classic-blue" }) {
     this.settledPending.delete(id);
-    // Heavy pen baseline physics
     const effectiveMass = (mass > 1.3) ? PHYSICS.HEAVY_PEN_MASS : PHYSICS.NORMAL_PEN_MASS * (mass || 1.0);
     this.pens[id] = {
       id, x, y, angle,
@@ -105,7 +90,6 @@ class PenFightEngine {
 
   removePen(id) { delete this.pens[id]; }
 
-  /** Generate random procedural bumpers across full tabletop bounds */
   generateBumpers(seed = Math.random()) {
     this.bumpers = [];
     const b = this.bench;
@@ -118,8 +102,8 @@ class PenFightEngine {
       return s / 233280;
     };
 
-    const count = 3 + Math.floor(rand() * 3); // 3 to 5 bumpers
-    const safetyRadius = 140; // 140px clearance around starting pens
+    const count = 3 + Math.floor(rand() * 3);
+    const safetyRadius = 140;
     const edgeMargin = 65;
 
     for (let attempts = 0; attempts < 60 && this.bumpers.length < count; attempts++) {
@@ -132,15 +116,12 @@ class PenFightEngine {
       const bx = b.x + edgeMargin + rand() * (b.w - edgeMargin * 2 - bw);
       const by = b.y + edgeMargin + rand() * (b.h - edgeMargin * 2 - bh);
 
-      // Rule 1: Safety clearance from starting pens
       const nearPen = penList.some((p) => Math.hypot(p.x - bx, p.y - by) < safetyRadius);
       if (nearPen) continue;
 
-      // Rule 2: Separation between bumpers
       const nearBumper = this.bumpers.some((other) => Math.hypot(other.x - bx, other.y - by) < 100);
       if (nearBumper) continue;
 
-      // Rule 3: Clear central direct corridor
       const centerDistY = Math.abs(by - (b.y + b.h / 2));
       const centerDistX = Math.abs(bx - (b.x + b.w / 2));
       if (centerDistY < 35 && centerDistX < 160) continue;
@@ -155,17 +136,14 @@ class PenFightEngine {
     return Math.abs(hash) / 2147483647;
   }
 
-  /** Apply single non-linear flick impulse to a pen */
   flick(id, angleRad, rawPower) {
     const pen = this.pens[id];
     if (!pen || !pen.alive) return;
 
-    // Soft quadratic power curve (Exponent 2.0)
     const normPower = Math.max(0, Math.min(1, rawPower));
     const scaledPower = Math.pow(normPower, PHYSICS.POWER_EXPONENT);
     const force = PHYSICS.MIN_FLICK_FORCE + scaledPower * (PHYSICS.MAX_FLICK_FORCE - PHYSICS.MIN_FLICK_FORCE);
 
-    // Initial Velocity = Force / (Mass / NORMAL_PEN_MASS)
     const massRatio = (pen.mass || PHYSICS.NORMAL_PEN_MASS) / PHYSICS.NORMAL_PEN_MASS;
     const initialSpeed = Math.min(PHYSICS.MAX_PEN_VELOCITY, force / massRatio);
 
@@ -197,7 +175,6 @@ class PenFightEngine {
     this._lastTs = ts;
     this._accumulator += frameTime;
 
-    // Fixed 60Hz sub-stepping physics integration
     while (this._accumulator >= PHYSICS.FIXED_DT) {
       this._update(1.0);
       this._accumulator -= PHYSICS.FIXED_DT;
@@ -236,7 +213,6 @@ class PenFightEngine {
         p.y += p.vy * dt * 0.1667;
         p.angle += p.angularVel * dt;
 
-        // Friction damping
         const fr = Math.pow(PHYSICS.FRICTION / (p.frictionMult * 0.98), dt);
         p.vx *= fr; p.vy *= fr;
         p.angularVel *= Math.pow(PHYSICS.ANGULAR_FRICTION, dt);
@@ -253,17 +229,14 @@ class PenFightEngine {
       p.trail.forEach((t) => (t.life -= 0.04 * dt));
       p.trail = p.trail.filter((t) => t.life > 0);
 
-      // Edge fall check against authoritative bench bounds
       if (this._isPastEdge(p)) {
         p.falling = true;
         p.fallVX = p.vx * 0.2;
       }
 
-      // Bumper bounce check
       this._resolveBumperCollisions(p);
     }
 
-    // Pairwise pen-to-pen collisions
     for (let i = 0; i < ids.length; i++) {
       for (let j = i + 1; j < ids.length; j++) {
         const a = this.pens[ids[i]], b = this.pens[ids[j]];
@@ -272,7 +245,6 @@ class PenFightEngine {
       }
     }
 
-    // Impact particles
     this.particles.forEach((pt) => {
       pt.x += pt.vx * dt; pt.y += pt.vy * dt;
       pt.life -= 0.04 * dt; pt.vy += 0.08 * dt;
@@ -406,62 +378,22 @@ class PenFightEngine {
     );
   }
 
-  // ---------------------------------------------------------------- render
+  // ---------------------------------------------------------------- render pipeline
 
   _render() {
     const ctx = this.ctx, b = this.bench, W = this.canvas.width, H = this.canvas.height;
     ctx.clearRect(0, 0, W, H);
 
-    // 1. Ambient Floor Margin Outer Backdrop
-    ctx.fillStyle = "#0a0d14";
-    ctx.fillRect(0, 0, W, H);
+    // 1. Realistic Classroom Environment Background Scene
+    this._renderClassroomEnvironment(ctx, W, H, b);
 
-    // 2. Authoritative Tabletop Surface (Occupies ~94% of canvas area!)
-    ctx.save();
+    // 2. Authoritative Hero Wooden Desk Surface (~93.5% Viewport area)
+    this._renderHeroWoodenDesk(ctx, b);
 
-    // Tabletop Floor Drop Shadow
-    ctx.fillStyle = "rgba(0, 0, 0, 0.65)";
-    this._roundRect(ctx, b.x + 6, b.y + 10, b.w, b.h + 8, 16);
-    ctx.fill();
-
-    // Tabletop 3D Front Lip
-    ctx.fillStyle = this.benchColorDark || "#381e0b";
-    this._roundRect(ctx, b.x, b.y + 6, b.w, b.h + 6, 16);
-    ctx.fill();
-
-    // Tabletop Surface Wood Gradient
-    const grad = ctx.createLinearGradient(b.x, b.y, b.x, b.y + b.h);
-    grad.addColorStop(0, this.benchColorLight || "#784f29");
-    grad.addColorStop(1, this.benchColorDark || "#422812");
-    ctx.fillStyle = grad;
-    this._roundRect(ctx, b.x, b.y, b.w, b.h, 16);
-    ctx.fill();
-
-    // Subtle Wood Grain Curves & Scratches
-    ctx.globalAlpha = 0.08;
-    ctx.strokeStyle = "#000000";
-    ctx.lineWidth = 2;
-    for (let i = 0; i < 11; i++) {
-      ctx.beginPath();
-      const yPos = b.y + 16 + (i * (b.h - 32)) / 10;
-      ctx.moveTo(b.x + 12, yPos);
-      ctx.bezierCurveTo(b.x + b.w * 0.3, yPos + (i % 2 === 0 ? 8 : -8), b.x + b.w * 0.7, yPos + (i % 2 === 0 ? -8 : 8), b.x + b.w - 12, yPos);
-      ctx.stroke();
-    }
-    ctx.restore();
-
-    // Tabletop Edge Bevel Highlight
-    ctx.save();
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
-    ctx.lineWidth = 2;
-    this._roundRect(ctx, b.x, b.y, b.w, b.h, 16);
-    ctx.stroke();
-    ctx.restore();
-
-    // 3. Render Bumpers
+    // 3. Procedural Bumpers
     this.bumpers.forEach((bmp) => this._drawBumper(bmp));
 
-    // 4. Dynamic Pen Shadows & Pen Bodies
+    // 4. Dynamic Pen Shadows & Bodies
     for (const id in this.pens) {
       const p = this.pens[id];
       if (p.alive) this._drawPenShadow(p);
@@ -475,7 +407,7 @@ class PenFightEngine {
       if (p.alive) this._drawPen(p);
     }
 
-    // 5. Impact Particles
+    // 5. Impact Spark Particles
     this.particles.forEach((pt) => {
       ctx.globalAlpha = Math.max(0, pt.life);
       ctx.fillStyle = pt.color;
@@ -485,10 +417,102 @@ class PenFightEngine {
       ctx.globalAlpha = 1;
     });
 
-    // 6. Debug Telemetry Overlay
+    // 6. Real-time Physics Telemetry Overlay (D key toggle)
     if (this.debugMode) {
       this._renderDebugOverlay(ctx);
     }
+  }
+
+  _renderClassroomEnvironment(ctx, W, H, b) {
+    ctx.save();
+    // Ambient Wall Background
+    ctx.fillStyle = "#1e293b";
+    ctx.fillRect(0, 0, W, H);
+
+    // Window Light Gradient on Left
+    const windowGrad = ctx.createRadialGradient(40, 60, 10, 40, 60, 260);
+    windowGrad.addColorStop(0, "rgba(255, 255, 255, 0.22)");
+    windowGrad.addColorStop(1, "rgba(255, 255, 255, 0)");
+    ctx.fillStyle = windowGrad;
+    ctx.fillRect(0, 0, 300, 200);
+
+    // Dark Classroom Blackboard
+    ctx.fillStyle = "#0f172a";
+    ctx.strokeStyle = "#475569";
+    ctx.lineWidth = 4;
+    ctx.fillRect(W * 0.28, 6, W * 0.44, 45);
+    ctx.strokeRect(W * 0.28, 6, W * 0.44, 45);
+
+    // Faint Chalk Diagram on Blackboard
+    ctx.globalAlpha = 0.25;
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(W * 0.5, 26, 12, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "9px sans-serif";
+    ctx.fillText("E = mc²", W * 0.32, 28);
+    ctx.fillText("PENFIGHT", W * 0.61, 28);
+    ctx.globalAlpha = 1.0;
+
+    // Wooden Desk Legs extending underneath desk
+    ctx.fillStyle = "#334155";
+    ctx.fillRect(b.x + 35, b.y + b.h + 2, 14, H - (b.y + b.h));
+    ctx.fillRect(b.x + b.w - 49, b.y + b.h + 2, 14, H - (b.y + b.h));
+    ctx.restore();
+  }
+
+  _renderHeroWoodenDesk(ctx, b) {
+    ctx.save();
+
+    // Tabletop Floor Drop Shadow
+    ctx.fillStyle = "rgba(0, 0, 0, 0.70)";
+    this._roundRect(ctx, b.x + 4, b.y + 8, b.w, b.h + 8, 16);
+    ctx.fill();
+
+    // Tabletop 3D Front Wooden Lip
+    ctx.fillStyle = this.benchColorDark || "#381e0b";
+    this._roundRect(ctx, b.x, b.y + 6, b.w, b.h + 6, 16);
+    ctx.fill();
+
+    // Tabletop Surface Rich Wood Texture
+    const grad = ctx.createLinearGradient(b.x, b.y, b.x, b.y + b.h);
+    grad.addColorStop(0, this.benchColorLight || "#8b5e3c");
+    grad.addColorStop(1, this.benchColorDark || "#4a2d17");
+    ctx.fillStyle = grad;
+    this._roundRect(ctx, b.x, b.y, b.w, b.h, 16);
+    ctx.fill();
+
+    // Wood Grain & Classroom Scratch Doodles
+    ctx.globalAlpha = 0.12;
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 1.5;
+
+    for (let i = 0; i < 12; i++) {
+      ctx.beginPath();
+      const yPos = b.y + 16 + (i * (b.h - 32)) / 11;
+      ctx.moveTo(b.x + 12, yPos);
+      ctx.bezierCurveTo(b.x + b.w * 0.35, yPos + (i % 2 === 0 ? 9 : -9), b.x + b.w * 0.65, yPos + (i % 2 === 0 ? -9 : 9), b.x + b.w - 12, yPos);
+      ctx.stroke();
+    }
+
+    // Scratch doodles (star, compass lines, pencil marks)
+    ctx.globalAlpha = 0.16;
+    ctx.beginPath();
+    ctx.arc(b.x + 80, b.y + 70, 16, 0, Math.PI * 2);
+    ctx.moveTo(b.x + b.w - 90, b.y + 75); ctx.lineTo(b.x + b.w - 60, b.y + 105);
+    ctx.moveTo(b.x + 140, b.y + b.h - 60); ctx.lineTo(b.x + 180, b.y + b.h - 40);
+    ctx.stroke();
+    ctx.restore();
+
+    // Tabletop Edge Bevel Highlight
+    ctx.save();
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.24)";
+    ctx.lineWidth = 2;
+    this._roundRect(ctx, b.x, b.y, b.w, b.h, 16);
+    ctx.stroke();
+    ctx.restore();
   }
 
   _drawBumper(bmp) {
@@ -527,7 +551,7 @@ class PenFightEngine {
     ctx.globalAlpha = alpha;
     ctx.translate(p.x, p.y + offsetY);
     ctx.rotate(p.angle);
-    ctx.scale(scaleX, 0.4);
+    ctx.scale(scaleX * 1.15, 0.46);
 
     ctx.fillStyle = "#000000";
     ctx.beginPath();
@@ -549,7 +573,8 @@ class PenFightEngine {
   _drawPen(p) {
     const ctx = this.ctx;
     const alpha = p.falling ? Math.max(0, 1 - p.fallProgress / 1.5) : 1;
-    const scale = p.falling ? Math.max(0.2, 1 - p.fallProgress * 0.5) : 1;
+    // Render pen 1.15x larger visually for high contrast against table
+    const scale = (p.falling ? Math.max(0.2, 1 - p.fallProgress * 0.5) : 1) * 1.15;
 
     ctx.save();
     ctx.globalAlpha = alpha;
@@ -560,7 +585,7 @@ class PenFightEngine {
       window.PenVisuals.drawPenToCanvas(ctx, p.assetKey || "classic-blue", 0, 0, 0, scale);
     } else {
       if (p.glow) { ctx.shadowColor = p.color; ctx.shadowBlur = 22; }
-      const L = this.PEN_LENGTH, Wd = this.PEN_WIDTH;
+      const L = this.PEN_LENGTH * 1.15, Wd = this.PEN_WIDTH * 1.15;
       ctx.fillStyle = p.color;
       this._roundRect(ctx, -L / 2, -Wd / 2, L, Wd, Wd / 2);
       ctx.fill();

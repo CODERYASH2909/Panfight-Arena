@@ -4,71 +4,357 @@
 
 {% block extra_css %}
 <style>
-  .battle-wrap { display:flex; flex-direction:column; align-items:center; gap:14px; width:100%; }
-  .battle-hud { display:flex; align-items:center; justify-content:space-between; width:100%; max-width:960px; }
-  .battle-player-card { display:flex; align-items:center; gap:10px; padding:10px 18px; border-radius:14px; background:var(--bg-surface); border:1px solid var(--border); min-width:220px; transition: all 0.2s; }
-  .battle-player-card.active-turn { border-color: var(--gold); box-shadow: 0 0 24px rgba(244,201,93,0.35); }
-  .battle-player-card.p2 { flex-direction: row-reverse; text-align: right; }
-  .battle-center-hud { display:flex; flex-direction:column; align-items:center; gap:4px; }
-  .battle-turn-banner {
-    font-family: var(--font-display); font-weight: 800; font-size: 18px; letter-spacing: 0.05em;
-    padding: 6px 22px; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--border);
+  /* 1. Global Fullscreen Game Viewport Overrides */
+  html, body {
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #060911 !important;
   }
-  .battle-round-banner {
-    font-family: var(--font-display); font-weight: 800; font-size: 13px; letter-spacing: 0.14em;
-    color: var(--gold); text-transform: uppercase;
+
+  /* Hide all website chrome (sidebar, topbar, mobile header, footer) */
+  .pf-sidebar, .pf-sidebar-overlay, .pf-topbar, .pf-mobile-header, .pf-footer {
+    display: none !important;
   }
-  .battle-score-dots { font-size: 16px; letter-spacing: 4px; color: var(--gold); margin-top: 2px; }
-  #battle-canvas { border-radius: 20px; box-shadow: var(--shadow-lg), 0 0 50px rgba(0,0,0,0.7); background: #05050a; touch-action: none; max-width:100%; }
-  .power-meter-wrap { width: 100%; max-width: 960px; }
-  .power-meter { height: 20px; border-radius: 999px; background: rgba(255,255,255,0.06); overflow: hidden; border: 1px solid var(--border); position: relative; }
-  .power-meter-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #34d399, #facc15, #f87171); transition: width 0.05s linear; }
+
+  .pf-shell, .pf-content, .pf-main, .pf-container {
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: 100vw !important;
+    overflow: hidden !important;
+    background: #060911 !important;
+  }
+
+  /* 2. Standalone Fullscreen Battle Container */
+  .pf-ref-battle-container {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #060911;
+    overflow: hidden;
+    z-index: 999999;
+  }
+
+  /* 3. Responsive Proportional Canvas Aspect-Ratio Scaling */
+  #battle-canvas {
+    display: block;
+    aspect-ratio: 960 / 520;
+    object-fit: contain;
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    touch-action: none;
+    box-shadow: 0 0 80px rgba(0, 0, 0, 0.9);
+  }
+
+  /* 4. Top-Left & Top-Right HUD Cards */
+  .pf-ref-hud-card {
+    position: absolute;
+    top: 18px;
+    z-index: 20;
+    background: rgba(14, 18, 26, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 10px 16px;
+    min-width: 190px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .pf-ref-hud-card.p1 { left: 20px; }
+  .pf-ref-hud-card.p2 { right: 20px; }
+
+  .pf-ref-player-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .pf-ref-hud-card.p2 .pf-ref-player-header {
+    flex-direction: row-reverse;
+  }
+
+  .pf-ref-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 15px;
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+  }
+  .pf-ref-hud-card.p1 .pf-ref-avatar { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+  .pf-ref-hud-card.p2 .pf-ref-avatar { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+
+  .pf-ref-meta {
+    display: flex;
+    flex-direction: column;
+  }
+  .pf-ref-hud-card.p2 .pf-ref-meta { text-align: right; }
+
+  .pf-ref-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: 0.05em;
+    color: #ffffff;
+    line-height: 1.1;
+  }
+
+  .pf-ref-rank {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #94a3b8;
+    letter-spacing: 0.08em;
+    margin-top: 2px;
+  }
+
+  .pf-ref-dots {
+    display: flex;
+    gap: 6px;
+    margin-top: 2px;
+  }
+  .pf-ref-hud-card.p2 .pf-ref-dots { justify-content: flex-end; }
+
+  .pf-ref-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .pf-ref-dot.win-p1 { background: #3b82f6; border-color: #93c5fd; box-shadow: 0 0 8px rgba(59, 130, 246, 0.8); }
+  .pf-ref-dot.win-p2 { background: #ef4444; border-color: #fca5a5; box-shadow: 0 0 8px rgba(239, 68, 68, 0.8); }
+
+  /* 5. Top-Center Score Box */
+  .pf-ref-hud-center {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .pf-ref-center-box {
+    background: rgba(14, 18, 26, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px 12px 0 0;
+    padding: 6px 32px;
+    text-align: center;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  }
+
+  .pf-ref-round-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: #94a3b8;
+  }
+
+  .pf-ref-score {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 34px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    color: #ffffff;
+    margin-top: 1px;
+  }
+
+  .pf-ref-turn-pill {
+    background: rgba(30, 27, 75, 0.95);
+    border: 1px solid rgba(99, 102, 241, 0.5);
+    border-radius: 0 0 10px 10px;
+    padding: 4px 24px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #c7d2fe;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  /* 6. Bottom Angle + Power Floating Control Bar */
+  .pf-ref-bottom-bar {
+    position: absolute;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    width: 90%;
+    max-width: 720px;
+    background: rgba(14, 18, 26, 0.94);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  }
+
+  .pf-ref-ctrl-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .pf-ref-ctrl-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: #cbd5e1;
+  }
+
+  .pf-ref-slider {
+    width: 100%;
+    accent-color: #8b5cf6;
+    cursor: pointer;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .pf-ref-sublabel {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #64748b;
+    text-transform: uppercase;
+  }
+
+  .pf-ref-flick-btn {
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    padding: 10px 22px;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.15s;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .pf-ref-flick-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.6);
+  }
+
   .pf-overlay {
     position: fixed; inset: 0; background: rgba(4,4,10,0.88); backdrop-filter: blur(8px);
-    display: flex; align-items: center; justify-content: center; z-index: 500; flex-direction: column; gap: 18px;
+    display: flex; align-items: center; justify-content: center; z-index: 5000000; flex-direction: column; gap: 18px;
   }
-  .countdown-text { font-family: var(--font-display); font-size: 130px; font-weight: 900; color: white; text-shadow: 0 0 60px rgba(139,92,246,0.7); }
-  .victory-title { font-family: var(--font-display); font-size: 56px; font-weight: 900; background: linear-gradient(135deg, var(--gold), var(--violet-bright)); -webkit-background-clip:text; background-clip:text; color:transparent; }
-  .conn-pill { padding:6px 14px; border-radius:999px; font-size:12px; font-weight:700; }
+  .countdown-text { font-family: 'Rajdhani', sans-serif; font-size: 130px; font-weight: 900; color: white; text-shadow: 0 0 60px rgba(139,92,246,0.7); }
+  .victory-title { font-family: 'Rajdhani', sans-serif; font-size: 56px; font-weight: 900; background: linear-gradient(135deg, #facc15, #8b5cf6); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .conn-pill { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); z-index: 30; padding:4px 12px; border-radius:999px; font-size:11px; font-weight:700; }
   .conn-pill.ok { background:rgba(52,211,153,0.15); color:#34d399; }
   .conn-pill.bad { background:rgba(248,113,113,0.15); color:#f87171; }
+
+  @media (max-width: 768px) {
+    .pf-ref-hud-card { min-width: 130px; padding: 6px 8px; top: 10px; }
+    .pf-ref-name { font-size: 12px; }
+    .pf-ref-score { font-size: 22px; }
+    .pf-ref-bottom-bar { padding: 8px 12px; gap: 10px; bottom: 10px; }
+    .pf-ref-sublabel { display: none; }
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="pf-center pf-mb-16"><span class="conn-pill bad" id="conn-pill">Connecting...</span></div>
-<div class="battle-wrap">
-  <div class="battle-hud">
-    <div class="battle-player-card p1" id="hud-p1">
-      <div class="pf-avatar-circle" style="background:#3b82f6;">{{ room.host.username|slice:":1"|upper }}</div>
-      <div>
-        <div style="font-weight:800;">{{ room.host.username }}{% if room.host == request.user %} (you){% endif %}</div>
-        <div class="battle-score-dots" id="p1-wins-dots">○○</div>
+<span class="conn-pill bad" id="conn-pill">Connecting...</span>
+
+<div class="pf-ref-battle-container">
+  <!-- Top-Left Player 1 HUD Card -->
+  <div class="pf-ref-hud-card p1" id="hud-p1">
+    <div class="pf-ref-player-header">
+      <div class="pf-ref-avatar" id="hud-p1-avatar">{{ room.host.username|slice:":1"|upper }}</div>
+      <div class="pf-ref-meta">
+        <div class="pf-ref-name" id="hud-p1-name">{{ room.host.username }}</div>
+        <div class="pf-ref-rank" id="hud-p1-rank">HOST</div>
       </div>
     </div>
-    <div class="battle-center-hud">
-      <div class="battle-round-banner" id="round-banner">ROUND 1</div>
-      <div class="battle-turn-banner" id="turn-banner">{{ room.host.username|upper }}'S TURN</div>
-      <button class="pf-btn pf-btn-ghost pf-btn-sm" id="sfx-toggle" type="button" title="Toggle sound effects" style="margin-top:2px;">🔊 SFX</button>
-    </div>
-    <div class="battle-player-card p2" id="hud-p2">
-      <div>
-        <div style="font-weight:800;">{{ room.guest.username }}{% if room.guest == request.user %} (you){% endif %}</div>
-        <div class="battle-score-dots" id="p2-wins-dots">○○</div>
-      </div>
-      <div class="pf-avatar-circle" style="background:#f87171;">{{ room.guest.username|slice:":1"|upper }}</div>
+    <div class="pf-ref-dots" id="p1-wins-dots">
+      <div class="pf-ref-dot" id="p1-dot-1"></div>
+      <div class="pf-ref-dot" id="p1-dot-2"></div>
     </div>
   </div>
 
+  <!-- Top-Center Match & Round Header -->
+  <div class="pf-ref-hud-center">
+    <div class="pf-ref-center-box">
+      <div class="pf-ref-round-label" id="round-label">ROUND 1</div>
+      <div class="pf-ref-score" id="score-text">0 — 0</div>
+    </div>
+    <div class="pf-ref-turn-pill" id="turn-pill">{{ room.host.username|upper }}'S TURN</div>
+  </div>
+
+  <!-- Top-Right Player 2 HUD Card -->
+  <div class="pf-ref-hud-card p2" id="hud-p2">
+    <div class="pf-ref-player-header">
+      <div class="pf-ref-avatar" id="hud-p2-avatar">{{ room.guest.username|slice:":1"|upper }}</div>
+      <div class="pf-ref-meta">
+        <div class="pf-ref-name" id="hud-p2-name">{{ room.guest.username }}</div>
+        <div class="pf-ref-rank" id="hud-p2-rank">GUEST</div>
+      </div>
+    </div>
+    <div class="pf-ref-dots" id="p2-wins-dots">
+      <div class="pf-ref-dot" id="p2-dot-1"></div>
+      <div class="pf-ref-dot" id="p2-dot-2"></div>
+    </div>
+  </div>
+
+  <!-- Hero Classroom Tabletop Canvas -->
   <canvas id="battle-canvas" width="960" height="520"></canvas>
 
-  <div class="power-meter-wrap">
-    <div class="pf-flex-between pf-mb-8">
-      <span class="pf-faint" style="font-size:12px; text-transform:uppercase; letter-spacing:0.08em;">Power Meter</span>
-      <span class="pf-faint" style="font-size:12px;" id="power-label">LOW</span>
+  <!-- Bottom Angle + Power Dual Control Panel -->
+  <div class="pf-ref-bottom-bar">
+    <div class="pf-ref-ctrl-group">
+      <div class="pf-ref-ctrl-header">
+        <span>ANGLE: <strong id="angle-val" style="color:white;">0°</strong></span>
+        <span>📐</span>
+      </div>
+      <input type="range" class="pf-ref-slider" id="angle-slider" min="0" max="360" value="0">
+      <div class="pf-ref-sublabel">DRAG TO AIM</div>
     </div>
-    <div class="power-meter"><div class="power-meter-fill" id="power-fill"></div></div>
-    <div class="pf-center pf-muted pf-mt-8" style="font-size:13px;" id="hint-text">Drag pen backward to aim, release to flick — Best of 3 Rounds. (Press 'D' for debug info)</div>
+
+    <div class="pf-ref-ctrl-group">
+      <div class="pf-ref-ctrl-header">
+        <span>POWER: <strong id="power-val" style="color:white;">0%</strong></span>
+        <span id="power-qual" style="color:#34d399;">LOW</span>
+      </div>
+      <input type="range" class="pf-ref-slider" id="power-slider" min="0" max="100" value="0">
+      <div class="pf-ref-sublabel">DRAG TO SET POWER</div>
+    </div>
+
+    <button type="button" class="pf-ref-flick-btn" id="flick-btn">💥 FLICK</button>
+    <button class="pf-btn pf-btn-ghost pf-btn-sm" id="sfx-toggle" type="button" title="Toggle Sound" style="padding:6px 10px;">🔊</button>
   </div>
 </div>
 
@@ -125,7 +411,7 @@
     penId: {{ room.guest.profile.equipped_pen_id|default:"null" }}, skinId: {{ room.guest.profile.equipped_skin_id|default:"null" }}
   };
 </script>
-<script src="{% static 'js/engine.js' %}?v=6.0"></script>
-<script src="{% static 'js/audio.js' %}?v=6.0"></script>
-<script src="{% static 'js/battle_online.js' %}?v=6.0"></script>
+<script src="{% static 'js/engine.js' %}?v=12.0"></script>
+<script src="{% static 'js/audio.js' %}?v=12.0"></script>
+<script src="{% static 'js/battle_online.js' %}?v=12.0"></script>
 {% endblock %}
