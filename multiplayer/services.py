@@ -88,3 +88,55 @@ def finish_online_match(match: Match, winner_user, loser_user, winner_pen=None, 
         "loser_rewards": loser_rewards,
         "winner_achievements": [{"name": a.name, "icon": a.icon} for a in winner_achievements],
     }
+
+
+@transaction.atomic
+def finish_team_match(match, winning_team, losing_team, slot_pen_data=None):
+    """Finalize a 2v2 team match. `winning_team` and `losing_team` are each
+    a list of 2 User objects. `slot_pen_data` maps slot -> {pen, skin}."""
+    slot_pen_data = slot_pen_data or {}
+    match.finish(winning_team[0])  # captain is the nominal "winner"
+    match.started_at = match.started_at or match.created_at
+    match.save(update_fields=["started_at"])
+
+    all_achievements = []
+    for user in winning_team:
+        slot_info = slot_pen_data.get(user.id, {})
+        slot_name = slot_info.get("slot", "t1p1")
+        MatchPlayer.objects.update_or_create(
+            match=match, slot=slot_name,
+            defaults=dict(user=user, pen=slot_info.get("pen"), skin=slot_info.get("skin"), is_winner=True),
+        )
+        profile = user.profile
+        profile.register_match_result(won=True, knockout=True)
+        apply_match_result_rewards(user, True, win_streak=profile.current_win_streak)
+        all_achievements.extend(check_achievements(user))
+        Notification.objects.create(
+            user=user, notif_type="match_result",
+            message=f"Your team won the 2v2 PenFight!",
+        )
+
+    for user in losing_team:
+        slot_info = slot_pen_data.get(user.id, {})
+        slot_name = slot_info.get("slot", "t2p1")
+        MatchPlayer.objects.update_or_create(
+            match=match, slot=slot_name,
+            defaults=dict(user=user, pen=slot_info.get("pen"), skin=slot_info.get("skin"), is_winner=False),
+        )
+        user.profile.register_match_result(won=False)
+        apply_match_result_rewards(user, False)
+        check_achievements(user)
+        Notification.objects.create(
+            user=user, notif_type="match_result",
+            message=f"Your team lost the 2v2 PenFight. Rematch?",
+        )
+
+    winner_rewards = {"pp": 100, "xp": 120}
+    loser_rewards = {"pp": 25, "xp": 40}
+
+    return {
+        "winner_rewards": winner_rewards,
+        "loser_rewards": loser_rewards,
+        "winner_achievements": [{"name": a.name, "icon": a.icon} for a in all_achievements],
+    }
+
