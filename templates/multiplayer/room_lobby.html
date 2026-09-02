@@ -2,27 +2,30 @@
 {% block title %}Room {{ room.code }} — PenFight Arena{% endblock %}
 {% block content %}
 <div class="pf-page-head pf-center">
-  <div class="pf-page-title">🔒 PRIVATE PENFIGHT</div>
-  <div class="pf-mt-16">
-    <span class="pf-badge pf-badge-epic" style="font-size:22px; padding:10px 24px; letter-spacing:0.1em;">{{ room.code }}</span>
+  <div class="pf-page-title" style="display:flex; align-items:center; justify-content:center; gap:10px;">
+    <span class="pf-icon-lg" style="color:var(--violet-bright);"><svg><use href="#icon-lock"></use></svg></span>
+    <span>PRIVATE ROOM LOBBY</span>
   </div>
-  <p class="pf-muted pf-mt-16">Share this code with your friend so they can join.</p>
+  <div class="pf-mt-16">
+    <span class="pf-badge pf-badge-epic" style="font-size:24px; padding:10px 24px; letter-spacing:0.12em; font-family:var(--font-display);">{{ room.code }}</span>
+  </div>
+  <p class="pf-muted pf-mt-16">Share this room code with your friend so they can join the duel.</p>
 </div>
 
 <div class="pf-flex" style="justify-content:center; gap:40px; margin-top:40px; flex-wrap:wrap;">
   <div class="pf-card pf-center" style="width:220px;">
-    <div class="pf-avatar-circle" style="width:56px;height:56px;font-size:22px;margin:0 auto;background:var(--grad-blue);">{{ room.host.username|slice:":1"|upper }}</div>
+    <div class="pf-avatar-circle" style="width:56px;height:56px;font-size:22px;margin:0 auto;background:var(--p1-blue);">{{ room.host.username|slice:":1"|upper }}</div>
     <div style="font-weight:800; margin-top:12px;">{{ room.host.username }}</div>
     <div class="pf-faint" style="font-size:12px;">HOST</div>
   </div>
   <div class="pf-duel-vs" style="position:static; font-size:40px;">VS</div>
   <div class="pf-card pf-center" style="width:220px;">
     {% if room.guest %}
-      <div class="pf-avatar-circle" style="width:56px;height:56px;font-size:22px;margin:0 auto;background:var(--grad-primary);">{{ room.guest.username|slice:":1"|upper }}</div>
+      <div class="pf-avatar-circle" style="width:56px;height:56px;font-size:22px;margin:0 auto;background:var(--p2-red);">{{ room.guest.username|slice:":1"|upper }}</div>
       <div style="font-weight:800; margin-top:12px;">{{ room.guest.username }}</div>
       <div class="pf-faint" style="font-size:12px;">CHALLENGER</div>
     {% else %}
-      <div class="pf-avatar-circle" style="width:56px;height:56px;font-size:22px;margin:0 auto;background:var(--bg-panel-2); border:1px dashed var(--border-soft);">?</div>
+      <div class="pf-avatar-circle" style="width:56px;height:56px;font-size:22px;margin:0 auto;background:var(--bg-elevated); border:1px dashed var(--border);">?</div>
       <div class="pf-faint pf-mt-16">Waiting for opponent...</div>
     {% endif %}
   </div>
@@ -48,9 +51,12 @@
 <div class="pf-center pf-mt-32">
   <form method="post" action="{% url 'multiplayer:room_start' room.code %}">
     {% csrf_token %}
-    <button class="pf-btn pf-btn-primary pf-btn-lg" {% if not room.guest %}disabled{% endif %}>⚔️ START PENFIGHT</button>
+    <button class="pf-btn pf-btn-primary pf-btn-lg" {% if not room.guest %}disabled{% endif %}>
+      <span class="pf-icon"><svg><use href="#icon-swords"></use></svg></span>
+      <span>START PENFIGHT</span>
+    </button>
   </form>
-  {% if not room.guest %}<p class="pf-faint pf-mt-16">Waiting for an opponent to join before you can start.</p>{% endif %}
+  {% if not room.guest %}<p class="pf-faint pf-mt-16">Waiting for an opponent to join before starting.</p>{% endif %}
 </div>
 {% else %}
 <div class="pf-center pf-mt-32">

@@ -2,24 +2,35 @@
 {% block title %}Friends — PenFight Arena{% endblock %}
 {% block content %}
 <div class="pf-page-head">
-  <div class="pf-page-title">🤝 FRIENDS</div>
-  <div class="pf-page-sub">Manage your PenFight Arena crew.</div>
+  <div class="pf-page-title" style="display:flex; align-items:center; gap:10px;">
+    <span class="pf-icon-lg" style="color:var(--violet-bright);"><svg><use href="#icon-users"></use></svg></span>
+    <span>FRIENDS & COMMUNITY</span>
+  </div>
+  <div class="pf-page-sub">Search fighters, manage friends, and launch direct challenges.</div>
 </div>
 
 <div class="pf-card pf-mb-24">
   <form method="get" class="pf-flex pf-gap-8">
-    <input class="pf-input" type="search" name="q" placeholder="Search players by username..." value="{{ query }}">
-    <button class="pf-btn pf-btn-primary" type="submit">Search</button>
+    <input class="pf-input" type="search" name="q" placeholder="Search fighters by username..." value="{{ query }}">
+    <button class="pf-btn pf-btn-primary" type="submit">
+      <span class="pf-icon"><svg><use href="#icon-search"></use></svg></span>
+      <span>SEARCH</span>
+    </button>
   </form>
   {% if search_results %}
     <div class="pf-mt-16">
       {% for u in search_results %}
-      <div class="pf-flex-between" style="padding:10px 0; border-bottom:1px solid var(--border-soft);">
-        <a href="{% url 'accounts:profile' u.username %}" class="pf-flex pf-gap-8">
-          <span class="pf-avatar-circle">{{ u.username|slice:":1"|upper }}</span> {{ u.username }}
+      <div class="pf-flex-between" style="padding:10px 0; border-bottom:1px solid var(--border);">
+        <a href="{% url 'accounts:profile' u.username %}" class="pf-flex pf-gap-8" style="color:var(--text-primary); font-weight:700;">
+          <span class="pf-avatar-circle" style="width:28px; height:28px; font-size:12px;">{{ u.username|slice:":1"|upper }}</span>
+          <span>{{ u.username }}</span>
         </a>
         <form method="post" action="{% url 'accounts:send_friend_request' u.username %}">
-          {% csrf_token %}<button class="pf-btn pf-btn-primary pf-btn-sm">+ Add Friend</button>
+          {% csrf_token %}
+          <button class="pf-btn pf-btn-primary pf-btn-sm">
+            <span class="pf-icon"><svg><use href="#icon-user-plus"></use></svg></span>
+            <span>Add Friend</span>
+          </button>
         </form>
       </div>
       {% endfor %}
@@ -32,8 +43,8 @@
     <div class="pf-section-title">FRIEND REQUESTS</div>
     {% if incoming %}
       {% for fr in incoming %}
-      <div class="pf-flex-between pf-mt-8">
-        <span>🔥 {{ fr.from_user.username }}</span>
+      <div class="pf-flex-between pf-mt-8" style="padding:8px 0; border-bottom:1px solid var(--border);">
+        <span style="font-weight:700;">{{ fr.from_user.username }}</span>
         <div class="pf-flex pf-gap-8">
           <form method="post" action="{% url 'accounts:respond_friend_request' fr.id 'accept' %}">{% csrf_token %}<button class="pf-btn pf-btn-primary pf-btn-sm">Accept</button></form>
           <form method="post" action="{% url 'accounts:respond_friend_request' fr.id 'decline' %}">{% csrf_token %}<button class="pf-btn pf-btn-ghost pf-btn-sm">Decline</button></form>
@@ -41,32 +52,42 @@
       </div>
       {% endfor %}
     {% else %}
-      <p class="pf-faint">No pending requests.</p>
+      <p class="pf-faint">No pending incoming requests.</p>
     {% endif %}
     {% if outgoing %}
       <div class="pf-section-title pf-mt-24">SENT REQUESTS</div>
       {% for fr in outgoing %}
-        <p class="pf-muted pf-mt-8">Waiting on {{ fr.to_user.username }}...</p>
+        <p class="pf-muted pf-mt-8">Waiting on response from <strong>{{ fr.to_user.username }}</strong>...</p>
       {% endfor %}
     {% endif %}
   </div>
 
   <div class="pf-card">
-    <div class="pf-section-title">YOUR FRIENDS ({{ friends|length }})</div>
+    <div class="pf-section-title">YOUR CREW ({{ friends|length }})</div>
     {% if friends %}
       {% for f in friends %}
-      <div class="pf-flex-between" style="padding:10px 0; border-bottom:1px solid var(--border-soft);">
-        <a href="{% url 'accounts:profile' f.username %}" class="pf-flex pf-gap-8">
-          <span class="pf-avatar-circle">{{ f.username|slice:":1"|upper }}</span> {{ f.username }}
+      <div class="pf-flex-between" style="padding:10px 0; border-bottom:1px solid var(--border);">
+        <a href="{% url 'accounts:profile' f.username %}" class="pf-flex pf-gap-8" style="color:var(--text-primary); font-weight:700;">
+          <span class="pf-avatar-circle" style="width:28px; height:28px; font-size:12px;">{{ f.username|slice:":1"|upper }}</span>
+          <span>{{ f.username }}</span>
         </a>
         <div class="pf-flex pf-gap-8">
-          <form method="post" action="{% url 'multiplayer:challenge_friend' f.username %}">{% csrf_token %}<button class="pf-btn pf-btn-primary pf-btn-sm">Challenge</button></form>
+          <form method="post" action="{% url 'multiplayer:challenge_friend' f.username %}">
+            {% csrf_token %}
+            <button class="pf-btn pf-btn-primary pf-btn-sm">
+              <span class="pf-icon"><svg><use href="#icon-swords"></use></svg></span>
+              <span>Challenge</span>
+            </button>
+          </form>
           <form method="post" action="{% url 'accounts:remove_friend' f.username %}">{% csrf_token %}<button class="pf-btn pf-btn-ghost pf-btn-sm">Remove</button></form>
         </div>
       </div>
       {% endfor %}
     {% else %}
-      <div class="pf-empty"><div class="pf-empty-icon">🤝</div>No friends yet — search above to find fighters.</div>
+      <div class="pf-empty">
+        <div class="pf-empty-icon"><svg><use href="#icon-users"></use></svg></div>
+        <div>No friends added yet — search above to find fighters.</div>
+      </div>
     {% endif %}
   </div>
 </div>

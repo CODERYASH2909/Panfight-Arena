@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% block title %}Log In — PenFight Arena{% endblock %}
 {% block content %}
-<div style="max-width:420px; margin:40px auto;">
+<div style="max-width:440px; margin:40px auto;">
   <div class="pf-glass" style="padding:36px;">
     <div class="pf-center pf-mb-24">
-      <div style="font-size:40px;">🖊️</div>
-      <h2 class="pf-mt-8">Welcome Back, Fighter</h2>
-      <p class="pf-muted pf-mt-8">Log in to your PenFight Arena account.</p>
+      <div class="pf-icon-lg" style="color:var(--violet-bright); width:44px; height:44px; margin:0 auto;"><svg><use href="#icon-pen"></use></svg></div>
+      <h2 class="pf-mt-8" style="font-family:var(--font-display); font-size:26px; font-weight:800;">WELCOME BACK, FIGHTER</h2>
+      <p class="pf-muted pf-mt-8">Log in to access your loadout and enter the arena.</p>
     </div>
     <form method="post">
       {% csrf_token %}
@@ -19,12 +19,15 @@
         {{ form.password }}
       </div>
       {% if form.errors %}
-        <p style="color:#f87171; font-size:13px; margin-bottom:14px;">Invalid username or password. Try again.</p>
+        <p style="color:var(--error); font-size:13px; margin-bottom:14px;">Invalid username or password. Try again.</p>
       {% endif %}
-      <button type="submit" class="pf-btn pf-btn-primary pf-btn-block pf-btn-lg">⚔️ ENTER THE ARENA</button>
+      <button type="submit" class="pf-btn pf-btn-primary pf-btn-block pf-btn-lg">
+        <span class="pf-icon"><svg><use href="#icon-swords"></use></svg></span>
+        <span>ENTER THE ARENA</span>
+      </button>
     </form>
-    <p class="pf-center pf-muted pf-mt-24" style="font-size:14px;">
-      New here? <a href="{% url 'accounts:signup' %}" style="color:var(--neon-blue); font-weight:700;">Create your fighter</a>
+    <p class="pf-center pf-muted pf-mt-24" style="font-size:13px;">
+      New here? <a href="{% url 'accounts:signup' %}" style="color:var(--violet-bright); font-weight:700;">Create your fighter</a>
     </p>
   </div>
 </div>

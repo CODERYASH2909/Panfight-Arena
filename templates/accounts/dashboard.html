@@ -1,76 +1,76 @@
 {% extends "base.html" %}
-{% block title %}Dashboard — PenFight Arena{% endblock %}
+{% block title %}Home — PenFight Arena{% endblock %}
 
 {% block content %}
-<div class="pf-glass" style="padding:32px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:24px;">
+<div class="pf-glass" style="padding:28px 32px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:24px;">
   <div class="pf-flex pf-gap-16">
-    <div class="pf-avatar-circle" style="width:64px; height:64px; font-size:26px; background: var(--grad-primary);">
+    <div class="pf-avatar-circle" style="width:58px; height:58px; font-size:24px;">
       {{ request.user.username|slice:":1"|upper }}
     </div>
     <div>
-      <div style="font-size:22px; font-weight:800;">Welcome back, {{ request.user.username }}</div>
+      <div style="font-family:var(--font-display); font-size:24px; font-weight:800;">WELCOME BACK, {{ request.user.username|upper }}</div>
       <div class="pf-flex pf-gap-8 pf-mt-8">
         <span class="pf-rank-chip pf-rank-{{ profile.rank_tier }}">{{ profile.get_rank_tier_display }}</span>
-        <span class="pf-faint" style="font-size:13px;">Rating {{ profile.rating }}</span>
+        <span class="pf-muted" style="font-size:12px;">Rating {{ profile.rating }}</span>
       </div>
     </div>
   </div>
-  <div style="min-width:220px;">
-    <div class="pf-flex-between" style="font-size:12px;">
-      <span class="pf-faint">LEVEL {{ profile.level }}</span>
-      <span class="pf-faint">{{ profile.xp }} / {{ profile.xp_to_next_level }} XP</span>
+  <div style="min-width:240px;">
+    <div class="pf-flex-between" style="font-size:11px; margin-bottom:6px; font-weight:700;">
+      <span class="pf-muted">LEVEL {{ profile.level }}</span>
+      <span class="pf-muted">{{ profile.xp }} / {{ profile.xp_to_next_level }} XP</span>
     </div>
-    <div class="pf-progress pf-mt-8"><div class="pf-progress-fill" style="width:{% widthratio profile.xp profile.xp_to_next_level 100 %}%;"></div></div>
+    <div class="pf-progress"><div class="pf-progress-fill" style="width:{% widthratio profile.xp profile.xp_to_next_level 100 %}%;"></div></div>
   </div>
 </div>
 
 <div class="pf-mt-32">
-  <div class="pf-section-title">GAME MODES</div>
+  <div class="pf-section-title">SELECT GAME MODE</div>
   <div class="pf-grid pf-grid-3">
-    <a href="{% url 'game:local_setup' %}" class="pf-mode-card pf-card-hover">
-      <div class="pf-mode-icon">🖥️</div>
-      <h3>Local Battle</h3>
-      <p class="pf-muted pf-mt-8">Hotseat play — two players, one screen.</p>
+    <a href="{% url 'game:local_setup' %}" class="pf-mode-card mode-local pf-card-hover">
+      <div class="pf-mode-icon"><svg><use href="#icon-monitor"></use></svg></div>
+      <h3>Local Duel</h3>
+      <p class="pf-muted pf-mt-8">Pass-the-device 1v1 battle on a single screen.</p>
     </a>
-    <a href="{% url 'multiplayer:quick_match' %}" class="pf-mode-card pf-card-hover">
-      <div class="pf-mode-icon">⚡</div>
+    <a href="{% url 'multiplayer:quick_match' %}" class="pf-mode-card mode-quick pf-card-hover">
+      <div class="pf-mode-icon"><svg><use href="#icon-zap"></use></svg></div>
       <h3>Quick Match</h3>
-      <p class="pf-muted pf-mt-8">Find a similarly-ranked opponent instantly.</p>
+      <p class="pf-muted pf-mt-8">Automated queue matching your rating rank.</p>
     </a>
-    <a href="{% url 'multiplayer:room_create' %}" class="pf-mode-card pf-card-hover">
-      <div class="pf-mode-icon">🔒</div>
-      <h3>Private Room</h3>
-      <p class="pf-muted pf-mt-8">Create a room and share the code with a friend.</p>
+    <a href="{% url 'multiplayer:room_create' %}" class="pf-mode-card mode-private pf-card-hover">
+      <div class="pf-mode-icon"><svg><use href="#icon-lock"></use></svg></div>
+      <h3>Create Room</h3>
+      <p class="pf-muted pf-mt-8">Host a private match and invite friends with code.</p>
     </a>
-    <a href="{% url 'multiplayer:room_join' %}" class="pf-mode-card pf-card-hover">
-      <div class="pf-mode-icon">🔑</div>
+    <a href="{% url 'multiplayer:room_join' %}" class="pf-mode-card mode-join pf-card-hover">
+      <div class="pf-mode-icon"><svg><use href="#icon-key"></use></svg></div>
       <h3>Join Room</h3>
-      <p class="pf-muted pf-mt-8">Got a code? Jump straight into a friend's room.</p>
+      <p class="pf-muted pf-mt-8">Enter a room code to join an active lobby.</p>
     </a>
-    <a href="{% url 'game:my_pen' %}" class="pf-mode-card pf-card-hover">
-      <div class="pf-mode-icon">🖊️</div>
-      <h3>My Pen</h3>
-      <p class="pf-muted pf-mt-8">Customize your loadout before the next fight.</p>
+    <a href="{% url 'game:my_pen' %}" class="pf-mode-card mode-pen pf-card-hover">
+      <div class="pf-mode-icon"><svg><use href="#icon-layers"></use></svg></div>
+      <h3>My Loadout</h3>
+      <p class="pf-muted pf-mt-8">Inspect pen stats and equip owned skins.</p>
     </a>
-    <a href="{% url 'store:home' %}" class="pf-mode-card pf-card-hover">
-      <div class="pf-mode-icon">🛒</div>
+    <a href="{% url 'store:home' %}" class="pf-mode-card mode-store pf-card-hover">
+      <div class="pf-mode-icon"><svg><use href="#icon-store"></use></svg></div>
       <h3>Pen Store</h3>
-      <p class="pf-muted pf-mt-8">Spend your Pen Points on new cosmetics.</p>
+      <p class="pf-muted pf-mt-8">Unlock rare & mythic pen skins with PP.</p>
     </a>
   </div>
 </div>
 
 <div class="pf-grid pf-grid-3 pf-mt-32">
   <div class="pf-card pf-stat">
-    <div class="pf-stat-value">{{ profile.wins }}</div>
-    <div class="pf-stat-label">Wins</div>
+    <div class="pf-stat-value" style="color:var(--text-primary);">{{ profile.wins }}</div>
+    <div class="pf-stat-label">Victories</div>
   </div>
   <div class="pf-card pf-stat">
-    <div class="pf-stat-value">{{ profile.win_rate }}%</div>
+    <div class="pf-stat-value" style="color:var(--violet-bright);">{{ profile.win_rate }}%</div>
     <div class="pf-stat-label">Win Rate</div>
   </div>
   <div class="pf-card pf-stat">
-    <div class="pf-stat-value">{{ achievements_unlocked }}/{{ achievements_total }}</div>
+    <div class="pf-stat-value" style="color:var(--gold);">{{ achievements_unlocked }}/{{ achievements_total }}</div>
     <div class="pf-stat-label">Achievements</div>
   </div>
 </div>
@@ -78,36 +78,41 @@
 <div class="pf-grid pf-grid-2 pf-mt-32">
   <div class="pf-card">
     <div class="pf-flex-between pf-mb-16">
-      <div class="pf-section-title" style="margin-bottom:0;">RECENT MATCHES</div>
-      <a href="{% url 'accounts:profile' request.user.username %}" class="pf-faint" style="font-size:12px;">View all →</a>
+      <div class="pf-section-title" style="margin-bottom:0;">RECENT BATTLES</div>
+      <a href="{% url 'accounts:profile' request.user.username %}" class="pf-faint" style="font-size:12px;">View profile →</a>
     </div>
     {% if recent_matches %}
       {% for mp in recent_matches %}
-      <div class="pf-flex-between" style="padding:10px 0; border-bottom:1px solid var(--border-soft);">
+      <div class="pf-flex-between" style="padding:10px 0; border-bottom:1px solid var(--border);">
         <div class="pf-flex pf-gap-12">
-          <span style="font-size:20px;">{{ mp.is_winner|yesno:"🏆,💀" }}</span>
+          <span class="pf-icon" style="color:{% if mp.is_winner %}var(--gold){% else %}var(--text-muted){% endif %};">
+            <svg><use href="{% if mp.is_winner %}#icon-trophy{% else %}#icon-skull{% endif %}"></use></svg>
+          </span>
           <div>
-            <div style="font-weight:700; font-size:14px;">{{ mp.match.get_match_type_display }}</div>
-            <div class="pf-faint" style="font-size:12px;">{{ mp.match.arena.name|default:"—" }}</div>
+            <div style="font-weight:700; font-size:13px;">{{ mp.match.get_match_type_display }}</div>
+            <div class="pf-faint" style="font-size:11px;">{{ mp.match.arena.name|default:"Classroom Desk" }}</div>
           </div>
         </div>
-        <span class="pf-faint" style="font-size:12px;">{{ mp.match.created_at|timesince }} ago</span>
+        <span class="pf-faint" style="font-size:11px;">{{ mp.match.created_at|timesince }} ago</span>
       </div>
       {% endfor %}
     {% else %}
-      <div class="pf-empty"><div class="pf-empty-icon">⚔️</div>No matches yet — start your first PenFight!</div>
+      <div class="pf-empty">
+        <div class="pf-empty-icon"><svg><use href="#icon-swords"></use></svg></div>
+        <div>No battles recorded yet — jump into your first PenFight!</div>
+      </div>
     {% endif %}
   </div>
 
   <div class="pf-card">
     <div class="pf-flex-between pf-mb-16">
-      <div class="pf-section-title" style="margin-bottom:0;">FRIENDS</div>
+      <div class="pf-section-title" style="margin-bottom:0;">FRIENDS & CHALLENGES</div>
       <a href="{% url 'accounts:friends' %}" class="pf-faint" style="font-size:12px;">Manage →</a>
     </div>
     {% if incoming_requests %}
       {% for fr in incoming_requests %}
-      <div class="pf-flex-between pf-mt-8">
-        <span>🔥 {{ fr.from_user.username }} wants to be friends</span>
+      <div class="pf-flex-between pf-mb-8" style="padding:8px; background:rgba(139,92,246,0.1); border-radius:var(--radius-sm);">
+        <span style="font-size:12px; font-weight:600;">{{ fr.from_user.username }} sent a request</span>
         <form method="post" action="{% url 'accounts:respond_friend_request' fr.id 'accept' %}">
           {% csrf_token %}<button class="pf-btn pf-btn-primary pf-btn-sm">Accept</button>
         </form>
@@ -116,18 +121,27 @@
     {% endif %}
     {% if friends %}
       {% for f in friends %}
-      <div class="pf-flex-between" style="padding:10px 0; border-bottom:1px solid var(--border-soft);">
+      <div class="pf-flex-between" style="padding:8px 0; border-bottom:1px solid var(--border);">
         <a href="{% url 'accounts:profile' f.username %}" class="pf-flex pf-gap-8">
-          <span class="pf-avatar-circle">{{ f.username|slice:":1"|upper }}</span> {{ f.username }}
+          <span class="pf-avatar-circle" style="width:26px; height:26px; font-size:11px;">{{ f.username|slice:":1"|upper }}</span>
+          <span style="font-weight:600; font-size:13px;">{{ f.username }}</span>
         </a>
         <form method="post" action="{% url 'multiplayer:challenge_friend' f.username %}">
-          {% csrf_token %}<button class="pf-btn pf-btn-ghost pf-btn-sm">Challenge</button>
+          {% csrf_token %}
+          <button class="pf-btn pf-btn-ghost pf-btn-sm">
+            <span class="pf-icon"><svg><use href="#icon-swords"></use></svg></span>
+            <span>Challenge</span>
+          </button>
         </form>
       </div>
       {% endfor %}
     {% else %}
-      <div class="pf-empty"><div class="pf-empty-icon">🤝</div>No friends yet — find some fighters!</div>
+      <div class="pf-empty">
+        <div class="pf-empty-icon"><svg><use href="#icon-users"></use></svg></div>
+        <div>No friends added yet — find opponents in Leaderboards!</div>
+      </div>
     {% endif %}
   </div>
 </div>
 {% endblock %}
+

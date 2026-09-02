@@ -3,13 +3,19 @@
 
 {% block content %}
 <div class="pf-page-head">
-  <div class="pf-page-title">🖥️ LOCAL BATTLE</div>
-  <div class="pf-page-sub">Two players, one device. Set your loadouts and pick a bench.</div>
+  <div class="pf-page-title" style="display:flex; align-items:center; gap:10px;">
+    <span class="pf-icon-lg" style="color:var(--violet-bright);"><svg><use href="#icon-monitor"></use></svg></span>
+    <span>LOCAL DUEL SETUP</span>
+  </div>
+  <div class="pf-page-sub">Two players, one device. Pass the desk and fight it out on the same bench.</div>
 </div>
 
 <div class="pf-grid pf-grid-2">
   <div class="pf-card" style="border-color: rgba(59,130,246,0.4);">
-    <div class="pf-section-title" style="color:#60a5fa;">PLAYER 1 (YOU)</div>
+    <div class="pf-section-title" style="color:#60a5fa; display:flex; align-items:center; gap:8px;">
+      <span class="pf-avatar-circle" style="width:20px; height:20px; font-size:10px; background:var(--p1-blue);">1</span>
+      <span>PLAYER 1 (YOU)</span>
+    </div>
     <div class="pf-field">
       <label class="pf-label">Name</label>
       <input class="pf-input" id="p1-name" value="{{ request.user.username }}" maxlength="16">
@@ -17,19 +23,22 @@
     <div class="pf-field">
       <label class="pf-label">Pen</label>
       <select class="pf-select" id="p1-pen">
-        {% for pen in pens %}<option value="{{ pen.id }}" data-mass="{{ pen.mass }}" data-friction="{{ pen.friction }}" data-power="{{ pen.max_power }}">{{ pen.icon }} {{ pen.name }}</option>{% endfor %}
+        {% for pen in pens %}<option value="{{ pen.id }}" data-mass="{{ pen.mass }}" data-friction="{{ pen.friction }}" data-power="{{ pen.max_power }}">{{ pen.name }}</option>{% endfor %}
       </select>
     </div>
     <div class="pf-field">
       <label class="pf-label">Skin</label>
       <select class="pf-select" id="p1-skin">
-        {% for skin in skins %}<option value="{{ skin.id }}" data-asset="{{ skin.asset_key }}" data-color="{{ skin.body_color }}" data-accent="{{ skin.accent_color }}" data-trail="{{ skin.trail_color }}" data-glow="{{ skin.glow|yesno:'1,0' }}">{{ skin.icon }} {{ skin.name }}</option>{% endfor %}
+        {% for skin in skins %}<option value="{{ skin.id }}" data-asset="{{ skin.asset_key }}" data-color="{{ skin.body_color }}" data-accent="{{ skin.accent_color }}" data-trail="{{ skin.trail_color }}" data-glow="{{ skin.glow|yesno:'1,0' }}">{{ skin.name }}</option>{% endfor %}
       </select>
     </div>
   </div>
 
   <div class="pf-card" style="border-color: rgba(248,113,113,0.4);">
-    <div class="pf-section-title" style="color:#f87171;">PLAYER 2</div>
+    <div class="pf-section-title" style="color:#f87171; display:flex; align-items:center; gap:8px;">
+      <span class="pf-avatar-circle" style="width:20px; height:20px; font-size:10px; background:var(--p2-red);">2</span>
+      <span>PLAYER 2</span>
+    </div>
     <div class="pf-field">
       <label class="pf-label">Name</label>
       <input class="pf-input" id="p2-name" value="Player 2" maxlength="16">
@@ -37,13 +46,13 @@
     <div class="pf-field">
       <label class="pf-label">Pen</label>
       <select class="pf-select" id="p2-pen">
-        {% for pen in pens %}<option value="{{ pen.id }}" data-mass="{{ pen.mass }}" data-friction="{{ pen.friction }}" data-power="{{ pen.max_power }}">{{ pen.icon }} {{ pen.name }}</option>{% endfor %}
+        {% for pen in pens %}<option value="{{ pen.id }}" data-mass="{{ pen.mass }}" data-friction="{{ pen.friction }}" data-power="{{ pen.max_power }}">{{ pen.name }}</option>{% endfor %}
       </select>
     </div>
     <div class="pf-field">
       <label class="pf-label">Skin</label>
       <select class="pf-select" id="p2-skin">
-        {% for skin in skins %}<option value="{{ skin.id }}" data-asset="{{ skin.asset_key }}" data-color="{{ skin.body_color }}" data-accent="{{ skin.accent_color }}" data-trail="{{ skin.trail_color }}" data-glow="{{ skin.glow|yesno:'1,0' }}" {% if forloop.counter == 5 %}selected{% endif %}>{{ skin.icon }} {{ skin.name }}</option>{% endfor %}
+        {% for skin in skins %}<option value="{{ skin.id }}" data-asset="{{ skin.asset_key }}" data-color="{{ skin.body_color }}" data-accent="{{ skin.accent_color }}" data-trail="{{ skin.trail_color }}" data-glow="{{ skin.glow|yesno:'1,0' }}" {% if forloop.counter == 5 %}selected{% endif %}>{{ skin.name }}</option>{% endfor %}
       </select>
     </div>
   </div>
@@ -55,7 +64,7 @@
     {% for arena in arenas %}
     <div class="pf-card pf-card-hover arena-choice" data-slug="{{ arena.slug }}"
          style="cursor:pointer; background: linear-gradient(135deg, {{ arena.bg_gradient_from }}, {{ arena.bg_gradient_to }}); {% if forloop.first %}outline: 2px solid {{ arena.accent_color }};{% endif %}">
-      <div style="font-size:26px;">🏟️</div>
+      <div class="pf-icon-lg" style="color:var(--gold); margin-bottom:6px;"><svg><use href="#icon-target"></use></svg></div>
       <div style="font-weight:700; margin-top:8px;">{{ arena.name }}</div>
       <div class="pf-faint" style="font-size:12px; margin-top:4px;">{{ arena.description }}</div>
     </div>
@@ -64,7 +73,10 @@
 </div>
 
 <div class="pf-center pf-mt-32">
-  <button class="pf-btn pf-btn-primary pf-btn-lg" id="start-btn">⚔️ START PENFIGHT</button>
+  <button class="pf-btn pf-btn-primary pf-btn-lg" id="start-btn">
+    <span class="pf-icon"><svg><use href="#icon-swords"></use></svg></span>
+    <span>START PENFIGHT</span>
+  </button>
 </div>
 {% endblock %}
 

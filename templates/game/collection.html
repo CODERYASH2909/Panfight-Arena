@@ -5,8 +5,11 @@
 
 {% block content %}
 <div class="pf-page-head">
-  <div class="pf-page-title">📦 MY COSMETIC COLLECTION</div>
-  <div class="pf-page-sub">{{ owned_count }} / {{ total_count }} PENS COLLECTED</div>
+  <div class="pf-page-title" style="display:flex; align-items:center; gap:10px;">
+    <span class="pf-icon-lg" style="color:var(--gold);"><svg><use href="#icon-grid"></use></svg></span>
+    <span>PEN SKIN COLLECTION</span>
+  </div>
+  <div class="pf-page-sub">{{ owned_count }} / {{ total_count }} PENS UNLOCKED</div>
 </div>
 
 <div class="pf-progress pf-mb-32" style="max-width:450px;">
@@ -15,11 +18,13 @@
 
 <div class="pf-grid pf-grid-4">
   {% for skin in all_skins %}
-  <div class="pf-card pen-card-{{ skin.rarity }} {% if skin.id in owned_ids %}pf-card-hover{% else %}pf-muted{% endif %}" style="{% if skin.id not in owned_ids %}opacity:0.4; filter:grayscale(0.6);{% endif %}">
+  <div class="pf-card pen-card-{{ skin.rarity }} {% if skin.id in owned_ids %}pf-card-hover{% else %}pf-muted{% endif %}" style="{% if skin.id not in owned_ids %}opacity:0.45; filter:grayscale(0.6);{% endif %}">
     <div class="pf-flex-between pf-mb-8">
       <span class="pf-badge pf-badge-{{ skin.rarity }}">{{ skin.get_rarity_display }}</span>
       {% if skin.id in owned_ids %}
         <span class="pf-badge pf-badge-common">OWNED</span>
+      {% else %}
+        <span class="pf-icon" style="color:var(--text-disabled);"><svg><use href="#icon-lock"></use></svg></span>
       {% endif %}
     </div>
 
@@ -32,7 +37,7 @@
     {% if skin.id in owned_ids %}
       <a href="{% url 'game:my_pen' %}" class="pf-btn pf-btn-blue pf-btn-sm pf-btn-block pf-mt-16">EQUIP LOADOUT</a>
     {% else %}
-      <a href="{% url 'store:home' %}" class="pf-btn pf-btn-ghost pf-btn-sm pf-btn-block pf-mt-16">🔒 STORE</a>
+      <a href="{% url 'store:home' %}" class="pf-btn pf-btn-ghost pf-btn-sm pf-btn-block pf-mt-16">VIEW IN STORE</a>
     {% endif %}
   </div>
   {% endfor %}

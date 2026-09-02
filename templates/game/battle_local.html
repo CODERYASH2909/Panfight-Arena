@@ -333,7 +333,7 @@
     <div class="pf-ref-ctrl-group">
       <div class="pf-ref-ctrl-header">
         <span>ANGLE: <strong id="angle-val" style="color:white;">0°</strong></span>
-        <span>📐</span>
+        <span class="pf-icon" style="color:var(--violet-bright);"><svg><use href="#icon-crosshair"></use></svg></span>
       </div>
       <input type="range" class="pf-ref-slider" id="angle-slider" min="0" max="360" value="0">
       <div class="pf-ref-sublabel">DRAG TO AIM</div>
@@ -348,8 +348,13 @@
       <div class="pf-ref-sublabel">DRAG TO SET POWER</div>
     </div>
 
-    <button type="button" class="pf-ref-flick-btn" id="flick-btn">💥 FLICK</button>
-    <button class="pf-btn pf-btn-ghost pf-btn-sm" id="sfx-toggle" type="button" title="Toggle Sound" style="padding:6px 10px;">🔊</button>
+    <button type="button" class="pf-ref-flick-btn" id="flick-btn">
+      <span class="pf-icon" style="width:14px; height:14px;"><svg><use href="#icon-zap"></use></svg></span>
+      <span>FLICK</span>
+    </button>
+    <button class="pf-btn pf-btn-ghost pf-btn-sm" id="sfx-toggle" type="button" title="Toggle Sound" style="padding:6px 10px;">
+      <span class="pf-icon" id="sfx-icon"><svg><use href="#icon-volume"></use></svg></span>
+    </button>
   </div>
 </div>
 
@@ -359,12 +364,15 @@
 
 <div class="pf-overlay" id="victory-overlay" style="display:none;">
   <div class="pf-center">
-    <div class="pf-faint" style="letter-spacing:0.2em; font-size:14px;">PENFALL KNOCKOUT MATCH</div>
+    <div class="pf-faint" style="letter-spacing:0.2em; font-size:14px; text-transform:uppercase;">PENFALL KNOCKOUT MATCH</div>
     <div class="victory-title pf-mt-8" id="victory-title">MATCH VICTORY!</div>
     <div style="font-size:22px; font-weight:700; margin-top:6px;" id="victory-winner">PLAYER 1 WINS</div>
     <div class="pf-flex pf-gap-16" style="justify-content:center; margin-top:20px;" id="victory-rewards"></div>
     <div class="pf-flex pf-gap-16" style="justify-content:center; margin-top:32px;">
-      <button class="pf-btn pf-btn-primary pf-btn-lg" id="rematch-btn">🔁 REMATCH</button>
+      <button class="pf-btn pf-btn-primary pf-btn-lg" id="rematch-btn">
+        <span class="pf-icon"><svg><use href="#icon-refresh"></use></svg></span>
+        <span>REMATCH</span>
+      </button>
       <a href="{% url 'game:local_setup' %}" class="pf-btn pf-btn-ghost pf-btn-lg">BACK TO ARENA</a>
     </div>
   </div>

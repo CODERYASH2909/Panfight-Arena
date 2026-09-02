@@ -7,11 +7,15 @@
 <!-- Page Header -->
 <div class="pf-page-head pf-flex-between">
   <div>
-    <div class="pf-page-title">🛒 PEN COSMETIC STORE</div>
+    <div class="pf-page-title" style="display:flex; align-items:center; gap:10px;">
+      <span class="pf-icon-lg" style="color:var(--gold);"><svg><use href="#icon-store"></use></svg></span>
+      <span>COSMETIC STORE</span>
+    </div>
     <div class="pf-page-sub">Equip & collect authentic premium ball pens. Pure cosmetics — never pay-to-win.</div>
   </div>
-  <div class="pf-pp-chip" style="font-size:17px; padding:12px 24px;">
-    🪙 {{ request.user.profile.pen_points }} PP
+  <div class="pf-pp-pill" style="font-size:16px; padding:8px 18px;">
+    <span class="pf-icon" style="color:var(--gold);"><svg><use href="#icon-coin"></use></svg></span>
+    <span>{{ request.user.profile.pen_points }} PP</span>
   </div>
 </div>
 
@@ -28,7 +32,7 @@
   </div>
 
   <div class="pf-flex pf-gap-12" style="flex:1; max-width:400px;">
-    <input type="text" id="store-search" placeholder="🔍 Search pens..." class="pf-input" style="padding:8px 14px; font-size:13px;">
+    <input type="text" id="store-search" placeholder="Search pens..." class="pf-input" style="padding:8px 14px; font-size:13px;">
     <select id="store-sort" class="pf-select" style="padding:8px 14px; font-size:13px; width:auto;">
       <option value="price-asc">Price: Low to High</option>
       <option value="price-desc">Price: High to Low</option>
@@ -40,7 +44,10 @@
 <!-- Featured Pens Section -->
 {% if featured %}
 <div class="pf-mb-32">
-  <div class="pf-section-title">✨ FEATURED COSMETICS</div>
+  <div class="pf-section-title" style="display:flex; align-items:center; gap:6px;">
+    <span class="pf-icon" style="color:var(--gold);"><svg><use href="#icon-star"></use></svg></span>
+    <span>FEATURED COSMETICS</span>
+  </div>
   <div class="pf-grid pf-grid-3">
     {% for skin in featured %}
     <div class="pf-card pf-card-hover pen-store-card pen-card-{{ skin.rarity }}"
@@ -61,11 +68,15 @@
       <div class="pf-faint" style="font-size:12px; margin-top:4px; height:32px; overflow:hidden;">{{ skin.description }}</div>
 
       <div class="pf-flex-between pf-mt-16">
-        <span style="font-weight:800; font-size:16px; color: var(--neon-gold);">
-          {% if skin.price_pp > 0 %}🪙 {{ skin.price_pp }} PP{% else %}FREE{% endif %}
+        <span style="font-weight:800; font-size:16px; color: var(--gold); display:inline-flex; align-items:center; gap:4px;">
+          <span class="pf-icon" style="width:14px; height:14px;"><svg><use href="#icon-coin"></use></svg></span>
+          {% if skin.price_pp > 0 %}{{ skin.price_pp }} PP{% else %}FREE{% endif %}
         </span>
         <div class="pf-flex pf-gap-8">
-          <button type="button" class="pf-btn pf-btn-ghost pf-btn-sm btn-preview" onclick="openPreviewModal('{{ skin.asset_key }}', '{{ skin.name|escapejs }}', '{{ skin.rarity }}', '{{ skin.description|escapejs }}', {{ skin.price_pp }}, {{ skin.id }}, {% if skin.id in owned_ids %}true{% else %}false{% endif %})">👁️ PREVIEW</button>
+          <button type="button" class="pf-btn pf-btn-ghost pf-btn-sm btn-preview" onclick="openPreviewModal('{{ skin.asset_key }}', '{{ skin.name|escapejs }}', '{{ skin.rarity }}', '{{ skin.description|escapejs }}', {{ skin.price_pp }}, {{ skin.id }}, {% if skin.id in owned_ids %}true{% else %}false{% endif %})">
+            <span class="pf-icon"><svg><use href="#icon-eye"></use></svg></span>
+            <span>PREVIEW</span>
+          </button>
           {% if skin.id in owned_ids %}
             <a href="{% url 'game:my_pen' %}" class="pf-btn pf-btn-sm pf-btn-ghost">EQUIP</a>
           {% else %}
@@ -104,11 +115,14 @@
     <div class="pf-faint" style="font-size:12px; margin-top:2px; height:32px; overflow:hidden;">{{ skin.description }}</div>
 
     <div class="pf-flex-between pf-mt-16">
-      <span style="font-weight:800; font-size:15px; color: var(--neon-gold);">
-        {% if skin.price_pp > 0 %}🪙 {{ skin.price_pp }} PP{% else %}FREE{% endif %}
+      <span style="font-weight:800; font-size:15px; color: var(--gold); display:inline-flex; align-items:center; gap:4px;">
+        <span class="pf-icon" style="width:14px; height:14px;"><svg><use href="#icon-coin"></use></svg></span>
+        {% if skin.price_pp > 0 %}{{ skin.price_pp }} PP{% else %}FREE{% endif %}
       </span>
       <div class="pf-flex pf-gap-8">
-        <button type="button" class="pf-btn pf-btn-ghost pf-btn-sm btn-preview" onclick="openPreviewModal('{{ skin.asset_key }}', '{{ skin.name|escapejs }}', '{{ skin.rarity }}', '{{ skin.description|escapejs }}', {{ skin.price_pp }}, {{ skin.id }}, {% if skin.id in owned_ids %}true{% else %}false{% endif %})">👁️</button>
+        <button type="button" class="pf-btn pf-btn-ghost pf-btn-sm btn-preview" onclick="openPreviewModal('{{ skin.asset_key }}', '{{ skin.name|escapejs }}', '{{ skin.rarity }}', '{{ skin.description|escapejs }}', {{ skin.price_pp }}, {{ skin.id }}, {% if skin.id in owned_ids %}true{% else %}false{% endif %})">
+          <span class="pf-icon"><svg><use href="#icon-eye"></use></svg></span>
+        </button>
         {% if skin.id in owned_ids %}
           <a href="{% url 'game:my_pen' %}" class="pf-btn pf-btn-sm pf-btn-ghost">EQUIP</a>
         {% else %}
@@ -121,7 +135,10 @@
     </div>
   </div>
   {% empty %}
-  <div class="pf-empty"><div class="pf-empty-icon">🛒</div>Store is currently empty.</div>
+  <div class="pf-empty">
+    <div class="pf-empty-icon"><svg><use href="#icon-store"></use></svg></div>
+    <div>Store is currently empty.</div>
+  </div>
   {% endfor %}
 </div>
 
@@ -156,7 +173,10 @@
         <div class="pf-flex-between pf-glass" style="padding:16px 20px; margin-bottom:24px;">
           <div>
             <div class="pf-faint" style="font-size:11px; text-transform:uppercase;">PRICE</div>
-            <div id="modal-pen-price" style="font-size:22px; font-weight:800; color:var(--neon-gold);">🪙 7,500 PP</div>
+            <div id="modal-pen-price" style="font-size:20px; font-weight:800; color:var(--gold); display:flex; align-items:center; gap:6px;">
+              <span class="pf-icon"><svg><use href="#icon-coin"></use></svg></span>
+              <span>7,500 PP</span>
+            </div>
           </div>
           <div id="modal-action-container">
             <!-- Dynamic Form or Equip Button -->

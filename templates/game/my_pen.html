@@ -1,41 +1,47 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}My Pen — PenFight Arena{% endblock %}
+{% block title %}My Loadout — PenFight Arena{% endblock %}
 
 {% block extra_css %}
 <style>
   .pen-hero-container {
-    background: radial-gradient(circle at 50% 40%, rgba(139,92,246,0.25), transparent 65%), var(--bg-panel);
-    border: 1px solid var(--border-glow);
-    border-radius: var(--radius-lg);
+    background: radial-gradient(circle at 50% 40%, rgba(139,92,246,0.2), transparent 65%), var(--bg-card);
+    border: 1px solid var(--border-hover);
+    border-radius: var(--radius-xl);
     padding: 32px; position: relative; overflow: hidden;
-    box-shadow: var(--shadow-panel), 0 0 50px rgba(139,92,246,0.2);
+    box-shadow: var(--shadow-lg), var(--shadow-violet);
   }
   .pen-pedestal {
-    height: 240px; border-radius: 20px;
-    background: radial-gradient(ellipse at 50% 70%, rgba(56,189,248,0.2), transparent 70%), var(--bg-panel-2);
-    border: 1px solid var(--border-soft);
+    height: 240px; border-radius: var(--radius-lg);
+    background: radial-gradient(ellipse at 50% 70%, rgba(56,189,248,0.15), transparent 70%), var(--bg-surface);
+    border: 1px solid var(--border);
     display: flex; align-items: center; justify-content: center; position: relative;
   }
   .skin-card {
-    cursor: pointer; border: 2px solid var(--border-soft); transition: all 0.2s ease;
+    cursor: pointer; border: 1px solid var(--border); transition: all 0.2s ease;
   }
-  .skin-card:hover { transform: translateY(-4px); border-color: var(--border-glow); }
-  .skin-card.selected { border-color: var(--neon-violet) !important; box-shadow: var(--shadow-glow-violet) !important; }
+  .skin-card:hover { transform: translateY(-4px); border-color: var(--border-hover); }
+  .skin-card.selected { border-color: var(--violet) !important; box-shadow: var(--shadow-violet) !important; }
   .skin-card.locked { opacity: 0.5; filter: grayscale(0.5); }
-  .pen-type-card { cursor: pointer; border: 2px solid var(--border-soft); }
-  .pen-type-card.selected { border-color: var(--neon-blue) !important; box-shadow: var(--shadow-glow-blue) !important; }
+  .pen-type-card { cursor: pointer; border: 1px solid var(--border); }
+  .pen-type-card.selected { border-color: var(--blue) !important; box-shadow: 0 0 16px rgba(56, 189, 248, 0.3) !important; }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="pf-page-head pf-flex-between">
   <div>
-    <div class="pf-page-title">🖊️ MY PEN LOADOUT</div>
-    <div class="pf-page-sub">Customize your active ball pen & equipment for battle.</div>
+    <div class="pf-page-title" style="display:flex; align-items:center; gap:10px;">
+      <span class="pf-icon-lg" style="color:var(--violet-bright);"><svg><use href="#icon-layers"></use></svg></span>
+      <span>MY LOADOUT</span>
+    </div>
+    <div class="pf-page-sub">Customize your active ball pen archetype and equipped skin for battle.</div>
   </div>
-  <a href="{% url 'store:home' %}" class="pf-btn pf-btn-gold pf-btn-sm">🛒 VISIT STORE</a>
+  <a href="{% url 'store:home' %}" class="pf-btn pf-btn-gold pf-btn-sm">
+    <span class="pf-icon"><svg><use href="#icon-store"></use></svg></span>
+    <span>VISIT STORE</span>
+  </a>
 </div>
 
 <!-- Hero Showcase Panel -->
@@ -65,24 +71,25 @@
       <div class="pf-glass pf-mb-24" style="padding:14px 20px; display:flex; justify-content:space-around;">
         <div class="pf-center">
           <div class="pf-faint" style="font-size:11px;">MASS</div>
-          <div id="hero-stat-mass" style="font-weight:800; font-size:18px; color:var(--neon-blue);">1.0</div>
+          <div id="hero-stat-mass" style="font-weight:800; font-size:18px; color:var(--blue);">1.0</div>
         </div>
         <div class="pf-center">
           <div class="pf-faint" style="font-size:11px;">FLICK POWER</div>
-          <div id="hero-stat-power" style="font-weight:800; font-size:18px; color:var(--neon-gold);">1.0</div>
+          <div id="hero-stat-power" style="font-weight:800; font-size:18px; color:var(--gold);">1.0</div>
         </div>
         <div class="pf-center">
           <div class="pf-faint" style="font-size:11px;">FRICTION</div>
-          <div id="hero-stat-friction" style="font-weight:800; font-size:18px; color:var(--neon-pink);">1.0</div>
+          <div id="hero-stat-friction" style="font-weight:800; font-size:18px; color:var(--violet-bright);">1.0</div>
         </div>
         <div class="pf-center">
           <div class="pf-faint" style="font-size:11px;">CONTROL</div>
-          <div id="hero-stat-control" style="font-weight:800; font-size:18px; color:var(--neon-green);">1.0</div>
+          <div id="hero-stat-control" style="font-weight:800; font-size:18px; color:var(--success);">1.0</div>
         </div>
       </div>
 
       <button type="button" onclick="document.getElementById('loadout-form').requestSubmit()" class="pf-btn pf-btn-primary pf-btn-lg pf-btn-block">
-        💾 SAVE EQUIPPED LOADOUT
+        <span class="pf-icon"><svg><use href="#icon-save"></use></svg></span>
+        <span>SAVE LOADOUT</span>
       </button>
     </div>
   </div>
@@ -100,7 +107,7 @@
     <div class="pf-card pen-type-card {% if pen.id == profile.equipped_pen_id %}selected{% endif %}"
          data-pen-id="{{ pen.id }}"
          data-mass="{{ pen.mass }}" data-power="{{ pen.max_power }}" data-friction="{{ pen.friction }}" data-control="{{ pen.control }}">
-      <div style="font-size:26px;">{{ pen.icon }}</div>
+      <div class="pf-icon-lg" style="color:var(--violet-bright); margin-bottom:6px;"><svg><use href="#icon-pen"></use></svg></div>
       <div style="font-weight:800; margin-top:6px; font-size:16px;">{{ pen.name }}</div>
       <div class="pf-faint" style="font-size:11px; margin-top:4px; height:32px; overflow:hidden;">{{ pen.description }}</div>
       <div class="pf-flex pf-gap-8 pf-mt-12" style="font-size:10px;">
@@ -121,7 +128,10 @@
       <div class="pf-flex-between pf-mb-8">
         <span class="pf-badge pf-badge-{{ skin.rarity }}">{{ skin.get_rarity_display }}</span>
         {% if skin.id not in owned_skin_ids %}
-          <span class="pf-badge pf-badge-common">🔒 STORE</span>
+          <span class="pf-badge pf-badge-common" style="display:inline-flex; align-items:center; gap:4px;">
+            <span class="pf-icon" style="width:10px; height:10px;"><svg><use href="#icon-lock"></use></svg></span>
+            <span>STORE</span>
+          </span>
         {% endif %}
       </div>
 

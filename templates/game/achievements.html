@@ -2,22 +2,34 @@
 {% block title %}Achievements — PenFight Arena{% endblock %}
 {% block content %}
 <div class="pf-page-head">
-  <div class="pf-page-title">🏆 ACHIEVEMENTS</div>
-  <div class="pf-page-sub">{{ unlocked_ids|length }} / {{ achievements|length }} unlocked</div>
+  <div class="pf-page-title" style="display:flex; align-items:center; gap:10px;">
+    <span class="pf-icon-lg" style="color:var(--gold);"><svg><use href="#icon-award"></use></svg></span>
+    <span>ACHIEVEMENTS</span>
+  </div>
+  <div class="pf-page-sub">{{ unlocked_ids|length }} / {{ achievements|length }} UNLOCKED</div>
 </div>
 
 <div class="pf-grid pf-grid-3">
   {% for a in achievements %}
-  <div class="pf-card {% if a.id in unlocked_ids %}pf-card-hover{% endif %}" style="{% if a.id not in unlocked_ids %}opacity:0.5;{% endif %}">
-    <div style="font-size:30px;">{{ a.icon }}</div>
-    <div style="font-weight:700; margin-top:10px;">{{ a.name }}</div>
-    <div class="pf-faint" style="font-size:13px; margin-top:6px;">{{ a.description }}</div>
+  <div class="pf-card {% if a.id in unlocked_ids %}pf-card-hover{% endif %}" style="{% if a.id not in unlocked_ids %}opacity:0.45; filter:grayscale(0.5);{% endif %}">
+    <div class="pf-icon-lg" style="color:var(--gold); width:36px; height:36px;"><svg><use href="#icon-award"></use></svg></div>
+    <div style="font-weight:800; font-size:18px; margin-top:12px; font-family:var(--font-display);">{{ a.name }}</div>
+    <div class="pf-faint" style="font-size:13px; margin-top:6px; min-height:36px;">{{ a.description }}</div>
     <div class="pf-flex pf-gap-8 pf-mt-16">
-      <span class="pf-badge pf-badge-rare">🪙 {{ a.reward_pp }} PP</span>
-      <span class="pf-badge pf-badge-epic">⭐ {{ a.reward_xp }} XP</span>
+      <span class="pf-badge pf-badge-legendary" style="display:inline-flex; align-items:center; gap:4px;">
+        <span class="pf-icon" style="width:10px; height:10px; color:var(--gold);"><svg><use href="#icon-coin"></use></svg></span>
+        <span>+{{ a.reward_pp }} PP</span>
+      </span>
+      <span class="pf-badge pf-badge-rare" style="display:inline-flex; align-items:center; gap:4px;">
+        <span class="pf-icon" style="width:10px; height:10px;"><svg><use href="#icon-star"></use></svg></span>
+        <span>+{{ a.reward_xp }} XP</span>
+      </span>
     </div>
     {% if a.id in unlocked_ids %}
-      <div class="pf-badge pf-badge-legendary pf-mt-16">✔ UNLOCKED</div>
+      <div class="pf-badge pf-badge-uncommon pf-mt-16" style="display:inline-flex; align-items:center; gap:4px;">
+        <span class="pf-icon" style="width:10px; height:10px;"><svg><use href="#icon-check"></use></svg></span>
+        <span>UNLOCKED</span>
+      </div>
     {% endif %}
   </div>
   {% endfor %}

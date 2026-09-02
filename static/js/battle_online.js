@@ -55,7 +55,7 @@
   const sfxToggle = document.getElementById("sfx-toggle");
   sfxToggle.addEventListener("click", () => {
     pfAudio.setSfx(!pfAudio.sfxOn);
-    sfxToggle.textContent = pfAudio.sfxOn ? "🔊" : "🔇";
+    sfxToggle.innerHTML = `<svg class="pf-icon"><use href="${pfAudio.sfxOn ? "#icon-volume" : "#icon-volume-off"}"></use></svg>`;
   });
 
   function updateScoreHUD() {
@@ -352,7 +352,7 @@
         <div style="font-family:var(--font-display); font-size:32px; font-weight:800; margin-top:12px; color:white;">
           ${score1}  —  ${score2}
         </div>
-        ${isFinalNext ? `<div class="pf-badge pf-badge-mythic" style="margin-top:16px; font-size:14px; padding:6px 16px;">🔥 FINAL ROUND NEXT!</div>` : ""}
+        ${isFinalNext ? `<div class="pf-badge pf-badge-mythic" style="margin-top:16px; font-size:14px; padding:6px 16px; display:inline-flex; align-items:center; gap:6px;"><span class="pf-icon"><svg><use href="#icon-flame"></use></svg></span> FINAL ROUND NEXT!</div>` : ""}
         <div class="pf-muted pf-mt-24" style="font-size:13px;">Preparing next round...</div>
       </div>
     `;
@@ -372,15 +372,15 @@
     const myRewards = iWon ? data.winner_rewards : data.loser_rewards;
     const box = document.getElementById("victory-rewards");
     box.innerHTML = `
-      <div class="pf-badge pf-badge-legendary">🪙 +${myRewards.pp || 0} PP</div>
-      <div class="pf-badge pf-badge-rare">⭐ +${myRewards.xp || 0} XP</div>
-      ${myRewards.streak_bonus ? `<div class="pf-badge pf-badge-epic">🔥 +${myRewards.streak_bonus} Streak Bonus</div>` : ""}
+      <div class="pf-badge pf-badge-legendary" style="display:inline-flex; align-items:center; gap:6px;"><span class="pf-icon" style="color:var(--gold);"><svg><use href="#icon-coin"></use></svg></span> +${myRewards.pp || 0} PP</div>
+      <div class="pf-badge pf-badge-rare" style="display:inline-flex; align-items:center; gap:6px;"><span class="pf-icon"><svg><use href="#icon-star"></use></svg></span> +${myRewards.xp || 0} XP</div>
+      ${myRewards.streak_bonus ? `<div class="pf-badge pf-badge-epic" style="display:inline-flex; align-items:center; gap:6px;"><span class="pf-icon"><svg><use href="#icon-flame"></use></svg></span> +${myRewards.streak_bonus} Streak Bonus</div>` : ""}
     `;
     if (iWon) {
       (data.winner_achievements || []).forEach((a) => {
         const div = document.createElement("div");
         div.className = "pf-badge pf-badge-mythic";
-        div.textContent = `${a.icon} ${a.name}`;
+        div.textContent = `${a.name}`;
         box.appendChild(div);
       });
     }

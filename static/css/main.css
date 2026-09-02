@@ -1,71 +1,80 @@
-/* =========================================================================
-   PENFIGHT ARENA — Design System v2
-   Premium esports + futuristic competitive interface.
-   70% dark graphite · 20% gray/white · 7% violet · 2% ice blue · 1% gold
-   ========================================================================= */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@600;700;800;900&family=Sora:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 /* ---------------------------------------------------------------- tokens */
 
 :root {
-  /* Backgrounds — five-level depth system */
-  --bg-void:      #08090D;
-  --bg-deep:      #0D0F14;
-  --bg-surface:   #11141B;
-  --bg-elevated:  #171A22;
-  --bg-card:      #14171F;
+  /* Commercial Charcoal + Classroom Palette */
+  --bg-void:      #0a0c10;
+  --bg-deep:      #12151c;
+  --bg-surface:   #181c26;
+  --bg-elevated:  #202634;
+  --bg-card:      #161a23;
 
-  /* Primary accent — Electric Violet (7%) */
-  --violet:       #8B5CF6;
-  --violet-bright:#A78BFA;
-  --violet-deep:  #6D28D9;
-  --violet-glow:  rgba(139, 92, 246, 0.18);
-  --violet-glow-strong: rgba(139, 92, 246, 0.35);
+  /* Classroom Wood Accents */
+  --wood-light:   #d49b54;
+  --wood-mid:     #8b5a2b;
+  --wood-dark:    #3d2613;
+  --wood-border:  rgba(184, 115, 51, 0.35);
 
-  /* Secondary accent — Ice Blue (2%) */
-  --blue:         #38BDF8;
-  --blue-deep:    #0284C7;
+  /* Classroom Chalkboard Green */
+  --chalk-green:  #2d4a3e;
+  --chalk-dark:   #1b3328;
+  --chalk-light:  #48826c;
 
-  /* Reward accent — Champagne Gold (1%) */
-  --gold:         #F4C95D;
-  --gold-deep:    #C89B32;
+  /* Primary Accent — Violet */
+  --violet:       #8b5cf6;
+  --violet-bright:#a78bfa;
+  --violet-deep:  #6d28d9;
+  --violet-glow:  rgba(139, 92, 246, 0.2);
+
+  /* Player Colors */
+  --p1-blue:      #3b82f6;
+  --p2-red:       #ef4444;
+
+  /* Reward Gold */
+  --gold:         #f59e0b;
+  --gold-bright:  #fbbf24;
+  --gold-deep:    #d97706;
+  --gold-glow:    rgba(245, 158, 11, 0.25);
 
   /* Semantic */
-  --success:      #34D399;
-  --error:        #F87171;
-  --warning:      #FBBF24;
+  --success:      #10b981;
+  --error:        #f87171;
+  --warning:      #f59e0b;
 
   /* Text */
-  --text-primary: #F5F7FA;
-  --text-secondary: #A7ADBB;
-  --text-muted:   #6B7280;
-  --text-disabled:#454A55;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted:   #64748b;
+  --text-disabled:#475569;
 
   /* Borders */
-  --border:       rgba(255, 255, 255, 0.06);
-  --border-hover: rgba(139, 92, 246, 0.35);
-  --border-active:rgba(139, 92, 246, 0.55);
-  --border-gold:  rgba(244, 201, 93, 0.45);
+  --border:       rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(139, 92, 246, 0.4);
+  --border-active:rgba(139, 92, 246, 0.65);
+  --border-gold:  rgba(245, 158, 11, 0.45);
 
-  /* Radius — sharp, not bubbly */
+  /* Radius */
   --radius-sm:    6px;
-  --radius-md:    8px;
-  --radius-lg:    10px;
-  --radius-xl:    12px;
+  --radius-md:    10px;
+  --radius-lg:    14px;
+  --radius-xl:    18px;
 
   /* Shadows */
-  --shadow-sm:    0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-md:    0 8px 24px rgba(0, 0, 0, 0.4);
-  --shadow-lg:    0 16px 48px rgba(0, 0, 0, 0.5);
-  --shadow-violet:0 0 20px rgba(139, 92, 246, 0.2);
-  --shadow-gold:  0 0 20px rgba(244, 201, 93, 0.2);
+  --shadow-sm:    0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md:    0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-lg:    0 16px 48px rgba(0, 0, 0, 0.7);
+  --shadow-violet:0 0 24px rgba(139, 92, 246, 0.25);
+  --shadow-gold:  0 0 24px rgba(245, 158, 11, 0.25);
 
   /* Typography */
-  --font-display: "Rajdhani", "Segoe UI", system-ui, sans-serif;
-  --font-body:    "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Rajdhani", "Sora", system-ui, sans-serif;
+  --font-body:    "Inter", "Space Grotesk", system-ui, sans-serif;
 
-  /* Sidebar */
-  --sidebar-w:    240px;
+  /* Navbar height */
+  --nav-h:        64px;
 }
+
 
 /* ---------------------------------------------------------------- reset */
 
@@ -109,7 +118,197 @@ button { font-family: inherit; cursor: pointer; }
 ::-webkit-scrollbar-thumb { background: #2a2d38; border-radius: 8px; }
 ::-webkit-scrollbar-thumb:hover { background: #3a3e4a; }
 
-/* ---------------------------------------------------------------- icons */
+/* ---------------------------------------------------------------- top global navbar */
+
+.pf-shell-top {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--bg-void);
+}
+
+.pf-global-nav {
+  position: sticky;
+  top: 0;
+  z-index: 500;
+  height: var(--nav-h);
+  background: rgba(18, 21, 28, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.pf-nav-container {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.pf-brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.pf-brand-mark {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--wood-mid), var(--wood-light));
+  display: flex; align-items: center; justify-content: center;
+  color: white;
+  box-shadow: 0 0 14px rgba(184, 115, 51, 0.4);
+}
+.pf-brand-mark svg { width: 20px; height: 20px; }
+.pf-brand-text {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  color: var(--text-primary);
+}
+.pf-brand-text span {
+  color: var(--violet-bright);
+}
+
+.pf-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+}
+.pf-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+  text-decoration: none;
+}
+.pf-nav-item svg {
+  width: 16px; height: 16px;
+  opacity: 0.75;
+  transition: opacity 0.15s;
+}
+.pf-nav-item:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+.pf-nav-item:hover svg { opacity: 1; }
+.pf-nav-item.active {
+  color: var(--violet-bright);
+  background: rgba(139, 92, 246, 0.12);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+.pf-nav-item.active svg { opacity: 1; color: var(--violet); }
+
+.pf-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.pf-pp-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--gold-bright);
+}
+.pf-pp-val { font-family: var(--font-display); font-size: 15px; }
+.pf-pp-lbl { font-size: 10px; opacity: 0.8; }
+
+.pf-rating-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--violet-bright);
+}
+
+.pf-nav-icon-btn {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.pf-nav-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.pf-nav-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px 4px 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  transition: all 0.15s;
+}
+.pf-nav-user:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--border-hover);
+}
+.pf-user-meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+.pf-user-name {
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--text-primary);
+}
+.pf-user-level {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.pf-app-body {
+  flex: 1;
+  padding: 32px 0 64px;
+}
+
+@media (max-width: 992px) {
+  .pf-nav-links span { display: none; }
+  .pf-nav-item { padding: 8px 10px; }
+  .pf-user-meta { display: none; }
+}
+
 
 .pf-icon {
   display: inline-flex;

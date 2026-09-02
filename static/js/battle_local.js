@@ -317,7 +317,7 @@
         <div style="font-family:var(--font-display); font-size:32px; font-weight:800; margin-top:12px; color:white;">
           ${score1}  —  ${score2}
         </div>
-        ${isFinalNext ? `<div class="pf-badge pf-badge-mythic" style="margin-top:16px; font-size:14px; padding:6px 16px;">🔥 FINAL ROUND NEXT!</div>` : ""}
+        ${isFinalNext ? `<div class="pf-badge pf-badge-mythic" style="margin-top:16px; font-size:14px; padding:6px 16px; display:inline-flex; align-items:center; gap:6px;"><span class="pf-icon"><svg><use href="#icon-flame"></use></svg></span> FINAL ROUND NEXT!</div>` : ""}
         <div class="pf-muted pf-mt-24" style="font-size:13px;">Preparing next round...</div>
       </div>
     `;
@@ -383,9 +383,12 @@
   document.getElementById("rematch-btn").addEventListener("click", () => window.location.reload());
 
   const sfxToggle = document.getElementById("sfx-toggle");
+  const sfxIcon = document.getElementById("sfx-icon");
   sfxToggle.addEventListener("click", () => {
     pfAudio.setSfx(!pfAudio.sfxOn);
-    sfxToggle.textContent = pfAudio.sfxOn ? "🔊" : "🔇";
+    if (sfxIcon) {
+      sfxIcon.innerHTML = pfAudio.sfxOn ? '<svg><use href="#icon-volume"></use></svg>' : '<svg><use href="#icon-volume-off"></use></svg>';
+    }
   });
 
   setupRound();

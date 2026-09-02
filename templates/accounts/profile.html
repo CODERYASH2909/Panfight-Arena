@@ -4,41 +4,52 @@
 {% block content %}
 <div class="pf-glass" style="padding:32px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:20px;">
   <div class="pf-flex pf-gap-16">
-    <div class="pf-avatar-circle" style="width:76px; height:76px; font-size:30px; background: var(--grad-primary);">
+    <div class="pf-avatar-circle" style="width:72px; height:72px; font-size:28px;">
       {{ profile_user.username|slice:":1"|upper }}
     </div>
     <div>
-      <div style="font-size:26px; font-weight:800;">{{ profile_user.username }}</div>
-      <p class="pf-muted">{{ profile.bio|default:"No bio yet." }}</p>
+      <div style="font-family:var(--font-display); font-size:28px; font-weight:800;">{{ profile_user.username|upper }}</div>
+      <p class="pf-muted" style="margin-top:2px;">{{ profile.bio|default:"Classroom pen fighter." }}</p>
       <div class="pf-flex pf-gap-8 pf-mt-8">
         <span class="pf-rank-chip pf-rank-{{ profile.rank_tier }}">{{ profile.get_rank_tier_display }}</span>
-        <span class="pf-badge pf-badge-rare">Lv.{{ profile.level }}</span>
+        <span class="pf-badge pf-badge-epic">Lv.{{ profile.level }}</span>
       </div>
     </div>
   </div>
   <div class="pf-flex pf-gap-12">
     {% if is_self %}
-      <a href="{% url 'accounts:profile_edit' %}" class="pf-btn pf-btn-ghost">Edit Profile</a>
+      <a href="{% url 'accounts:profile_edit' %}" class="pf-btn pf-btn-ghost">
+        <span class="pf-icon"><svg><use href="#icon-settings"></use></svg></span>
+        <span>Edit Profile</span>
+      </a>
     {% elif is_friend %}
       <form method="post" action="{% url 'multiplayer:challenge_friend' profile_user.username %}">
-        {% csrf_token %}<button class="pf-btn pf-btn-primary">⚔️ Challenge</button>
+        {% csrf_token %}
+        <button class="pf-btn pf-btn-primary">
+          <span class="pf-icon"><svg><use href="#icon-swords"></use></svg></span>
+          <span>Challenge</span>
+        </button>
       </form>
       <form method="post" action="{% url 'accounts:remove_friend' profile_user.username %}">
         {% csrf_token %}<button class="pf-btn pf-btn-ghost">Remove Friend</button>
       </form>
     {% else %}
       <form method="post" action="{% url 'accounts:send_friend_request' profile_user.username %}">
-        {% csrf_token %}<button class="pf-btn pf-btn-primary">+ Add Friend</button>
+        {% csrf_token %}
+        <button class="pf-btn pf-btn-primary">
+          <span class="pf-icon"><svg><use href="#icon-user-plus"></use></svg></span>
+          <span>Add Friend</span>
+        </button>
       </form>
     {% endif %}
   </div>
 </div>
 
 <div class="pf-grid pf-grid-4 pf-mt-24">
-  <div class="pf-card pf-stat"><div class="pf-stat-value">{{ profile.wins }}</div><div class="pf-stat-label">Wins</div></div>
-  <div class="pf-card pf-stat"><div class="pf-stat-value">{{ profile.losses }}</div><div class="pf-stat-label">Losses</div></div>
-  <div class="pf-card pf-stat"><div class="pf-stat-value">{{ profile.win_rate }}%</div><div class="pf-stat-label">Win Rate</div></div>
-  <div class="pf-card pf-stat"><div class="pf-stat-value">{{ profile.best_win_streak }}</div><div class="pf-stat-label">Best Streak</div></div>
+  <div class="pf-card pf-stat"><div class="pf-stat-value" style="color:var(--text-primary);">{{ profile.wins }}</div><div class="pf-stat-label">Victories</div></div>
+  <div class="pf-card pf-stat"><div class="pf-stat-value" style="color:var(--error);">{{ profile.losses }}</div><div class="pf-stat-label">Defeats</div></div>
+  <div class="pf-card pf-stat"><div class="pf-stat-value" style="color:var(--violet-bright);">{{ profile.win_rate }}%</div><div class="pf-stat-label">Win Rate</div></div>
+  <div class="pf-card pf-stat"><div class="pf-stat-value" style="color:var(--gold);">{{ profile.best_win_streak }}</div><div class="pf-stat-label">Best Streak</div></div>
 </div>
 
 <div class="pf-grid pf-grid-2 pf-mt-24">
@@ -46,32 +57,43 @@
     <div class="pf-section-title">MATCH HISTORY</div>
     {% if matches %}
       {% for mp in matches %}
-      <div class="pf-flex-between" style="padding:10px 0; border-bottom:1px solid var(--border-soft);">
+      <div class="pf-flex-between" style="padding:10px 0; border-bottom:1px solid var(--border);">
         <div class="pf-flex pf-gap-12">
-          <span style="font-size:18px;">{{ mp.is_winner|yesno:"🏆,💀" }}</span>
+          <span class="pf-icon" style="color:{% if mp.is_winner %}var(--gold){% else %}var(--text-muted){% endif %};">
+            <svg><use href="{% if mp.is_winner %}#icon-trophy{% else %}#icon-skull{% endif %}"></use></svg>
+          </span>
           <div>
-            <div style="font-weight:700; font-size:14px;">{{ mp.match.get_match_type_display }} · {{ mp.match.arena.name|default:"—" }}</div>
-            <div class="pf-faint" style="font-size:12px;">{{ mp.pen.name|default:"" }} / {{ mp.skin.name|default:"" }}</div>
+            <div style="font-weight:700; font-size:13px;">{{ mp.match.get_match_type_display }} · {{ mp.match.arena.name|default:"Classroom Desk" }}</div>
+            <div class="pf-faint" style="font-size:11px;">{{ mp.pen.name|default:"Classic" }} / {{ mp.skin.name|default:"Default Skin" }}</div>
           </div>
         </div>
-        <span class="pf-faint" style="font-size:12px;">{{ mp.match.created_at|timesince }} ago</span>
+        <span class="pf-faint" style="font-size:11px;">{{ mp.match.created_at|timesince }} ago</span>
       </div>
       {% endfor %}
     {% else %}
-      <div class="pf-empty"><div class="pf-empty-icon">📜</div>No match history yet.</div>
+      <div class="pf-empty">
+        <div class="pf-empty-icon"><svg><use href="#icon-swords"></use></svg></div>
+        <div>No match history recorded yet.</div>
+      </div>
     {% endif %}
   </div>
 
   <div class="pf-card">
-    <div class="pf-section-title">ACHIEVEMENTS</div>
+    <div class="pf-section-title">UNLOCKED ACHIEVEMENTS</div>
     {% if achievements %}
       <div class="pf-grid pf-grid-2">
         {% for ua in achievements %}
-        <div class="pf-badge pf-badge-legendary" style="padding:10px 14px;">{{ ua.achievement.icon }} {{ ua.achievement.name }}</div>
+        <div class="pf-badge pf-badge-legendary" style="padding:8px 12px; display:inline-flex; align-items:center; gap:6px;">
+          <span class="pf-icon" style="color:var(--gold);"><svg><use href="#icon-award"></use></svg></span>
+          <span>{{ ua.achievement.name }}</span>
+        </div>
         {% endfor %}
       </div>
     {% else %}
-      <div class="pf-empty"><div class="pf-empty-icon">🏆</div>No achievements unlocked yet.</div>
+      <div class="pf-empty">
+        <div class="pf-empty-icon"><svg><use href="#icon-award"></use></svg></div>
+        <div>No achievements unlocked yet.</div>
+      </div>
     {% endif %}
   </div>
 </div>

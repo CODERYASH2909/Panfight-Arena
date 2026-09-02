@@ -16,17 +16,23 @@
 {% endblock %}
 {% block content %}
 <div class="qm-wrap">
-  <h2>⚡ QUICK MATCH</h2>
+  <div class="pf-flex pf-gap-12" style="justify-content:center; margin-bottom:8px;">
+    <span class="pf-icon-lg" style="color:var(--blue);"><svg><use href="#icon-zap"></use></svg></span>
+    <h2 style="font-family:var(--font-display); font-size:28px; font-weight:800; margin:0;">QUICK MATCH QUEUE</h2>
+  </div>
   <p class="pf-muted pf-mt-8" id="qm-status">Ready to find an opponent near your rank.</p>
 
   <div class="qm-radar" id="qm-radar" style="display:none;">
     <div class="qm-radar-ring"></div>
     <div class="qm-radar-ring"></div>
     <div class="qm-radar-ring"></div>
-    <div class="qm-center">🖊️</div>
+    <div class="qm-center" style="color:var(--violet-bright);"><svg class="pf-icon-lg" style="width:36px; height:36px;"><use href="#icon-crosshair"></use></svg></div>
   </div>
 
-  <button class="pf-btn pf-btn-primary pf-btn-lg pf-mt-24" id="qm-start-btn">SEARCH FOR OPPONENT</button>
+  <button class="pf-btn pf-btn-primary pf-btn-lg pf-mt-24" id="qm-start-btn">
+    <span class="pf-icon"><svg><use href="#icon-search"></use></svg></span>
+    <span>SEARCH FOR OPPONENT</span>
+  </button>
   <button class="pf-btn pf-btn-ghost pf-btn-lg pf-mt-24" id="qm-cancel-btn" style="display:none;">CANCEL SEARCH</button>
 </div>
 {% endblock %}
