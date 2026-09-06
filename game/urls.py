@@ -15,4 +15,8 @@ urlpatterns = [
     path("battle/local/setup/", views.local_battle_setup, name="local_setup"),
     path("battle/local/play/", views.local_battle_play, name="local_play"),
     path("battle/local/result/", views.local_battle_result, name="local_result"),
+
+    path("battle/ai/setup/", views.ai_battle_setup, name="ai_setup"),
+    path("battle/ai/play/", views.ai_battle_play, name="ai_play"),
+    path("battle/ai/result/", views.ai_battle_result, name="ai_result"),
 ]

@@ -34,7 +34,7 @@
             <span class="pf-icon"><svg><use href="#icon-home"></use></svg></span>
             <span>Home</span>
           </a>
-          <a class="pf-nav-item {% if request.resolver_match.url_name == 'local_setup' or 'battle' in request.path or 'room' in request.path or 'quick-match' in request.path %}active{% endif %}" href="{% url 'game:local_setup' %}">
+          <a class="pf-nav-item {% if request.resolver_match.url_name == 'ai_setup' or 'battle' in request.path or 'room' in request.path or 'quick-match' in request.path %}active{% endif %}" href="{% url 'game:ai_setup' %}">
             <span class="pf-icon"><svg><use href="#icon-swords"></use></svg></span>
             <span>Play</span>
           </a>

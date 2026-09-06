@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Fight with AI Setup — PenFight Arena{% endblock %}
+
+{% block content %}
+<div class="pf-page-head">
+  <div class="pf-page-title" style="display:flex; align-items:center; gap:10px;">
+    <span class="pf-icon-lg" style="color:var(--violet-bright);"><svg><use href="#icon-monitor"></use></svg></span>
+    <span>FIGHT WITH AI</span>
+  </div>
+  <div class="pf-page-sub">Face off against a real AI opponent. Choose your difficulty and prepare for battle.</div>
+</div>
+
+<div class="pf-grid pf-grid-2">
+  <div class="pf-card" style="border-color: rgba(59,130,246,0.4);">
+    <div class="pf-section-title" style="color:#60a5fa; display:flex; align-items:center; gap:8px;">
+      <span class="pf-avatar-circle" style="width:20px; height:20px; font-size:10px; background:var(--p1-blue);">1</span>
+      <span>PLAYER 1 (YOU)</span>
+    </div>
+    <div class="pf-field">
+      <label class="pf-label">Name</label>
+      <input class="pf-input" id="p1-name" value="{{ request.user.username }}" maxlength="16">
+    </div>
+    <div class="pf-field">
+      <label class="pf-label">Pen</label>
+      <select class="pf-select" id="p1-pen">
+        {% for pen in pens %}<option value="{{ pen.id }}" data-mass="{{ pen.mass }}" data-friction="{{ pen.friction }}" data-power="{{ pen.max_power }}">{{ pen.name }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="pf-field">
+      <label class="pf-label">Skin</label>
+      <select class="pf-select" id="p1-skin">
+        {% for skin in skins %}<option value="{{ skin.id }}" data-asset="{{ skin.asset_key }}" data-color="{{ skin.body_color }}" data-accent="{{ skin.accent_color }}" data-trail="{{ skin.trail_color }}" data-glow="{{ skin.glow|yesno:'1,0' }}">{{ skin.name }}</option>{% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="pf-card" style="border-color: rgba(239, 68, 68, 0.4);">
+    <div class="pf-section-title" style="color:#ef4444; display:flex; align-items:center; gap:8px;">
+      <span class="pf-avatar-circle" style="width:20px; height:20px; font-size:10px; background:var(--p2-red);">AI</span>
+      <span>AI OPPONENT</span>
+    </div>
+    <div class="pf-field">
+      <label class="pf-label">Difficulty</label>
+      <div class="pf-grid pf-grid-3 pf-mt-8" id="difficulty-grid">
+        <div class="pf-card pf-card-hover diff-choice" data-level="easy" style="cursor:pointer; text-align:center; padding:12px;">
+          <div style="font-weight:700; color:#34d399;">EASY</div>
+          <div class="pf-faint" style="font-size:10px; margin-top:4px;">Direct shots</div>
+        </div>
+        <div class="pf-card pf-card-hover diff-choice" data-level="normal" style="cursor:pointer; text-align:center; padding:12px; outline: 2px solid #8b5cf6;">
+          <div style="font-weight:700; color:#8b5cf6;">NORMAL</div>
+          <div class="pf-faint" style="font-size:10px; margin-top:4px;">Bank shots</div>
+        </div>
+        <div class="pf-card pf-card-hover diff-choice" data-level="hard" style="cursor:pointer; text-align:center; padding:12px;">
+          <div style="font-weight:700; color:#ef4444;">HARD</div>
+          <div class="pf-faint" style="font-size:10px; margin-top:4px;">Strategic</div>
+        </div>
+      </div>
+    </div>
+    <div class="pf-mt-24 pf-muted" style="font-size:13px; line-height:1.6;">
+      The AI opponent uses the same physics as a real player. It will analyze your position, the bumpers, and the edges of the table to plan its shots.
+    </div>
+  </div>
+</div>
+
+<div class="pf-mt-32">
+  <div class="pf-section-title">CHOOSE YOUR ARENA</div>
+  <div class="pf-grid pf-grid-4" id="arena-grid">
+    {% for arena in arenas %}
+    <div class="pf-card pf-card-hover arena-choice" data-slug="{{ arena.slug }}"
+         style="cursor:pointer; background: linear-gradient(135deg, {{ arena.bg_gradient_from }}, {{ arena.bg_gradient_to }}); {% if forloop.first %}outline: 2px solid {{ arena.accent_color }};{% endif %}">
+      <div class="pf-icon-lg" style="color:var(--gold); margin-bottom:6px;"><svg><use href="#icon-target"></use></svg></div>
+      <div style="font-weight:700; margin-top:8px;">{{ arena.name }}</div>
+      <div class="pf-faint" style="font-size:12px; margin-top:4px;">{{ arena.description }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="pf-center pf-mt-32">
+  <button class="pf-btn pf-btn-primary pf-btn-lg" id="start-btn">
+    <span class="pf-icon"><svg><use href="#icon-swords"></use></svg></span>
+    <span>START BATTLE WITH AI</span>
+  </button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  let selectedArena = document.querySelector('.arena-choice').dataset.slug;
+  document.querySelectorAll('.arena-choice').forEach(el => {
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.arena-choice').forEach(e => e.style.outline = 'none');
+      el.style.outline = `2px solid ${el.style.background.match(/#\w+/g)?.[1] || '#8b5cf6'}`;
+      selectedArena = el.dataset.slug;
+    });
+  });
+
+  let selectedDifficulty = "normal";
+  document.querySelectorAll('.diff-choice').forEach(el => {
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.diff-choice').forEach(e => e.style.outline = 'none');
+      let color = '#8b5cf6';
+      if(el.dataset.level === 'easy') color = '#34d399';
+      if(el.dataset.level === 'hard') color = '#ef4444';
+      el.style.outline = `2px solid ${color}`;
+      selectedDifficulty = el.dataset.level;
+    });
+  });
+
+  function readSkin(id) {
+    const opt = document.getElementById(id).selectedOptions[0];
+    return { id: opt.value, assetKey: opt.dataset.asset || 'classic-blue', color: opt.dataset.color, accent: opt.dataset.accent, trail: opt.dataset.trail, glow: opt.dataset.glow === '1' };
+  }
+  function readPen(id) {
+    const opt = document.getElementById(id).selectedOptions[0];
+    return { id: opt.value, mass: parseFloat(opt.dataset.mass), friction: parseFloat(opt.dataset.friction), power: parseFloat(opt.dataset.power) };
+  }
+
+  document.getElementById('start-btn').addEventListener('click', () => {
+    const config = {
+      player1: { name: document.getElementById('p1-name').value || 'Player 1', pen: readPen('p1-pen'), skin: readSkin('p1-skin') },
+      difficulty: selectedDifficulty,
+      arena: selectedArena,
+    };
+    sessionStorage.setItem('pf_ai_config', JSON.stringify(config));
+    window.location.href = "{% url 'game:ai_play' %}?arena=" + selectedArena;
+  });
+</script>
+{% endblock %}

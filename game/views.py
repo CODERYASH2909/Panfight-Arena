@@ -119,6 +119,49 @@ def achievements_view(request):
     })
 
 
+@login_required
+def ai_battle_setup(request):
+    arenas = Arena.objects.filter(is_active=True)
+    pens = Pen.objects.all()
+    skins = PenSkin.objects.all()
+    return render(request, "game/ai_setup.html", {
+        "arenas": arenas, "pens": pens, "skins": skins,
+    })
+
+
+@login_required
+def ai_battle_play(request):
+    arena_slug = request.GET.get("arena", Arena.Slug.CLASSROOM)
+    arena = get_object_or_404(Arena, slug=arena_slug)
+    return render(request, "game/battle_ai.html", {"arena": arena})
+
+
+@login_required
+@require_POST
+def ai_battle_result(request):
+    from rewards.services import apply_match_result_rewards, check_achievements
+
+    data = json.loads(request.body or "{}")
+    winner_slot = data.get("winner")  # "player1" or "player2"
+    won = winner_slot == "player1"
+
+    profile = request.user.profile
+    profile.register_match_result(won=won, knockout=True)
+    
+    # Optional: difficulty multiplier logic could be added here
+    reward_summary = apply_match_result_rewards(request.user, won, win_streak=profile.current_win_streak)
+    newly_unlocked = check_achievements(request.user)
+
+    return _json_ok({
+        "rewards": reward_summary,
+        "achievements": [{"name": a.name, "icon": a.icon} for a in newly_unlocked],
+        "profile": {
+            "level": profile.level, "xp": profile.xp, "xp_needed": profile.xp_to_next_level,
+            "pen_points": profile.pen_points, "rank_tier": profile.rank_tier, "rating": profile.rating,
+        },
+    })
+
+
 def _json_ok(payload):
     from django.http import JsonResponse
     payload["ok"] = True
