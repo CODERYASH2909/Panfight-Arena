@@ -32,22 +32,6 @@
 </div>
 
 {% if room.host == request.user %}
-<div class="pf-mt-32">
-  <div class="pf-section-title pf-center">CHOOSE ARENA</div>
-  <div class="pf-grid pf-grid-4">
-    {% for arena in arenas %}
-    <form method="post" action="{% url 'multiplayer:room_set_arena' room.code %}">
-      {% csrf_token %}
-      <input type="hidden" name="arena_id" value="{{ arena.id }}">
-      <button type="submit" class="pf-card pf-card-hover pf-btn-block" style="cursor:pointer; text-align:left; {% if room.arena_id == arena.id %}outline:2px solid {{ arena.accent_color }};{% endif %} background: linear-gradient(135deg, {{ arena.bg_gradient_from }}, {{ arena.bg_gradient_to }});">
-        <div style="font-weight:700;">{{ arena.name }}</div>
-        <div class="pf-faint" style="font-size:12px;">{{ arena.description }}</div>
-      </button>
-    </form>
-    {% endfor %}
-  </div>
-</div>
-
 <div class="pf-center pf-mt-32">
   <form method="post" action="{% url 'multiplayer:room_start' room.code %}">
     {% csrf_token %}

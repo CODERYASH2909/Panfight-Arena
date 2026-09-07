@@ -32,8 +32,7 @@
 {% block content %}
 <div class="pf-page-head pf-flex-between">
   <div>
-    <div class="pf-page-title" style="display:flex; align-items:center; gap:10px;">
-      <span class="pf-icon-lg" style="color:var(--violet-bright);"><svg><use href="#icon-layers"></use></svg></span>
+    <div class="pf-page-title">
       <span>MY LOADOUT</span>
     </div>
     <div class="pf-page-sub">Customize your active ball pen archetype and equipped skin for battle.</div>
@@ -107,8 +106,7 @@
     <div class="pf-card pen-type-card {% if pen.id == profile.equipped_pen_id %}selected{% endif %}"
          data-pen-id="{{ pen.id }}"
          data-mass="{{ pen.mass }}" data-power="{{ pen.max_power }}" data-friction="{{ pen.friction }}" data-control="{{ pen.control }}">
-      <div class="pf-icon-lg" style="color:var(--violet-bright); margin-bottom:6px;"><svg><use href="#icon-pen"></use></svg></div>
-      <div style="font-weight:800; margin-top:6px; font-size:16px;">{{ pen.name }}</div>
+      <div style="font-weight:800; font-size:16px;">{{ pen.name }}</div>
       <div class="pf-faint" style="font-size:11px; margin-top:4px; height:32px; overflow:hidden;">{{ pen.description }}</div>
       <div class="pf-flex pf-gap-8 pf-mt-12" style="font-size:10px;">
         <span class="pf-badge pf-badge-common">M:{{ pen.mass }}</span>
