@@ -1,10 +1,10 @@
 /* =========================================================================
-   PENFIGHT ARENA — Physics & Rendering Engine v8
+   PENFIGHT ARENA — Physics & Rendering Engine v8.1
    - Balanced Composition: Hero Wooden Desk occupies ~76% Width x ~70% Height
    - Multi-Layered Classroom Environment (Daylight Window, Chalkboard, Clock, Bookshelves)
-   - Internal Physics Coordinates & Constants 100% UNTOUCHED
    - Heavy Pen Baseline Physics (NORMAL = 2.5, HEAVY = 4.0)
-   - Soft Quadratic Power Curve (Exp 2.0) & low velocity cap (75 px/s)
+   - Tuned Power Curve (Exp 1.85) & velocity cap (90 px/s)
+   - Improved pen-to-pen collision momentum transfer (KNOCKBACK_SCALE 0.80)
    - Fixed 60Hz timestep sub-stepping
    ========================================================================= */
 
@@ -12,16 +12,16 @@ const PHYSICS = {
   NORMAL_PEN_MASS: 2.5,     // Heavy baseline mass for standard pens
   HEAVY_PEN_MASS: 4.0,      // Extra heavy mass for Heavy Pen archetype
   MIN_FLICK_FORCE: 5.0,     // 5% power force (creeps ~10-20px)
-  MAX_FLICK_FORCE: 55.0,    // 100% max power force
-  POWER_EXPONENT: 2.0,      // Soft quadratic power curve (power^2)
+  MAX_FLICK_FORCE: 88.0,    // 100% max power force (tuned up from 55)
+  POWER_EXPONENT: 1.85,     // Slightly flatter curve: low power stays gentle, high power hits harder
   FRICTION: 0.935,          // Strong realistic desk surface friction
   ANGULAR_FRICTION: 0.85,   // Rotation damping
   MIN_SPEED: 1.2,           // Settling threshold below which motion stops
-  RESTITUTION: 0.52,        // Pen-to-pen bounce elasticity
+  RESTITUTION: 0.58,        // Pen-to-pen bounce elasticity (tuned up from 0.52)
   BUMPER_RESTITUTION: 0.70, // Bumper vector reflection elasticity
-  KNOCKBACK_SCALE: 0.45,    // Reduced collision displacement multiplier
+  KNOCKBACK_SCALE: 0.80,    // Collision momentum transfer multiplier (tuned up from 0.45)
   EDGE_MARGIN: 8,           // Collision body edge fall offset
-  MAX_PEN_VELOCITY: 75.0,   // Low maximum speed cap (75.0 px/s)
+  MAX_PEN_VELOCITY: 90.0,   // Maximum speed cap (tuned up from 75 to let high-power flicks express)
   FIXED_DT: 1 / 60,         // Fixed 60Hz physics timestep
 };
 
@@ -271,7 +271,7 @@ class PenFightEngine {
     const overlap = minDist - dist;
     const totalMass = a.mass + b.mass;
     a.x -= nx * overlap * (b.mass / totalMass);
-    a.y -= ny * overlap * (a.mass / totalMass);
+    a.y -= ny * overlap * (b.mass / totalMass);
     b.x += nx * overlap * (a.mass / totalMass);
     b.y += ny * overlap * (a.mass / totalMass);
 
@@ -284,8 +284,10 @@ class PenFightEngine {
 
     a.vx -= ix / a.mass; a.vy -= iy / a.mass;
     b.vx += ix / b.mass; b.vy += iy / b.mass;
-    a.angularVel += (Math.random() - 0.5) * 0.06;
-    b.angularVel += (Math.random() - 0.5) * 0.06;
+    // Deterministic tangential torque from collision (no randomness for multiplayer sync)
+    const tangent = nx * rvy - ny * rvx;
+    a.angularVel -= tangent * 0.003;
+    b.angularVel += tangent * 0.003;
 
     this.settledPending.add(a.id);
     this.settledPending.add(b.id);
