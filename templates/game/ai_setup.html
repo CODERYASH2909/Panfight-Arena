@@ -62,6 +62,19 @@
   </div>
 </div>
 
+<div class="pf-card pf-mt-24" style="border-color: rgba(139,92,246,0.4);">
+  <div class="pf-section-title" style="color:#a78bfa; display:flex; align-items:center; gap:8px;">
+    <span class="pf-icon" style="color:var(--violet-bright);"><svg><use href="#icon-monitor"></use></svg></span>
+    <span>ARENA</span>
+  </div>
+  <div class="pf-field">
+    <label class="pf-label">Select Arena</label>
+    <select class="pf-select" id="arena-select">
+      {% for arena in arenas %}<option value="{{ arena.slug }}">{{ arena.name }}</option>{% endfor %}
+    </select>
+  </div>
+</div>
+
 <div class="pf-center pf-mt-32">
   <button class="pf-btn pf-btn-primary pf-btn-lg" id="start-btn">
     <span class="pf-icon"><svg><use href="#icon-swords"></use></svg></span>
@@ -72,8 +85,6 @@
 
 {% block extra_js %}
 <script>
-  const selectedArena = 'classic';
-
   let selectedDifficulty = "normal";
   document.querySelectorAll('.diff-choice').forEach(el => {
     el.addEventListener('click', () => {
@@ -96,13 +107,14 @@
   }
 
   document.getElementById('start-btn').addEventListener('click', () => {
+    const arenaSlug = document.getElementById('arena-select').value;
     const config = {
       player1: { name: document.getElementById('p1-name').value || 'Player 1', pen: readPen('p1-pen'), skin: readSkin('p1-skin') },
       difficulty: selectedDifficulty,
-      arena: selectedArena,
+      arena: arenaSlug,
     };
     sessionStorage.setItem('pf_ai_config', JSON.stringify(config));
-    window.location.href = "{% url 'game:ai_play' %}?arena=" + selectedArena;
+    window.location.href = "{% url 'game:ai_play' %}?arena=" + arenaSlug;
   });
 </script>
 {% endblock %}

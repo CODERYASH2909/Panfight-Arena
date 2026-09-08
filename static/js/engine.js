@@ -237,11 +237,20 @@ class PenFightEngine {
       this._resolveBumperCollisions(p);
     }
 
+    // Pass 1: full collision resolution (impulse + effects)
     for (let i = 0; i < ids.length; i++) {
       for (let j = i + 1; j < ids.length; j++) {
         const a = this.pens[ids[i]], b = this.pens[ids[j]];
         if (!a.alive || !b.alive || a.falling || b.falling) continue;
-        this._resolvePenCollision(a, b);
+        this._resolvePenCollision(a, b, true);
+      }
+    }
+    // Pass 2: position-only separation to unstick any remaining overlap
+    for (let i = 0; i < ids.length; i++) {
+      for (let j = i + 1; j < ids.length; j++) {
+        const a = this.pens[ids[i]], b = this.pens[ids[j]];
+        if (!a.alive || !b.alive || a.falling || b.falling) continue;
+        this._resolvePenCollision(a, b, false);
       }
     }
 
@@ -261,7 +270,7 @@ class PenFightEngine {
     );
   }
 
-  _resolvePenCollision(a, b) {
+  _resolvePenCollision(a, b, fireEffects = true) {
     const dx = b.x - a.x, dy = b.y - a.y;
     const dist = Math.hypot(dx, dy) || 0.001;
     const minDist = this.PEN_LENGTH * 0.42;
@@ -270,16 +279,27 @@ class PenFightEngine {
     const nx = dx / dist, ny = dy / dist;
     const overlap = minDist - dist;
     const totalMass = a.mass + b.mass;
-    a.x -= nx * overlap * (b.mass / totalMass);
-    a.y -= ny * overlap * (b.mass / totalMass);
-    b.x += nx * overlap * (a.mass / totalMass);
-    b.y += ny * overlap * (a.mass / totalMass);
+
+    // Position correction with 1.5px buffer to prevent re-overlap next frame
+    const correction = overlap + 1.5;
+    a.x -= nx * correction * (b.mass / totalMass);
+    a.y -= ny * correction * (b.mass / totalMass);
+    b.x += nx * correction * (a.mass / totalMass);
+    b.y += ny * correction * (a.mass / totalMass);
+
+    // Position-only pass: skip impulse/effects
+    if (!fireEffects) return;
 
     const rvx = b.vx - a.vx, rvy = b.vy - a.vy;
     const velAlongNormal = rvx * nx + rvy * ny;
-    if (velAlongNormal > 0) return;
 
-    const impulse = (-(1 + PHYSICS.RESTITUTION) * velAlongNormal) / (1 / a.mass + 1 / b.mass);
+    // If pens are separating AND overlap was shallow, no impulse needed
+    if (velAlongNormal > 0 && overlap < 3) return;
+
+    // For deep overlaps where pens are stuck, guarantee a minimum separation speed
+    const effectiveVel = (velAlongNormal > 0) ? -6.0 : velAlongNormal;
+
+    const impulse = (-(1 + PHYSICS.RESTITUTION) * effectiveVel) / (1 / a.mass + 1 / b.mass);
     const ix = impulse * nx * PHYSICS.KNOCKBACK_SCALE, iy = impulse * ny * PHYSICS.KNOCKBACK_SCALE;
 
     a.vx -= ix / a.mass; a.vy -= iy / a.mass;
@@ -292,7 +312,7 @@ class PenFightEngine {
     this.settledPending.add(a.id);
     this.settledPending.add(b.id);
 
-    const strength = Math.min(1, Math.abs(velAlongNormal) / 60);
+    const strength = Math.min(1, Math.abs(effectiveVel) / 60);
     this._spawnImpact((a.x + b.x) / 2, (a.y + b.y) / 2, strength);
     this.onCollision(a.id, b.id, strength);
   }
