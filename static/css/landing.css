@@ -1,0 +1,1396 @@
+/* ==========================================================================
+   PENFIGHT ARENA — LANDING & LOGIN REDESIGN
+   Visual Identity: Warm Classroom + Vintage Desk + Premium Gaming
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Rajdhani:wght@600;700;800&display=swap');
+
+/* ---------------------------------------------------------------- design tokens */
+:root {
+  /* Classroom Espresso Palette */
+  --espresso:       #17110D;
+  --walnut:         #2A1B13;
+  --walnut-mid:     #3A2819;
+  --rich-brown:     #4A2C1E;
+  --warm-wood:      #7A4B2D;
+  --copper:         #B87333;
+  --copper-glow:    rgba(184, 115, 51, 0.25);
+  --brass:          #D6A84F;
+  --brass-glow:     rgba(214, 168, 79, 0.2);
+  --cream:          #F3E7D3;
+  --off-white:      #E8DED0;
+  --parchment:      #D4C5B2;
+
+  /* Surface variants */
+  --surface-dark:   rgba(23, 17, 13, 0.95);
+  --surface-card:   rgba(42, 27, 19, 0.7);
+  --surface-glass:  rgba(42, 27, 19, 0.45);
+
+  /* Borders */
+  --border-wood:    rgba(184, 115, 51, 0.2);
+  --border-brass:   rgba(214, 168, 79, 0.3);
+  --border-subtle:  rgba(243, 231, 211, 0.08);
+
+  /* Shadows */
+  --shadow-warm:    0 8px 32px rgba(0, 0, 0, 0.6);
+  --shadow-copper:  0 0 20px rgba(184, 115, 51, 0.15);
+  --shadow-deep:    0 20px 60px rgba(0, 0, 0, 0.8);
+
+  /* Typography */
+  --font-heading:   'Bebas Neue', 'Rajdhani', system-ui, sans-serif;
+  --font-sub:       'Rajdhani', 'Manrope', system-ui, sans-serif;
+  --font-body:      'Manrope', 'Inter', system-ui, sans-serif;
+
+  /* Easing */
+  --ease-smooth:    cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out:       cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ---------------------------------------------------------------- landing page overrides */
+
+body.page-landing,
+body.page-login {
+  background: var(--espresso) !important;
+  background-image: none !important;
+}
+
+body.page-landing .pf-shell-top,
+body.page-login .pf-shell-top {
+  background: var(--espresso);
+}
+
+/* ---------------------------------------------------------------- navbar overrides for landing/login */
+
+body.page-landing .pf-global-nav,
+body.page-login .pf-global-nav {
+  background: rgba(23, 17, 13, 0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-wood);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+}
+
+body.page-landing .pf-brand-mark,
+body.page-login .pf-brand-mark {
+  background: linear-gradient(135deg, var(--rich-brown), var(--copper));
+  box-shadow: 0 0 14px var(--copper-glow);
+}
+
+body.page-landing .pf-brand-text span,
+body.page-login .pf-brand-text span {
+  color: var(--brass);
+}
+
+body.page-landing .pf-brand-text,
+body.page-login .pf-brand-text {
+  color: var(--cream);
+}
+
+body.page-landing .pf-btn-primary,
+body.page-login .pf-btn-primary {
+  background: linear-gradient(135deg, var(--copper), var(--brass));
+  color: var(--espresso);
+  box-shadow: 0 4px 16px var(--copper-glow);
+  font-weight: 700;
+}
+body.page-landing .pf-btn-primary:hover,
+body.page-login .pf-btn-primary:hover {
+  box-shadow: 0 6px 28px rgba(184, 115, 51, 0.4);
+  filter: brightness(1.1);
+}
+
+body.page-landing .pf-btn-ghost,
+body.page-login .pf-btn-ghost {
+  background: rgba(184, 115, 51, 0.08);
+  color: var(--cream);
+  border: 1px solid var(--border-wood);
+}
+body.page-landing .pf-btn-ghost:hover,
+body.page-login .pf-btn-ghost:hover {
+  background: rgba(184, 115, 51, 0.15);
+  border-color: var(--copper);
+  color: var(--brass);
+}
+
+body.page-landing .pf-footer,
+body.page-login .pf-footer {
+  background: var(--espresso);
+  border-top: 1px solid var(--border-wood);
+  color: var(--parchment);
+  opacity: 0.6;
+}
+
+/* ================================================================
+   LANDING PAGE — HERO SECTION
+   ================================================================ */
+
+.pfa-landing {
+  overflow: hidden;
+}
+
+/* ----- hero ----- */
+.pfa-hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 120px 40px 80px;
+}
+
+/* Background image layer */
+.pfa-hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.pfa-hero-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
+  opacity: 0;
+  transition: opacity 2s var(--ease-smooth);
+  filter: brightness(0.35) saturate(0.9);
+}
+
+.pfa-hero-bg img.loaded {
+  opacity: 1;
+}
+
+/* Dark cinematic overlays */
+.pfa-hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(180deg, 
+      rgba(23, 17, 13, 0.7) 0%, 
+      rgba(23, 17, 13, 0.2) 35%,
+      rgba(23, 17, 13, 0.1) 50%,
+      rgba(23, 17, 13, 0.4) 75%,
+      rgba(23, 17, 13, 0.95) 100%
+    );
+}
+
+/* Warm light beam effect */
+.pfa-hero-light {
+  position: absolute;
+  top: -10%;
+  right: 15%;
+  width: 50%;
+  height: 120%;
+  z-index: 1;
+  background: radial-gradient(ellipse at top, rgba(184, 115, 51, 0.06), transparent 70%);
+  transform: rotate(-15deg);
+  pointer-events: none;
+  animation: pfa-light-drift 12s ease-in-out infinite;
+}
+
+@keyframes pfa-light-drift {
+  0%, 100% { transform: rotate(-15deg) translateX(0); opacity: 1; }
+  50% { transform: rotate(-12deg) translateX(20px); opacity: 0.7; }
+}
+
+/* Dust particles */
+.pfa-dust-container {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.pfa-dust {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(214, 168, 79, 0.4);
+  animation: pfa-dust-float linear infinite;
+}
+
+@keyframes pfa-dust-float {
+  0% {
+    transform: translateY(100vh) translateX(0) scale(0.3);
+    opacity: 0;
+  }
+  10% { opacity: 0.6; }
+  90% { opacity: 0.2; }
+  100% {
+    transform: translateY(-20vh) translateX(40px) scale(0.8);
+    opacity: 0;
+  }
+}
+
+/* Hero content */
+.pfa-hero-content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  max-width: 800px;
+  opacity: 0;
+  transform: translateY(40px);
+  animation: pfa-content-reveal 1.2s var(--ease-out) 0.8s forwards;
+}
+
+@keyframes pfa-content-reveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Tagline badge */
+.pfa-tagline-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 18px;
+  border-radius: 999px;
+  background: var(--surface-glass);
+  border: 1px solid var(--border-wood);
+  font-family: var(--font-sub);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brass);
+  margin-bottom: 32px;
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transform: translateY(20px);
+  animation: pfa-fade-up 0.8s var(--ease-out) 1s forwards;
+}
+
+.pfa-tagline-badge svg {
+  width: 14px;
+  height: 14px;
+  color: var(--copper);
+}
+
+/* Main Title */
+.pfa-hero-title {
+  font-family: var(--font-heading);
+  font-size: clamp(72px, 12vw, 140px);
+  font-weight: 400; /* Bebas Neue is already bold */
+  line-height: 0.9;
+  letter-spacing: 0.04em;
+  color: var(--cream);
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  margin: 0;
+  opacity: 0;
+  transform: translateY(30px) scale(0.95);
+  animation: pfa-title-reveal 1.4s var(--ease-out) 1.2s forwards;
+}
+
+.pfa-hero-title span {
+  display: block;
+  background: linear-gradient(135deg, var(--copper), var(--brass), var(--copper));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  background-size: 200% 100%;
+  animation: pfa-shimmer 4s ease-in-out infinite 2.5s;
+}
+
+@keyframes pfa-title-reveal {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pfa-shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Subtitle */
+.pfa-hero-subtitle {
+  font-family: var(--font-body);
+  font-size: clamp(16px, 2vw, 22px);
+  color: var(--parchment);
+  opacity: 0.7;
+  margin-top: 20px;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+  opacity: 0;
+  animation: pfa-fade-up 0.8s var(--ease-out) 1.6s forwards;
+}
+
+/* CTA Buttons */
+.pfa-hero-cta {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 40px;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: pfa-fade-up 0.8s var(--ease-out) 1.9s forwards;
+}
+
+.pfa-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--copper), var(--brass));
+  color: var(--espresso);
+  font-family: var(--font-sub);
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s var(--ease-smooth);
+  box-shadow: 0 4px 20px var(--copper-glow), inset 0 1px 0 rgba(255,255,255,0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.pfa-btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transition: left 0.5s var(--ease-smooth);
+}
+
+.pfa-btn-primary:hover::after {
+  left: 100%;
+}
+
+.pfa-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(184, 115, 51, 0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+.pfa-btn-primary:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.pfa-btn-primary svg {
+  width: 18px;
+  height: 18px;
+}
+
+.pfa-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 32px;
+  border-radius: 12px;
+  background: rgba(184, 115, 51, 0.08);
+  color: var(--cream);
+  font-family: var(--font-sub);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid var(--border-wood);
+  cursor: pointer;
+  transition: all 0.3s var(--ease-smooth);
+  backdrop-filter: blur(8px);
+}
+
+.pfa-btn-secondary:hover {
+  background: rgba(184, 115, 51, 0.18);
+  border-color: var(--copper);
+  color: var(--brass);
+  transform: translateY(-2px);
+}
+
+.pfa-btn-secondary svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Scroll indicator */
+.pfa-scroll-hint {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  animation: pfa-fade-up 0.8s var(--ease-out) 2.5s forwards;
+}
+
+.pfa-scroll-hint span {
+  font-family: var(--font-sub);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--parchment);
+  opacity: 0.4;
+}
+
+.pfa-scroll-line {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(180deg, var(--copper), transparent);
+  animation: pfa-scroll-pulse 2s ease-in-out infinite;
+}
+
+@keyframes pfa-scroll-pulse {
+  0%, 100% { opacity: 0.3; transform: scaleY(1); }
+  50% { opacity: 0.7; transform: scaleY(1.2); }
+}
+
+/* ================================================================
+   HOW IT WORKS SECTION
+   ================================================================ */
+
+.pfa-section {
+  position: relative;
+  padding: 100px 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.pfa-section-label {
+  font-family: var(--font-sub);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--copper);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pfa-section-label::before {
+  content: '';
+  width: 32px;
+  height: 1px;
+  background: var(--copper);
+}
+
+.pfa-section-title {
+  font-family: var(--font-heading);
+  font-size: clamp(36px, 5vw, 56px);
+  color: var(--cream);
+  letter-spacing: 0.03em;
+  line-height: 1;
+  margin: 0 0 48px;
+}
+
+/* Steps grid */
+.pfa-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
+.pfa-step {
+  position: relative;
+  padding: 40px 32px;
+  border-radius: 16px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  backdrop-filter: blur(8px);
+  transition: all 0.4s var(--ease-smooth);
+  overflow: hidden;
+}
+
+.pfa-step::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--copper), transparent);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.pfa-step:hover {
+  border-color: var(--border-wood);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-copper);
+}
+
+.pfa-step:hover::before {
+  opacity: 1;
+}
+
+.pfa-step-number {
+  font-family: var(--font-heading);
+  font-size: 48px;
+  color: var(--copper);
+  opacity: 0.3;
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+.pfa-step-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(184, 115, 51, 0.1);
+  border: 1px solid var(--border-wood);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  color: var(--copper);
+  transition: all 0.3s var(--ease-smooth);
+}
+
+.pfa-step:hover .pfa-step-icon {
+  background: rgba(184, 115, 51, 0.2);
+  box-shadow: 0 0 16px var(--copper-glow);
+}
+
+.pfa-step-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.pfa-step-title {
+  font-family: var(--font-sub);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--cream);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.pfa-step-desc {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--parchment);
+  opacity: 0.6;
+  line-height: 1.6;
+}
+
+/* Connector lines between steps */
+.pfa-step-connector {
+  display: none; /* visible only in grid via pseudo-elements */
+}
+
+/* ================================================================
+   GAME MODES SECTION
+   ================================================================ */
+
+.pfa-modes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.pfa-mode {
+  position: relative;
+  padding: 32px;
+  border-radius: 16px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  transition: all 0.35s var(--ease-smooth);
+  overflow: hidden;
+  cursor: default;
+}
+
+.pfa-mode::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(184, 115, 51, 0.06), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+
+.pfa-mode:hover {
+  border-color: var(--border-wood);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-copper);
+}
+
+.pfa-mode:hover::after {
+  opacity: 1;
+}
+
+.pfa-mode-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+
+.pfa-mode-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.pfa-mode-icon.icon-local {
+  background: rgba(184, 115, 51, 0.12);
+  color: var(--copper);
+  border: 1px solid rgba(184, 115, 51, 0.2);
+}
+
+.pfa-mode-icon.icon-online {
+  background: rgba(214, 168, 79, 0.1);
+  color: var(--brass);
+  border: 1px solid rgba(214, 168, 79, 0.2);
+}
+
+.pfa-mode-icon.icon-quick {
+  background: rgba(122, 75, 45, 0.15);
+  color: var(--warm-wood);
+  border: 1px solid rgba(122, 75, 45, 0.25);
+}
+
+.pfa-mode-icon.icon-private {
+  background: rgba(243, 231, 211, 0.06);
+  color: var(--off-white);
+  border: 1px solid rgba(243, 231, 211, 0.1);
+}
+
+.pfa-mode:hover .pfa-mode-icon {
+  transform: scale(1.1);
+}
+
+.pfa-mode-info h3 {
+  font-family: var(--font-sub);
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--cream);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0 0 6px;
+}
+
+.pfa-mode-info p {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--parchment);
+  opacity: 0.55;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ================================================================
+   BEST OF 3 / ROUNDS SECTION
+   ================================================================ */
+
+.pfa-rounds-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin: 40px 0;
+}
+
+.pfa-round-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.pfa-round-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid var(--border-wood);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sub);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--parchment);
+  opacity: 0.5;
+  background: var(--surface-card);
+  transition: all 0.4s var(--ease-smooth);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pfa-round-circle.active {
+  border-color: var(--copper);
+  color: var(--brass);
+  opacity: 1;
+  box-shadow: 0 0 20px var(--copper-glow);
+  background: rgba(184, 115, 51, 0.1);
+}
+
+.pfa-round-label {
+  font-family: var(--font-sub);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--parchment);
+  opacity: 0.4;
+}
+
+.pfa-round-connector {
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--border-wood), rgba(184, 115, 51, 0.1));
+  margin: 0 -4px;
+  margin-bottom: 28px;
+}
+
+.pfa-rounds-desc {
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--parchment);
+  opacity: 0.6;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* ================================================================
+   PEN POINTS TEASER
+   ================================================================ */
+
+.pfa-pp-teaser {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 64px;
+  padding: 60px 40px;
+  background: var(--surface-card);
+  border-radius: 20px;
+  border: 1px solid var(--border-subtle);
+  margin-top: 60px;
+}
+
+.pfa-pp-item {
+  text-align: center;
+  transition: transform 0.3s var(--ease-smooth);
+}
+
+.pfa-pp-item:hover {
+  transform: translateY(-4px);
+}
+
+.pfa-pp-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(214, 168, 79, 0.08);
+  border: 1px solid rgba(214, 168, 79, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
+  color: var(--brass);
+}
+
+.pfa-pp-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.pfa-pp-label {
+  font-family: var(--font-sub);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--cream);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ================================================================
+   FINAL CTA
+   ================================================================ */
+
+.pfa-final-cta {
+  text-align: center;
+  padding: 100px 40px;
+  position: relative;
+}
+
+.pfa-final-cta::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--copper), transparent);
+}
+
+.pfa-final-title {
+  font-family: var(--font-heading);
+  font-size: clamp(32px, 5vw, 52px);
+  color: var(--cream);
+  margin: 0 0 16px;
+}
+
+.pfa-final-sub {
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--parchment);
+  opacity: 0.5;
+  max-width: 500px;
+  margin: 0 auto 36px;
+  line-height: 1.6;
+}
+
+/* ================================================================
+   SCROLL REVEAL ANIMATIONS
+   ================================================================ */
+
+.pfa-reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+}
+
+.pfa-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.pfa-reveal-delay-1 { transition-delay: 0.1s; }
+.pfa-reveal-delay-2 { transition-delay: 0.2s; }
+.pfa-reveal-delay-3 { transition-delay: 0.3s; }
+.pfa-reveal-delay-4 { transition-delay: 0.4s; }
+
+@keyframes pfa-fade-up {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ================================================================
+   LOGIN PAGE
+   ================================================================ */
+
+.pfa-login-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: calc(100vh - var(--nav-h, 64px));
+}
+
+/* Left — Cinematic classroom */
+.pfa-login-visual {
+  position: relative;
+  overflow: hidden;
+}
+
+.pfa-login-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 2s var(--ease-smooth);
+  filter: brightness(0.5) saturate(0.85);
+}
+
+.pfa-login-visual img.loaded {
+  opacity: 1;
+}
+
+.pfa-login-visual-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent 60%, var(--espresso) 100%),
+    linear-gradient(180deg, rgba(23, 17, 13, 0.3) 0%, rgba(23, 17, 13, 0.5) 100%);
+  z-index: 1;
+}
+
+/* Animated dust on login visual */
+.pfa-login-dust {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Subtle parallax shift on visual */
+.pfa-login-visual-inner {
+  position: absolute;
+  inset: -20px;
+  transition: transform 0.8s var(--ease-smooth);
+}
+
+/* Right — Login panel */
+.pfa-login-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+  background: var(--espresso);
+  position: relative;
+}
+
+.pfa-login-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, var(--border-wood), transparent);
+}
+
+.pfa-login-card {
+  width: 100%;
+  max-width: 400px;
+  opacity: 0;
+  transform: translateX(30px);
+  animation: pfa-login-slide-in 0.8s var(--ease-out) 0.4s forwards;
+}
+
+@keyframes pfa-login-slide-in {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Logo in login */
+.pfa-login-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 40px;
+  opacity: 0;
+  animation: pfa-fade-up 0.6s var(--ease-out) 0.6s forwards;
+  transform: translateY(10px);
+}
+
+.pfa-login-logo-mark {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--rich-brown), var(--copper));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 0 16px var(--copper-glow);
+}
+
+.pfa-login-logo-mark svg {
+  width: 20px;
+  height: 20px;
+}
+
+.pfa-login-logo-text {
+  font-family: var(--font-heading);
+  font-size: 22px;
+  letter-spacing: 0.06em;
+  color: var(--cream);
+}
+
+.pfa-login-logo-text em {
+  font-style: normal;
+  color: var(--brass);
+}
+
+/* Login heading */
+.pfa-login-heading {
+  font-family: var(--font-sub);
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--cream);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0 0 8px;
+  opacity: 0;
+  animation: pfa-fade-up 0.6s var(--ease-out) 0.8s forwards;
+  transform: translateY(10px);
+}
+
+.pfa-login-sub {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--parchment);
+  opacity: 0.5;
+  margin: 0 0 32px;
+  opacity: 0;
+  animation: pfa-fade-up 0.6s var(--ease-out) 0.9s forwards;
+  transform: translateY(10px);
+}
+
+/* Form */
+.pfa-login-form {
+  opacity: 0;
+  animation: pfa-fade-up 0.6s var(--ease-out) 1s forwards;
+  transform: translateY(10px);
+}
+
+.pfa-field {
+  margin-bottom: 20px;
+}
+
+.pfa-field-label {
+  display: block;
+  font-family: var(--font-sub);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--parchment);
+  opacity: 0.5;
+  margin-bottom: 8px;
+}
+
+.pfa-field input[type="text"],
+.pfa-field input[type="password"] {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: var(--walnut);
+  border: 1px solid var(--border-subtle);
+  color: var(--cream);
+  font-family: var(--font-body);
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.3s var(--ease-smooth), box-shadow 0.3s var(--ease-smooth), background 0.3s;
+}
+
+.pfa-field input:focus {
+  border-color: var(--copper) !important;
+  box-shadow: 0 0 0 3px var(--copper-glow) !important;
+  background: var(--walnut-mid) !important;
+}
+
+.pfa-field input::placeholder {
+  color: var(--parchment);
+  opacity: 0.3;
+}
+
+/* Login button */
+.pfa-login-btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--copper), var(--brass));
+  color: var(--espresso);
+  font-family: var(--font-sub);
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s var(--ease-smooth);
+  box-shadow: 0 4px 20px var(--copper-glow);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.pfa-login-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+  transition: left 0.5s var(--ease-smooth);
+}
+
+.pfa-login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(184, 115, 51, 0.45);
+}
+
+.pfa-login-btn:hover::after {
+  left: 100%;
+}
+
+.pfa-login-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.pfa-login-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Error message */
+.pfa-login-error {
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  color: #FCA5A5;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pfa-login-error svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* Secondary links */
+.pfa-login-links {
+  margin-top: 28px;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--parchment);
+  opacity: 0.5;
+  opacity: 0;
+  animation: pfa-fade-up 0.6s var(--ease-out) 1.2s forwards;
+  transform: translateY(10px);
+}
+
+.pfa-login-links a {
+  color: var(--brass);
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.pfa-login-links a:hover {
+  color: var(--copper);
+}
+
+/* ================================================================
+   PEN ANIMATION ON LANDING (CSS-drawn pens)
+   ================================================================ */
+
+.pfa-pen-stage {
+  position: absolute;
+  bottom: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 60px;
+  z-index: 5;
+  opacity: 0;
+  animation: pfa-fade-up 1s var(--ease-out) 2.2s forwards;
+  pointer-events: none;
+}
+
+.pfa-pen {
+  position: absolute;
+  bottom: 0;
+  width: 120px;
+  height: 12px;
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.pfa-pen-blue {
+  left: 15%;
+  background: linear-gradient(90deg, #1e3a5f, #2563eb, #1e40af);
+  animation: pfa-pen-idle-left 3.5s ease-in-out infinite;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3), 0 0 12px rgba(37, 99, 235, 0.15);
+}
+
+.pfa-pen-red {
+  right: 15%;
+  background: linear-gradient(90deg, #7f1d1d, #dc2626, #b91c1c);
+  animation: pfa-pen-idle-right 3.5s ease-in-out infinite;
+  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.3), 0 0 12px rgba(220, 38, 38, 0.15);
+}
+
+/* Pen tip (metal) */
+.pfa-pen::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  width: 20px;
+  height: 8px;
+  border-radius: 0 4px 4px 0;
+  background: linear-gradient(180deg, #c0c0c0, #808080);
+}
+.pfa-pen-blue::before { right: -12px; }
+.pfa-pen-red::before { left: -12px; border-radius: 4px 0 0 4px; }
+
+/* Pen clip */
+.pfa-pen::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  width: 16px;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05));
+}
+.pfa-pen-blue::after { left: 15px; }
+.pfa-pen-red::after { right: 15px; }
+
+/* Pen grip texture */
+.pfa-pen-grip {
+  position: absolute;
+  top: 2px;
+  width: 30px;
+  height: 8px;
+  border-radius: 2px;
+  background: repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 3px);
+}
+.pfa-pen-blue .pfa-pen-grip { right: 12px; }
+.pfa-pen-red .pfa-pen-grip { left: 12px; }
+
+@keyframes pfa-pen-idle-left {
+  0%, 100% { transform: translateX(0) rotate(-2deg); }
+  50% { transform: translateX(10px) rotate(1deg); }
+}
+
+@keyframes pfa-pen-idle-right {
+  0%, 100% { transform: translateX(0) rotate(2deg); }
+  50% { transform: translateX(-10px) rotate(-1deg); }
+}
+
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
+
+@media (max-width: 1024px) {
+  .pfa-login-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .pfa-login-visual {
+    height: 280px;
+  }
+  
+  .pfa-login-visual-overlay {
+    background:
+      linear-gradient(180deg, rgba(23, 17, 13, 0.2) 0%, var(--espresso) 100%) !important;
+  }
+  
+  .pfa-login-panel {
+    padding: 40px 32px;
+  }
+  
+  .pfa-login-panel::before { display: none; }
+  
+  .pfa-modes {
+    grid-template-columns: 1fr;
+  }
+  
+  .pfa-pp-teaser {
+    flex-direction: row;
+    gap: 40px;
+    padding: 48px 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .pfa-hero {
+    padding: 100px 24px 80px;
+    min-height: 90vh;
+  }
+  
+  .pfa-hero-title {
+    font-size: clamp(52px, 14vw, 80px);
+  }
+  
+  .pfa-steps {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .pfa-section {
+    padding: 60px 24px;
+  }
+  
+  .pfa-pen-stage {
+    width: 300px;
+  }
+  
+  .pfa-pen {
+    width: 80px;
+    height: 10px;
+  }
+  
+  .pfa-rounds-visual {
+    gap: 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 10px;
+  }
+  
+  .pfa-round-circle {
+    width: 50px;
+    height: 50px;
+    font-size: 11px;
+  }
+  
+  .pfa-round-connector {
+    width: 30px;
+  }
+  
+  .pfa-pp-teaser {
+    gap: 24px;
+    padding: 40px 20px;
+  }
+  
+  .pfa-pp-icon {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .pfa-scroll-hint { display: none; }
+}
+
+@media (max-width: 480px) {
+  .pfa-hero {
+    padding: 80px 16px 60px;
+  }
+  
+  .pfa-hero-cta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .pfa-btn-primary,
+  .pfa-btn-secondary {
+    justify-content: center;
+    padding: 14px 24px;
+  }
+  
+  .pfa-login-panel {
+    padding: 32px 20px;
+  }
+  
+  .pfa-login-visual {
+    height: 200px;
+  }
+}
