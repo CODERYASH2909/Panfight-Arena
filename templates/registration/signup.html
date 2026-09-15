@@ -1,43 +1,143 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Create Your Fighter — PenFight Arena{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/landing.css' %}?v=2.0">
+{% endblock %}
+
 {% block content %}
-<div style="max-width:440px; margin:40px auto;">
-  <div class="pf-glass" style="padding:36px;">
-    <div class="pf-center pf-mb-24">
-      <div class="pf-icon-lg" style="color:var(--violet-bright); width:44px; height:44px; margin:0 auto;"><svg><use href="#icon-swords"></use></svg></div>
-      <h2 class="pf-mt-8" style="font-family:var(--font-display); font-size:26px; font-weight:800;">CREATE YOUR FIGHTER</h2>
-      <p class="pf-muted pf-mt-8">A free Classic Ball Pen and Classic Blue skin are waiting.</p>
+<div class="pfa-login-layout">
+
+  <!-- ========== LEFT — Cinematic Classroom Visual ========== -->
+  <div class="pfa-login-visual">
+    <div class="pfa-login-visual-inner">
+      <img src="{% static 'images/login_classroom_bg.png' %}" alt="" id="pfa-login-img">
     </div>
-    <form method="post">
-      {% csrf_token %}
-      <div class="pf-field">
-        <label class="pf-label">Username</label>
-        {{ form.username }}
-        {% for e in form.username.errors %}<p style="color:var(--error); font-size:12px; margin-top:4px;">{{ e }}</p>{% endfor %}
-      </div>
-      <div class="pf-field">
-        <label class="pf-label">Email</label>
-        {{ form.email }}
-        {% for e in form.email.errors %}<p style="color:var(--error); font-size:12px; margin-top:4px;">{{ e }}</p>{% endfor %}
-      </div>
-      <div class="pf-field">
-        <label class="pf-label">Password</label>
-        {{ form.password1 }}
-        {% for e in form.password1.errors %}<p style="color:var(--error); font-size:12px; margin-top:4px;">{{ e }}</p>{% endfor %}
-      </div>
-      <div class="pf-field">
-        <label class="pf-label">Confirm Password</label>
-        {{ form.password2 }}
-        {% for e in form.password2.errors %}<p style="color:var(--error); font-size:12px; margin-top:4px;">{{ e }}</p>{% endfor %}
-      </div>
-      <button type="submit" class="pf-btn pf-btn-primary pf-btn-block pf-btn-lg">
-        <span class="pf-icon"><svg><use href="#icon-pen"></use></svg></span>
-        <span>START MY JOURNEY</span>
-      </button>
-    </form>
-    <p class="pf-center pf-muted pf-mt-24" style="font-size:13px;">
-      Already have an account? <a href="{% url 'accounts:login' %}" style="color:var(--violet-bright); font-weight:700;">Log in</a>
-    </p>
+    <div class="pfa-login-visual-overlay"></div>
+    <div class="pfa-login-dust" id="pfa-login-dust"></div>
   </div>
+
+  <!-- ========== RIGHT — Signup Panel ========== -->
+  <div class="pfa-login-panel">
+    <div class="pfa-login-card">
+
+      <!-- Logo -->
+      <div class="pfa-login-logo">
+        <div class="pfa-login-logo-mark">
+          <svg><use href="#icon-pen"></use></svg>
+        </div>
+        <div class="pfa-login-logo-text">
+          PENFIGHT <em>ARENA</em>
+        </div>
+      </div>
+
+      <!-- Heading -->
+      <h2 class="pfa-login-heading">Create Your Fighter</h2>
+      <p class="pfa-login-sub">A free Classic Ball Pen and Classic Blue skin are waiting for you.</p>
+
+      <!-- Form -->
+      <form method="post" class="pfa-login-form">
+        {% csrf_token %}
+
+        <div class="pfa-field">
+          <label class="pfa-field-label" for="id_username">Username</label>
+          {{ form.username }}
+          {% for e in form.username.errors %}<p style="color:var(--error); font-size:12px; margin-top:4px;">{{ e }}</p>{% endfor %}
+        </div>
+
+        <div class="pfa-field">
+          <label class="pfa-field-label" for="id_email">Email</label>
+          {{ form.email }}
+          {% for e in form.email.errors %}<p style="color:var(--error); font-size:12px; margin-top:4px;">{{ e }}</p>{% endfor %}
+        </div>
+
+        <div class="pfa-field">
+          <label class="pfa-field-label" for="id_password1">Password</label>
+          {{ form.password1 }}
+          {% for e in form.password1.errors %}<p style="color:var(--error); font-size:12px; margin-top:4px;">{{ e }}</p>{% endfor %}
+        </div>
+
+        <div class="pfa-field">
+          <label class="pfa-field-label" for="id_password2">Confirm Password</label>
+          {{ form.password2 }}
+          {% for e in form.password2.errors %}<p style="color:var(--error); font-size:12px; margin-top:4px;">{{ e }}</p>{% endfor %}
+        </div>
+
+        <button type="submit" class="pfa-login-btn" id="btn-create-fighter">
+          <svg><use href="#icon-swords"></use></svg>
+          <span>START MY JOURNEY</span>
+        </button>
+      </form>
+
+      <!-- Secondary Links -->
+      <div class="pfa-login-links">
+        Already have an account? <a href="{% url 'accounts:login' %}">Log in here</a>
+      </div>
+
+    </div>
+  </div>
+
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  'use strict';
+
+  // --- Add body class ---
+  document.body.classList.add('page-login');
+
+  // --- Image load reveal ---
+  const loginImg = document.getElementById('pfa-login-img');
+  if (loginImg) {
+    if (loginImg.complete) {
+      loginImg.classList.add('loaded');
+    } else {
+      loginImg.addEventListener('load', function() {
+        this.classList.add('loaded');
+      });
+    }
+  }
+
+  // --- Dust particles on visual ---
+  const dustContainer = document.getElementById('pfa-login-dust');
+  if (dustContainer) {
+    for (let i = 0; i < 15; i++) {
+      const d = document.createElement('div');
+      d.className = 'pfa-dust';
+      const size = 1.5 + Math.random() * 2.5;
+      d.style.width = size + 'px';
+      d.style.height = size + 'px';
+      d.style.left = Math.random() * 100 + '%';
+      d.style.animationDuration = (10 + Math.random() * 14) + 's';
+      d.style.animationDelay = (Math.random() * 8) + 's';
+      d.style.opacity = 0.15 + Math.random() * 0.2;
+      dustContainer.appendChild(d);
+    }
+  }
+
+  // --- Subtle parallax ---
+  const visualInner = document.querySelector('.pfa-login-visual-inner');
+  if (visualInner && window.innerWidth > 768) {
+    document.addEventListener('mousemove', function(e) {
+      const x = (e.clientX / window.innerWidth - 0.5) * 8;
+      const y = (e.clientY / window.innerHeight - 0.5) * 8;
+      visualInner.style.transform = 'translate(' + (-x) + 'px, ' + (-y) + 'px)';
+    });
+  }
+
+  // --- Focus effects on inputs ---
+  document.querySelectorAll('.pfa-field input').forEach(function(input) {
+    input.addEventListener('focus', function() {
+      this.parentElement.classList.add('focused');
+    });
+    input.addEventListener('blur', function() {
+      this.parentElement.classList.remove('focused');
+    });
+  });
+
+})();
+</script>
 {% endblock %}

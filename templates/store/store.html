@@ -145,7 +145,7 @@
 <!-- Fullscreen Cinematic Preview Modal -->
 <div class="pf-modal-backdrop" id="preview-modal">
   <div class="pf-modal-box">
-    <button class="pf-modal-close" onclick="closePreviewModal()">✕</button>
+    <button class="pf-modal-close" onclick="closePreviewModal()"><svg class="pf-icon"><use href="#icon-x"></use></svg></button>
 
     <div class="pf-grid pf-grid-2" style="align-items:center;">
       <!-- Hero Stage -->
@@ -266,7 +266,7 @@
     container.innerHTML = PenVisuals.renderSVG(key, { width: 380, height: 110 });
     nameEl.textContent = name;
     descEl.textContent = desc || "Authentic ball pen cosmetic skin for PenFight Arena.";
-    priceEl.textContent = price > 0 ? `🪙 ${price} PP` : 'FREE';
+    priceEl.textContent = price > 0 ? `${price} PP` : 'FREE';
 
     badgeEl.textContent = rarity.toUpperCase();
     badgeEl.className = `pf-badge pf-badge-${rarity}`;
@@ -279,7 +279,7 @@
       actionEl.innerHTML = `
         <form method="post" action="/store/buy/${skinId}/">
           {% csrf_token %}
-          <button class="pf-btn pf-btn-gold" ${disabled}>BUY FOR 🪙 ${price} PP</button>
+          <button class="pf-btn pf-btn-gold" ${disabled}>BUY FOR ${price} PP</button>
         </form>
       `;
     }

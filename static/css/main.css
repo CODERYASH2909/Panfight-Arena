@@ -1,41 +1,36 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@600;700;800;900&family=Sora:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Rajdhani:wght@600;700;800;900&family=Sora:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 /* ---------------------------------------------------------------- tokens */
 
 :root {
-  /* Commercial Charcoal + Classroom Palette */
-  --bg-void:      #0a0c10;
-  --bg-deep:      #12151c;
-  --bg-surface:   #181c26;
-  --bg-elevated:  #202634;
-  --bg-card:      #161a23;
+  /* Classroom Espresso & Vintage Desk Palette */
+  --bg-void:      #17110D;
+  --bg-deep:      #221711;
+  --bg-surface:   #2A1B13;
+  --bg-elevated:  #3A2819;
+  --bg-card:      #2A1B13;
 
   /* Classroom Wood Accents */
-  --wood-light:   #d49b54;
-  --wood-mid:     #8b5a2b;
-  --wood-dark:    #3d2613;
-  --wood-border:  rgba(184, 115, 51, 0.35);
+  --wood-light:   #D6A84F;
+  --wood-mid:     #B87333;
+  --wood-dark:    #4A2C1E;
+  --wood-border:  rgba(184, 115, 51, 0.25);
 
-  /* Classroom Chalkboard Green */
-  --chalk-green:  #2d4a3e;
-  --chalk-dark:   #1b3328;
-  --chalk-light:  #48826c;
-
-  /* Primary Accent — Violet */
-  --violet:       #8b5cf6;
-  --violet-bright:#a78bfa;
-  --violet-deep:  #6d28d9;
-  --violet-glow:  rgba(139, 92, 246, 0.2);
+  /* Primary Accent — Warm Copper & Brass */
+  --violet:       #B87333;
+  --violet-bright:#D6A84F;
+  --violet-deep:  #7A4B2D;
+  --violet-glow:  rgba(184, 115, 51, 0.25);
 
   /* Player Colors */
   --p1-blue:      #3b82f6;
   --p2-red:       #ef4444;
 
-  /* Reward Gold */
-  --gold:         #f59e0b;
-  --gold-bright:  #fbbf24;
-  --gold-deep:    #d97706;
-  --gold-glow:    rgba(245, 158, 11, 0.25);
+  /* Reward Gold / Brass */
+  --gold:         #D6A84F;
+  --gold-bright:  #F3E7D3;
+  --gold-deep:    #B87333;
+  --gold-glow:    rgba(214, 168, 79, 0.25);
 
   /* Semantic */
   --success:      #10b981;
@@ -43,16 +38,16 @@
   --warning:      #f59e0b;
 
   /* Text */
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted:   #64748b;
-  --text-disabled:#475569;
+  --text-primary: #F3E7D3;
+  --text-secondary: #D4C5B2;
+  --text-muted:   #9A8875;
+  --text-disabled:#635345;
 
   /* Borders */
-  --border:       rgba(255, 255, 255, 0.08);
-  --border-hover: rgba(139, 92, 246, 0.4);
-  --border-active:rgba(139, 92, 246, 0.65);
-  --border-gold:  rgba(245, 158, 11, 0.45);
+  --border:       rgba(184, 115, 51, 0.2);
+  --border-hover: rgba(214, 168, 79, 0.45);
+  --border-active:rgba(214, 168, 79, 0.7);
+  --border-gold:  rgba(214, 168, 79, 0.4);
 
   /* Radius */
   --radius-sm:    6px;
@@ -62,14 +57,14 @@
 
   /* Shadows */
   --shadow-sm:    0 2px 8px rgba(0, 0, 0, 0.4);
-  --shadow-md:    0 8px 24px rgba(0, 0, 0, 0.5);
-  --shadow-lg:    0 16px 48px rgba(0, 0, 0, 0.7);
-  --shadow-violet:0 0 24px rgba(139, 92, 246, 0.25);
-  --shadow-gold:  0 0 24px rgba(245, 158, 11, 0.25);
+  --shadow-md:    0 8px 32px rgba(0, 0, 0, 0.6);
+  --shadow-lg:    0 16px 48px rgba(0, 0, 0, 0.8);
+  --shadow-violet:0 0 24px rgba(184, 115, 51, 0.25);
+  --shadow-gold:  0 0 24px rgba(214, 168, 79, 0.25);
 
   /* Typography */
-  --font-display: "Rajdhani", "Sora", system-ui, sans-serif;
-  --font-body:    "Inter", "Space Grotesk", system-ui, sans-serif;
+  --font-display: 'Bebas Neue', 'Rajdhani', system-ui, sans-serif;
+  --font-body:    'Manrope', 'Inter', system-ui, sans-serif;
 
   /* Navbar height */
   --nav-h:        64px;
@@ -94,8 +89,8 @@ html, body {
 
 body {
   background-image:
-    radial-gradient(ellipse at 15% 0%, rgba(139, 92, 246, 0.07), transparent 50%),
-    radial-gradient(ellipse at 85% 100%, rgba(56, 189, 248, 0.04), transparent 50%);
+    radial-gradient(ellipse at 15% 0%, rgba(184, 115, 51, 0.1), transparent 60%),
+    radial-gradient(ellipse at 85% 100%, rgba(214, 168, 79, 0.05), transparent 60%);
   background-attachment: fixed;
 }
 
@@ -132,11 +127,11 @@ button { font-family: inherit; cursor: pointer; }
   top: 0;
   z-index: 500;
   height: var(--nav-h);
-  background: rgba(18, 21, 28, 0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(23, 17, 13, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
 }
 
 .pf-nav-container {
@@ -160,21 +155,21 @@ button { font-family: inherit; cursor: pointer; }
 .pf-brand-mark {
   width: 36px; height: 36px;
   border-radius: var(--radius-md);
-  background: linear-gradient(135deg, var(--wood-mid), var(--wood-light));
+  background: linear-gradient(135deg, var(--wood-dark), var(--wood-mid));
   display: flex; align-items: center; justify-content: center;
-  color: white;
-  box-shadow: 0 0 14px rgba(184, 115, 51, 0.4);
+  color: var(--gold-bright);
+  box-shadow: 0 0 14px rgba(184, 115, 51, 0.35);
 }
 .pf-brand-mark svg { width: 20px; height: 20px; }
 .pf-brand-text {
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: 15px;
+  font-size: 16px;
   letter-spacing: 0.08em;
   color: var(--text-primary);
 }
 .pf-brand-text span {
-  color: var(--violet-bright);
+  color: var(--brass);
 }
 
 .pf-nav-links {
@@ -203,16 +198,16 @@ button { font-family: inherit; cursor: pointer; }
 }
 .pf-nav-item:hover {
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(184, 115, 51, 0.08);
+  border-color: rgba(184, 115, 51, 0.15);
 }
 .pf-nav-item:hover svg { opacity: 1; }
 .pf-nav-item.active {
-  color: var(--violet-bright);
-  background: rgba(139, 92, 246, 0.12);
-  border-color: rgba(139, 92, 246, 0.3);
+  color: var(--brass);
+  background: rgba(184, 115, 51, 0.15);
+  border-color: rgba(184, 115, 51, 0.3);
 }
-.pf-nav-item.active svg { opacity: 1; color: var(--violet); }
+.pf-nav-item.active svg { opacity: 1; color: var(--wood-mid); }
 
 .pf-nav-right {
   display: flex;
@@ -626,42 +621,44 @@ svg {
 .pf-btn:active { transform: scale(0.97); }
 
 .pf-btn-primary {
-  background: linear-gradient(135deg, var(--violet-deep), var(--violet));
-  color: white;
-  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.25);
+  background: linear-gradient(135deg, var(--wood-mid), var(--wood-light));
+  color: var(--bg-void);
+  font-weight: 700;
+  box-shadow: 0 4px 16px var(--copper-glow), inset 0 1px 0 rgba(255,255,255,0.2);
 }
 .pf-btn-primary:hover {
-  filter: brightness(1.12);
-  box-shadow: 0 6px 24px rgba(139, 92, 246, 0.35);
+  filter: brightness(1.1);
+  box-shadow: 0 6px 24px rgba(184, 115, 51, 0.45), inset 0 1px 0 rgba(255,255,255,0.2);
 }
 
 .pf-btn-blue {
-  background: linear-gradient(135deg, var(--blue-deep), var(--blue));
+  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
   color: white;
-  box-shadow: 0 4px 16px rgba(56, 189, 248, 0.2);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
 }
 .pf-btn-blue:hover { filter: brightness(1.1); }
 
 .pf-btn-gold {
-  background: var(--bg-elevated);
-  color: var(--gold);
+  background: linear-gradient(135deg, var(--wood-mid), var(--gold));
+  color: var(--bg-void);
+  font-weight: 700;
   border: 1px solid var(--border-gold);
-  box-shadow: 0 4px 16px rgba(244, 201, 93, 0.1);
+  box-shadow: 0 4px 16px var(--gold-glow);
 }
 .pf-btn-gold:hover {
-  background: rgba(244, 201, 93, 0.08);
-  box-shadow: var(--shadow-gold);
+  filter: brightness(1.12);
+  box-shadow: 0 6px 24px rgba(214, 168, 79, 0.4);
 }
 
 .pf-btn-ghost {
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--text-secondary);
+  background: rgba(184, 115, 51, 0.08);
+  color: var(--text-primary);
   border: 1px solid var(--border);
 }
 .pf-btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.12);
-  color: var(--text-primary);
+  background: rgba(184, 115, 51, 0.18);
+  border-color: var(--wood-mid);
+  color: var(--wood-light);
 }
 
 .pf-btn-danger {
@@ -677,10 +674,11 @@ svg {
 /* ---------------------------------------------------------------- panels / cards */
 
 .pf-glass {
-  background: rgba(17, 20, 27, 0.7);
+  background: rgba(42, 27, 19, 0.65);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   box-shadow: var(--shadow-md);
 }
 
@@ -689,11 +687,11 @@ svg {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 20px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
 }
 .pf-card-hover:hover {
   border-color: var(--border-hover);
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.08);
+  box-shadow: 0 0 24px rgba(184, 115, 51, 0.2);
   transform: translateY(-2px);
 }
 
@@ -927,7 +925,7 @@ svg {
   width: 100%;
   padding: 11px 14px;
   border-radius: var(--radius-md);
-  background: var(--bg-elevated);
+  background: rgba(23, 17, 13, 0.8);
   border: 1px solid var(--border);
   color: var(--text-primary);
   font-size: 14px;
@@ -936,8 +934,8 @@ svg {
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 .pf-input:focus, .pf-select:focus {
-  border-color: var(--violet);
-  box-shadow: 0 0 0 3px var(--violet-glow);
+  border-color: var(--wood-mid);
+  box-shadow: 0 0 0 3px var(--copper-glow);
 }
 
 /* Auto-style Django raw form widgets */
@@ -946,7 +944,7 @@ input[type="search"], select, textarea {
   width: 100%;
   padding: 11px 14px;
   border-radius: var(--radius-md);
-  background: var(--bg-elevated);
+  background: rgba(23, 17, 13, 0.8);
   border: 1px solid var(--border);
   color: var(--text-primary);
   font-size: 14px;
@@ -955,8 +953,8 @@ input[type="search"], select, textarea {
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, select:focus, textarea:focus {
-  border-color: var(--violet);
-  box-shadow: 0 0 0 3px var(--violet-glow);
+  border-color: var(--wood-mid);
+  box-shadow: 0 0 0 3px var(--copper-glow);
 }
 
 /* ---------------------------------------------------------------- misc */

@@ -12,7 +12,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env(
     DEBUG=(bool, True),
 )
-environ.Env.read_env(BASE_DIR / ".env")
+# Local project settings should take precedence over inherited shell values.
+# This keeps DEBUG=True in .env effective when running the development server.
+environ.Env.read_env(BASE_DIR / ".env", overwrite=True)
 
 SECRET_KEY = env("SECRET_KEY", default="dev-insecure-secret-key-change-me-in-prod")
 DEBUG = env.bool("DEBUG", default=True)

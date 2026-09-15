@@ -159,7 +159,7 @@ def challenge_friend(request, username):
     room = PrivateRoom.objects.create(host=request.user, guest=friend, arena=arena, status=PrivateRoom.Status.READY)
     Notification.objects.create(
         user=friend, notif_type="challenge",
-        message=f"🔥 {request.user.username} challenged you to a PenFight!",
+        message=f"{request.user.username} challenged you to a PenFight!",
         link=f"/arena/room/{room.code}/",
     )
     messages.success(request, f"Challenge sent to {friend.username}!")

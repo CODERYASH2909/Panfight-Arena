@@ -25,7 +25,7 @@
   document.getElementById("hud-p1-rank").textContent = `RANK: ${config.player1.rank || "ROOKIE"}`;
 
   document.getElementById("hud-p2-name").textContent = aiName;
-  document.getElementById("hud-p2-avatar").textContent = "🤖";
+  document.getElementById("hud-p2-avatar").textContent = "AI";
   document.getElementById("hud-p2-rank").textContent = `RANK: ${aiRank}`;
 
   // Add AI indicator style to p2 card
