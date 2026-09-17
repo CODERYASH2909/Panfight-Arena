@@ -2,13 +2,13 @@
 {% block title %}Home — PenFight Arena{% endblock %}
 
 {% block content %}
-<div class="pf-glass" style="padding:28px 32px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:24px;">
+<div class="pf-card" style="padding:28px 32px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:24px; background:var(--bg-card);">
   <div class="pf-flex pf-gap-16">
-    <div class="pf-avatar-circle" style="width:58px; height:58px; font-size:24px;">
+    <div class="pf-avatar-circle" style="width:58px; height:58px; font-size:24px; background:var(--brown-dark);">
       {{ request.user.username|slice:":1"|upper }}
     </div>
     <div>
-      <div style="font-family:var(--font-display); font-size:24px; font-weight:800;">WELCOME BACK, {{ request.user.username|upper }}</div>
+      <div style="font-family:var(--font-display); font-size:24px; font-weight:800; color:var(--brown-dark);">WELCOME BACK, {{ request.user.username|upper }}</div>
       <div class="pf-flex pf-gap-8 pf-mt-8">
         <span class="pf-rank-chip pf-rank-{{ profile.rank_tier }}">{{ profile.get_rank_tier_display }}</span>
         <span class="pf-muted" style="font-size:12px;">Rating {{ profile.rating }}</span>
@@ -62,11 +62,11 @@
 
 <div class="pf-grid pf-grid-3 pf-mt-32">
   <div class="pf-card pf-stat">
-    <div class="pf-stat-value" style="color:var(--text-primary);">{{ profile.wins }}</div>
+    <div class="pf-stat-value" style="color:var(--brown-dark);">{{ profile.wins }}</div>
     <div class="pf-stat-label">Victories</div>
   </div>
   <div class="pf-card pf-stat">
-    <div class="pf-stat-value" style="color:var(--violet-bright);">{{ profile.win_rate }}%</div>
+    <div class="pf-stat-value" style="color:var(--copper);">{{ profile.win_rate }}%</div>
     <div class="pf-stat-label">Win Rate</div>
   </div>
   <div class="pf-card pf-stat">
@@ -74,6 +74,7 @@
     <div class="pf-stat-label">Achievements</div>
   </div>
 </div>
+
 
 <div class="pf-grid pf-grid-2 pf-mt-32">
   <div class="pf-card">

@@ -16,7 +16,8 @@ from .services import try_pair_quick_match
 @login_required
 def private_room_create(request):
     arena = Arena.objects.filter(is_active=True).first()
-    room = PrivateRoom.objects.create(host=request.user, arena=arena)
+    room = PrivateRoom.objects.create(host=request.user, arena=arena, status=PrivateRoom.Status.WAITING)
+    messages.success(request, f"Private battle room created! Room Code: {room.code}")
     return redirect("multiplayer:room_lobby", code=room.code)
 
 
@@ -24,37 +25,70 @@ def private_room_create(request):
 def private_room_join(request):
     if request.method == "POST":
         code = request.POST.get("code", "").strip().upper()
-        room = PrivateRoom.objects.filter(code=code).first()
+        if not code:
+            messages.error(request, "Please enter a valid room code.")
+            return redirect("multiplayer:room_join")
+
+        room = PrivateRoom.objects.filter(code__iexact=code).first()
         if not room:
-            messages.error(request, "Invalid room code. Double-check and try again.")
+            messages.error(request, "Room not found. Double-check the code and try again.")
             return redirect("multiplayer:room_join")
-        if room.status != PrivateRoom.Status.WAITING:
-            messages.error(request, "That room is no longer accepting players.")
+
+        if room.status in [PrivateRoom.Status.FINISHED, PrivateRoom.Status.CANCELLED]:
+            messages.error(request, "Battle room is no longer available.")
             return redirect("multiplayer:room_join")
+
         if room.host == request.user:
-            messages.error(request, "You can't join your own room.")
+            return redirect("multiplayer:room_lobby", code=room.code)
+
+        if room.guest and room.guest != request.user:
+            messages.error(request, "Room is already full.")
             return redirect("multiplayer:room_join")
+
         room.guest = request.user
         room.status = PrivateRoom.Status.READY
         room.save(update_fields=["guest", "status"])
+        messages.success(request, f"Joined battle room {room.code}!")
         return redirect("multiplayer:room_lobby", code=room.code)
+
     return render(request, "multiplayer/room_join.html")
 
 
 @login_required
 def room_lobby(request, code):
-    room = get_object_or_404(PrivateRoom, code=code)
+    room = PrivateRoom.objects.filter(code__iexact=code).first()
+    if not room:
+        messages.error(request, "Room not found.")
+        return redirect("accounts:dashboard")
+
+    if room.status == PrivateRoom.Status.CANCELLED:
+        messages.error(request, "Battle room is no longer available.")
+        return redirect("accounts:friends")
+
+    # If guest visits room link directly when slot is open
+    if request.user != room.host and not room.guest and room.status == PrivateRoom.Status.WAITING:
+        room.guest = request.user
+        room.status = PrivateRoom.Status.READY
+        room.save(update_fields=["guest", "status"])
+
     if request.user not in [room.host, room.guest]:
-        messages.error(request, "You're not part of this room.")
-        return redirect("game:landing")
+        messages.error(request, "You're not part of this battle room.")
+        return redirect("accounts:dashboard")
+
     arenas = Arena.objects.filter(is_active=True)
-    return render(request, "multiplayer/room_lobby.html", {"room": room, "arenas": arenas})
+    my_slot = "player1" if request.user == room.host else "player2"
+
+    return render(request, "multiplayer/room_lobby.html", {
+        "room": room,
+        "arenas": arenas,
+        "my_slot": my_slot,
+    })
 
 
 @login_required
 @require_POST
 def room_set_arena(request, code):
-    room = get_object_or_404(PrivateRoom, code=code, host=request.user)
+    room = get_object_or_404(PrivateRoom, code__iexact=code, host=request.user)
     arena = get_object_or_404(Arena, id=request.POST.get("arena_id"))
     room.arena = arena
     room.save(update_fields=["arena"])
@@ -64,14 +98,17 @@ def room_set_arena(request, code):
 @login_required
 @require_POST
 def room_start(request, code):
-    room = get_object_or_404(PrivateRoom, code=code, host=request.user)
-    if room.status != PrivateRoom.Status.READY:
-        messages.error(request, "Waiting for an opponent to join.")
+    room = get_object_or_404(PrivateRoom, code__iexact=code)
+    if not room.guest:
+        messages.error(request, "Waiting for an opponent to join before starting.")
         return redirect("multiplayer:room_lobby", code=code)
+
     if not room.match:
         match = Match.objects.create(
-            match_type=Match.MatchType.PRIVATE, arena=room.arena,
-            status=Match.Status.IN_PROGRESS, room_code=room.code,
+            match_type=Match.MatchType.PRIVATE,
+            arena=room.arena,
+            status=Match.Status.IN_PROGRESS,
+            room_code=room.code,
         )
         room.match = match
     room.status = PrivateRoom.Status.IN_PROGRESS
@@ -81,22 +118,29 @@ def room_start(request, code):
 
 @login_required
 def room_status(request, code):
-    room = get_object_or_404(PrivateRoom, code=code)
-    return JsonResponse({"status": room.status, "has_guest": bool(room.guest_id)})
+    room = PrivateRoom.objects.filter(code__iexact=code).first()
+    if not room:
+        return JsonResponse({"exists": False, "status": "not_found"}, status=404)
+    return JsonResponse({
+        "exists": True,
+        "status": room.status,
+        "has_guest": bool(room.guest_id),
+        "host": room.host.username,
+        "guest": room.guest.username if room.guest else None,
+    })
 
 
 @login_required
 def online_battle(request, code):
-    room = get_object_or_404(PrivateRoom, code=code)
+    room = get_object_or_404(PrivateRoom, code__iexact=code)
     if request.user not in [room.host, room.guest]:
-        messages.error(request, "You're not part of this room.")
-        return redirect("game:landing")
+        messages.error(request, "You're not part of this battle room.")
+        return redirect("accounts:dashboard")
     my_slot = "player1" if request.user == room.host else "player2"
     opponent = room.guest if my_slot == "player1" else room.host
     return render(request, "multiplayer/battle_online.html", {
         "room": room, "my_slot": my_slot, "opponent": opponent,
     })
-
 
 
 # --- Quick match ------------------------------------------------------
@@ -155,12 +199,55 @@ def quick_match_cancel(request):
 @require_POST
 def challenge_friend(request, username):
     friend = get_object_or_404(User, username=username)
+    if friend == request.user:
+        messages.error(request, "You can't challenge yourself, champ.")
+        return redirect("accounts:friends")
+
     arena = Arena.objects.filter(is_active=True).first()
-    room = PrivateRoom.objects.create(host=request.user, guest=friend, arena=arena, status=PrivateRoom.Status.READY)
-    Notification.objects.create(
-        user=friend, notif_type="challenge",
-        message=f"{request.user.username} challenged you to a PenFight!",
-        link=f"/arena/room/{room.code}/",
+    room = PrivateRoom.objects.create(
+        host=request.user,
+        guest=friend,
+        arena=arena,
+        status=PrivateRoom.Status.WAITING
     )
-    messages.success(request, f"Challenge sent to {friend.username}!")
+    Notification.objects.create(
+        user=friend,
+        notif_type="challenge",
+        message=f"{request.user.username} challenged you to a PenFight!",
+        link=f"/arena/room/{room.code}/accept/",
+    )
+    messages.success(request, f"Challenge sent to {friend.username}! Room code: {room.code}")
     return redirect("multiplayer:room_lobby", code=room.code)
+
+
+@login_required
+def accept_challenge(request, code):
+    room = PrivateRoom.objects.filter(code__iexact=code).first()
+    if not room or room.status in [PrivateRoom.Status.FINISHED, PrivateRoom.Status.CANCELLED]:
+        messages.error(request, "Battle room is no longer available.")
+        return redirect("accounts:friends")
+
+    if room.guest and room.guest != request.user and room.host != request.user:
+        messages.error(request, "Room is already full.")
+        return redirect("accounts:friends")
+
+    if not room.guest or room.guest == request.user:
+        room.guest = request.user
+        room.status = PrivateRoom.Status.READY
+        room.save(update_fields=["guest", "status"])
+
+    Notification.objects.filter(user=request.user, notif_type="challenge", link__icontains=room.code).update(is_read=True)
+    messages.success(request, f"Accepted challenge from {room.host.username}!")
+    return redirect("multiplayer:room_lobby", code=room.code)
+
+
+@login_required
+def decline_challenge(request, code):
+    room = PrivateRoom.objects.filter(code__iexact=code).first()
+    if room and room.status == PrivateRoom.Status.WAITING:
+        room.status = PrivateRoom.Status.CANCELLED
+        room.save(update_fields=["status"])
+
+    Notification.objects.filter(user=request.user, notif_type="challenge", link__icontains=code).update(is_read=True)
+    messages.info(request, "Challenge declined.")
+    return redirect("accounts:friends")

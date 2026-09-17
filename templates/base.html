@@ -88,11 +88,21 @@
               </div>
               {% if nav_notifications %}
                 {% for n in nav_notifications %}
-                <form method="post" action="{% url 'accounts:mark_notification_read' n.id %}" class="pf-dropdown-item">
-                  {% csrf_token %}
-                  <div style="font-size:12px; color:var(--text-primary);">{{ n.message }}</div>
-                  <button type="submit" class="pf-btn pf-btn-ghost pf-btn-sm pf-mt-8" style="padding:2px 8px; font-size:10px;">Mark read</button>
-                </form>
+                <div class="pf-dropdown-item">
+                  <div style="font-size:12px; font-weight:600; color:var(--brown-dark);">{{ n.message }}</div>
+                  {% if n.notif_type == "challenge" and n.link %}
+                    <div class="pf-flex pf-gap-8 pf-mt-8">
+                      <a href="{{ n.link }}" class="pf-btn pf-btn-primary pf-btn-sm" style="padding:4px 10px; font-size:11px;">ACCEPT</a>
+                      <a href="javascript:void(0)" onclick="window.location.href='{{ n.link }}'.replace('/accept/', '/decline/')" class="pf-btn pf-btn-ghost pf-btn-sm" style="padding:4px 10px; font-size:11px;">DECLINE</a>
+                    </div>
+
+                  {% else %}
+                    <form method="post" action="{% url 'accounts:mark_notification_read' n.id %}">
+                      {% csrf_token %}
+                      <button type="submit" class="pf-btn pf-btn-ghost pf-btn-sm pf-mt-8" style="padding:2px 8px; font-size:10px;">Mark read</button>
+                    </form>
+                  {% endif %}
+                </div>
                 {% endfor %}
                 <form method="post" action="{% url 'accounts:mark_all_notifications_read' %}" style="padding:8px 14px;">
                   {% csrf_token %}
@@ -102,6 +112,7 @@
                 <div class="pf-dropdown-item pf-muted pf-center" style="padding:16px;">All caught up!</div>
               {% endif %}
             </div>
+
           </div>
 
           <!-- Profile Link -->

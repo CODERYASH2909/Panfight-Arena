@@ -1,66 +1,433 @@
 {% extends "base.html" %}
-{% block title %}Room {{ room.code }} — PenFight Arena{% endblock %}
-{% block content %}
-<div class="pf-page-head pf-center">
-  <div class="pf-page-title" style="display:flex; align-items:center; justify-content:center; gap:10px;">
-    <span class="pf-icon-lg" style="color:var(--violet-bright);"><svg><use href="#icon-lock"></use></svg></span>
-    <span>PRIVATE ROOM LOBBY</span>
-  </div>
-  <div class="pf-mt-16">
-    <span class="pf-badge pf-badge-epic" style="font-size:24px; padding:10px 24px; letter-spacing:0.12em; font-family:var(--font-display);">{{ room.code }}</span>
-  </div>
-  <p class="pf-muted pf-mt-16">Share this room code with your friend so they can join the duel.</p>
-</div>
+{% load static %}
+{% block title %}Private Battle Lobby — {{ room.code }}{% endblock %}
 
-<div class="pf-flex" style="justify-content:center; gap:40px; margin-top:40px; flex-wrap:wrap;">
-  <div class="pf-card pf-center" style="width:220px;">
-    <div class="pf-avatar-circle" style="width:56px;height:56px;font-size:22px;margin:0 auto;background:var(--p1-blue);">{{ room.host.username|slice:":1"|upper }}</div>
-    <div style="font-weight:800; margin-top:12px;">{{ room.host.username }}</div>
-    <div class="pf-faint" style="font-size:12px;">HOST</div>
+{% block extra_css %}
+<style>
+  .lobby-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 36px 28px;
+    box-shadow: var(--shadow-md);
+    max-width: 780px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .room-code-badge {
+    background: var(--bg-surface);
+    border: 1.5px solid var(--border-gold);
+    color: var(--brown-dark);
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    padding: 10px 24px;
+    border-radius: var(--radius-lg);
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .slot-card {
+    flex: 1;
+    min-width: 220px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    text-align: center;
+    transition: all 0.25s ease;
+  }
+  .slot-card.ready-active {
+    border-color: var(--success);
+    box-shadow: 0 0 16px rgba(22, 163, 74, 0.15);
+  }
+
+  .slot-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    margin: 0 auto 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 24px;
+    color: white;
+    box-shadow: var(--shadow-sm);
+  }
+  .slot-avatar.p1 { background: linear-gradient(135deg, #1d4ed8, #2563eb); }
+  .slot-avatar.p2 { background: linear-gradient(135deg, #b91c1c, #dc2626); }
+  .slot-avatar.empty {
+    background: var(--bg-beige);
+    color: var(--text-muted);
+    border: 2px dashed var(--border);
+    animation: pulse-waiting 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-waiting {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.04); }
+  }
+
+  .vs-badge {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--brown-dark);
+    color: var(--gold);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid var(--bg-cream);
+    box-shadow: var(--shadow-sm);
+    flex-shrink: 0;
+  }
+
+  .ready-btn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 10px 16px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    font-size: 13px;
+    border-radius: var(--radius-md);
+  }
+
+  .ready-btn.is-ready {
+    background: var(--success) !important;
+    color: white !important;
+    border-color: var(--success) !important;
+  }
+
+  .lobby-countdown-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(43, 33, 27, 0.92);
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--bg-surface);
+  }
+  .lobby-countdown-num {
+    font-family: var(--font-display);
+    font-size: 120px;
+    font-weight: 900;
+    color: var(--gold);
+    animation: pop-scale 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  @keyframes pop-scale {
+    0% { transform: scale(0.3); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lobby-card pf-center">
+  <!-- Lobby Header -->
+  <div class="pf-flex-between pf-mb-24" style="border-bottom: 1px solid var(--border); padding-bottom: 16px;">
+    <div class="pf-flex pf-gap-8">
+      <span class="pf-icon" style="color:var(--copper);"><svg><use href="#icon-lock"></use></svg></span>
+      <span style="font-family:var(--font-display); font-size:16px; font-weight:800; letter-spacing:0.06em; color:var(--brown-dark);">PRIVATE BATTLE LOBBY</span>
+    </div>
+    <span class="pf-badge pf-badge-epic">BEST OF 3</span>
   </div>
-  <div class="pf-duel-vs" style="position:static; font-size:40px;">VS</div>
-  <div class="pf-card pf-center" style="width:220px;">
-    {% if room.guest %}
-      <div class="pf-avatar-circle" style="width:56px;height:56px;font-size:22px;margin:0 auto;background:var(--p2-red);">{{ room.guest.username|slice:":1"|upper }}</div>
-      <div style="font-weight:800; margin-top:12px;">{{ room.guest.username }}</div>
-      <div class="pf-faint" style="font-size:12px;">CHALLENGER</div>
+
+  <!-- Room Code Display & Copy Button -->
+  <div class="pf-mb-32">
+    <div style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:8px;">ROOM CODE</div>
+    <div class="pf-flex" style="justify-content:center; gap:12px;">
+      <div class="room-code-badge" id="room-code-display">
+        <span>{{ room.code }}</span>
+      </div>
+      <button type="button" class="pf-btn pf-btn-ghost" id="copy-btn" onclick="copyRoomCode('{{ room.code }}')">
+        <span class="pf-icon" id="copy-icon"><svg><use href="#icon-copy"></use></svg></span>
+        <span id="copy-text">COPY CODE</span>
+      </button>
+    </div>
+    <p class="pf-faint pf-mt-8" style="font-size:13px;">Share this code with your classmate to let them join your bench duel.</p>
+  </div>
+
+  <!-- Player Slots -->
+  <div class="pf-flex" style="justify-content:center; gap:20px; flex-wrap:wrap; align-items:center;">
+    <!-- Player 1 Slot (Host) -->
+    <div class="slot-card" id="slot-p1">
+      <div class="slot-avatar p1">{{ room.host.username|slice:":1"|upper }}</div>
+      <div style="font-weight:800; font-size:16px; color:var(--brown-dark);" id="p1-username">{{ room.host.username }}</div>
+      <div class="pf-faint" style="font-size:11px; margin-top:2px;">PLAYER 1 (HOST)</div>
+
+      <div class="pf-mt-16">
+        {% if request.user == room.host %}
+          <button type="button" class="pf-btn pf-btn-primary ready-btn" id="ready-btn-p1" onclick="toggleReadyState()">
+            <span class="pf-icon" id="ready-icon-p1"><svg><use href="#icon-swords"></use></svg></span>
+            <span id="ready-text-p1">READY</span>
+          </button>
+        {% else %}
+          <div id="ready-indicator-p1" class="pf-badge pf-badge-common" style="padding:6px 16px; font-size:11px;">
+            WAITING READY
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- VS Divider -->
+    <div class="vs-badge">VS</div>
+
+    <!-- Player 2 Slot (Guest / Challenger) -->
+    <div class="slot-card" id="slot-p2">
+      {% if room.guest %}
+        <div class="slot-avatar p2" id="p2-avatar">{{ room.guest.username|slice:":1"|upper }}</div>
+        <div style="font-weight:800; font-size:16px; color:var(--brown-dark);" id="p2-username">{{ room.guest.username }}</div>
+        <div class="pf-faint" style="font-size:11px; margin-top:2px;">PLAYER 2 (GUEST)</div>
+
+        <div class="pf-mt-16">
+          {% if request.user == room.guest %}
+            <button type="button" class="pf-btn pf-btn-primary ready-btn" id="ready-btn-p2" onclick="toggleReadyState()">
+              <span class="pf-icon" id="ready-icon-p2"><svg><use href="#icon-swords"></use></svg></span>
+              <span id="ready-text-p2">READY</span>
+            </button>
+          {% else %}
+            <div id="ready-indicator-p2" class="pf-badge pf-badge-common" style="padding:6px 16px; font-size:11px;">
+              WAITING READY
+            </div>
+          {% endif %}
+        </div>
+      {% else %}
+        <div class="slot-avatar empty" id="p2-avatar">?</div>
+        <div style="font-weight:800; font-size:15px; color:var(--text-muted);" id="p2-username">WAITING FOR OPPONENT</div>
+        <div class="pf-faint" style="font-size:11px; margin-top:2px;">PLAYER 2</div>
+
+        <div class="pf-mt-16">
+          <div class="pf-badge pf-badge-common" id="p2-status-badge" style="padding:6px 16px; font-size:11px;">
+            <span class="pf-icon" style="color:var(--warning); width:12px; height:12px;"><svg><use href="#icon-clock"></use></svg></span>
+            <span>WAITING TO JOIN</span>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Arena selection / Start match controls for host -->
+  <div class="pf-mt-32" style="border-top:1px solid var(--border); padding-top:24px;">
+    {% if room.host == request.user %}
+      <div class="pf-flex-between" style="max-width:500px; margin:0 auto; gap:16px; flex-wrap:wrap;">
+        <form method="post" action="{% url 'multiplayer:room_set_arena' room.code %}" class="pf-flex pf-gap-8" style="flex:1;">
+          {% csrf_token %}
+          <select name="arena_id" class="pf-select" onchange="this.form.submit()" style="padding:8px 12px; font-size:13px;">
+            {% for a in arenas %}
+              <option value="{{ a.id }}" {% if room.arena_id == a.id %}selected{% endif %}>Arena: {{ a.name }}</option>
+            {% endfor %}
+          </select>
+        </form>
+
+        <form method="post" action="{% url 'multiplayer:room_start' room.code %}" id="manual-start-form">
+          {% csrf_token %}
+          <button type="submit" class="pf-btn pf-btn-primary" id="start-btn" {% if not room.guest %}disabled{% endif %}>
+            <span class="pf-icon"><svg><use href="#icon-swords"></use></svg></span>
+            <span>FORCE START</span>
+          </button>
+        </form>
+      </div>
+      <p class="pf-faint pf-mt-16" style="font-size:12px;" id="lobby-status-msg">
+        Both players press <strong>READY</strong> to launch countdown automatically!
+      </p>
     {% else %}
-      <div class="pf-avatar-circle" style="width:56px;height:56px;font-size:22px;margin:0 auto;background:var(--bg-elevated); border:1px dashed var(--border);">?</div>
-      <div class="pf-faint pf-mt-16">Waiting for opponent...</div>
+      <p class="pf-muted" style="font-size:13px;" id="lobby-status-msg">
+        Press <strong>READY</strong> when you are prepared for battle.
+      </p>
     {% endif %}
   </div>
 </div>
 
-{% if room.host == request.user %}
-<div class="pf-center pf-mt-32">
-  <form method="post" action="{% url 'multiplayer:room_start' room.code %}">
-    {% csrf_token %}
-    <button class="pf-btn pf-btn-primary pf-btn-lg" {% if not room.guest %}disabled{% endif %}>
-      <span class="pf-icon"><svg><use href="#icon-swords"></use></svg></span>
-      <span>START PENFIGHT</span>
-    </button>
-  </form>
-  {% if not room.guest %}<p class="pf-faint pf-mt-16">Waiting for an opponent to join before starting.</p>{% endif %}
+<!-- Countdown Modal Overlay -->
+<div class="lobby-countdown-overlay" id="lobby-countdown" style="display:none;">
+  <div style="font-size:14px; font-weight:800; letter-spacing:0.2em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:12px;">BOTH PLAYERS READY</div>
+  <div class="lobby-countdown-num" id="countdown-number">3</div>
+  <div style="font-size:18px; font-weight:800; color:white; margin-top:16px;">GET READY TO FLICK!</div>
 </div>
-{% else %}
-<div class="pf-center pf-mt-32">
-  <p class="pf-muted">Waiting for {{ room.host.username }} to start the match...</p>
-</div>
-{% endif %}
-
 {% endblock %}
 
 {% block extra_js %}
-{% if room.host != request.user %}
+<script src="{% static 'js/audio.js' %}?v=16.0"></script>
 <script>
-  // Guests poll for the host starting the match, then auto-redirect.
-  const statusUrl = "{% url 'multiplayer:room_status' room.code %}";
+  const roomCode = "{{ room.code }}";
+  const mySlot = "{{ my_slot }}";
+  const isHost = {% if request.user == room.host %}true{% else %}false{% endif %};
   const battleUrl = "{% url 'multiplayer:online_battle' room.code %}";
+
+  let isReady = false;
+
+  // Copy Room Code logic
+  function copyRoomCode(code) {
+    navigator.clipboard.writeText(code).then(() => {
+      const btnText = document.getElementById('copy-text');
+      const btnIcon = document.getElementById('copy-icon');
+      btnText.textContent = "COPIED";
+      btnIcon.innerHTML = `<svg><use href="#icon-check"></use></svg>`;
+      setTimeout(() => {
+        btnText.textContent = "COPY CODE";
+        btnIcon.innerHTML = `<svg><use href="#icon-copy"></use></svg>`;
+      }, 2000);
+    }).catch(() => {});
+  }
+
+  // WebSocket connection for real-time lobby sync
+  const scheme = window.location.protocol === "https:" ? "wss" : "ws";
+  const socket = new WebSocket(`${scheme}://${window.location.host}/ws/battle/${roomCode}/`);
+
+  socket.addEventListener("open", () => {
+    console.log("Lobby WebSocket Connected.");
+  });
+
+  socket.addEventListener("message", (evt) => {
+    const data = JSON.parse(evt.data);
+
+    if (data.kind === "player_joined") {
+      if (data.guest_username && !document.getElementById('p2-username').textContent.includes(data.guest_username)) {
+        updateGuestSlot(data.guest_username);
+      }
+      updateReadyUI("player1", data.p1_ready);
+      updateReadyUI("player2", data.p2_ready);
+    } else if (data.kind === "player_ready_state") {
+      updateReadyUI(data.slot, data.ready);
+      if (data.p1_ready && data.p2_ready) {
+        startCountdownSequence();
+      }
+    } else if (data.kind === "start_countdown") {
+      startCountdownSequence();
+    } else if (data.kind === "opponent_left") {
+      if (data.slot === "player2" && isHost) {
+        resetGuestSlot();
+      }
+    }
+  });
+
+  function toggleReadyState() {
+    isReady = !isReady;
+    if (socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify({ kind: "toggle_ready" }));
+    }
+  }
+
+  function updateReadyUI(slot, readyState) {
+    const btn = document.getElementById(`ready-btn-${slot}`);
+    const text = document.getElementById(`ready-text-${slot}`);
+    const icon = document.getElementById(`ready-icon-${slot}`);
+    const indicator = document.getElementById(`ready-indicator-${slot}`);
+    const slotCard = document.getElementById(`slot-${slot}`);
+
+    if (slotCard) {
+      if (readyState) slotCard.classList.add('ready-active');
+      else slotCard.classList.remove('ready-active');
+    }
+
+    if (btn) {
+      if (readyState) {
+        btn.classList.add('is-ready');
+        text.textContent = "READY ✓";
+        icon.innerHTML = `<svg><use href="#icon-check"></use></svg>`;
+      } else {
+        btn.classList.remove('is-ready');
+        text.textContent = "READY";
+        icon.innerHTML = `<svg><use href="#icon-swords"></use></svg>`;
+      }
+    }
+
+    if (indicator) {
+      if (readyState) {
+        indicator.className = "pf-badge pf-badge-uncommon";
+        indicator.innerHTML = `<span class="pf-icon" style="width:12px;height:12px;"><svg><use href="#icon-check"></use></svg></span> READY`;
+      } else {
+        indicator.className = "pf-badge pf-badge-common";
+        indicator.textContent = "WAITING READY";
+      }
+    }
+  }
+
+  function updateGuestSlot(guestUsername) {
+    const p2Avatar = document.getElementById('p2-avatar');
+    const p2Name = document.getElementById('p2-username');
+    const startBtn = document.getElementById('start-btn');
+
+    if (p2Avatar) {
+      p2Avatar.className = "slot-avatar p2";
+      p2Avatar.textContent = guestUsername.substring(0, 1).toUpperCase();
+    }
+    if (p2Name) {
+      p2Name.textContent = guestUsername;
+    }
+    if (startBtn) {
+      startBtn.disabled = false;
+    }
+  }
+
+  function resetGuestSlot() {
+    const p2Avatar = document.getElementById('p2-avatar');
+    const p2Name = document.getElementById('p2-username');
+    const startBtn = document.getElementById('start-btn');
+
+    if (p2Avatar) {
+      p2Avatar.className = "slot-avatar empty";
+      p2Avatar.textContent = "?";
+    }
+    if (p2Name) {
+      p2Name.textContent = "WAITING FOR OPPONENT";
+    }
+    if (startBtn) {
+      startBtn.disabled = true;
+    }
+  }
+
+  let countdownStarted = false;
+  function startCountdownSequence() {
+    if (countdownStarted) return;
+    countdownStarted = true;
+
+    const overlay = document.getElementById('lobby-countdown');
+    const num = document.getElementById('countdown-number');
+    overlay.style.display = 'flex';
+
+    let count = 3;
+    num.textContent = count;
+    try { pfAudio.countdownTick(); } catch(e){}
+
+    const timer = setInterval(() => {
+      count--;
+      if (count > 0) {
+        num.textContent = count;
+        try { pfAudio.countdownTick(); } catch(e){}
+      } else {
+        clearInterval(timer);
+        num.textContent = "GO!";
+        try { pfAudio.fight(); } catch(e){}
+        setTimeout(() => {
+          window.location.href = battleUrl;
+        }, 500);
+      }
+    }, 800);
+  }
+
+  // Backup HTTP polling for fallback
+  const statusUrl = "{% url 'multiplayer:room_status' room.code %}";
   setInterval(() => {
     fetch(statusUrl).then(r => r.json()).then(data => {
-      if (data.status === "in_progress") window.location.href = battleUrl;
+      if (data.status === "in_progress") {
+        window.location.href = battleUrl;
+      } else if (data.has_guest && document.getElementById('p2-username').textContent.includes('WAITING')) {
+        updateGuestSlot(data.guest);
+      }
     }).catch(() => {});
-  }, 2500);
+  }, 2000);
 </script>
-{% endif %}
 {% endblock %}

@@ -1,31 +1,15 @@
 import json
-
+import asyncio
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 
 class BattleConsumer(AsyncJsonWebsocketConsumer):
     """
-    Real-time PenFight sync for a single private room / quick-match room.
-
-    Design note on server authority (see spec #22/#39): full physics replay
-    on the server is out of scope for this build, so the *simulation* runs
-    client-side on both peers (deterministic canvas engine, no client-side
-    randomness in the resolution step). What IS server-authoritative:
-
-      * turn order (server tracks whose turn it is and rejects out-of-turn flicks)
-      * the final "pen fell off the bench" ruling and everything downstream of
-        it — match.finish(), Profile stats, Pen Points, XP, achievements are
-        all written exactly once, from `multiplayer.services.finish_online_match`,
-        never from a value the client claims those numbers should be.
-
-    Message types (client -> server):
-      join, ready, select_loadout, flick, settle_state, pen_out, rematch, chat
-
-    Message types (server -> group):
-      player_joined, both_ready, start_countdown, opponent_flicked,
-      sync_state, turn_change, match_over, opponent_left, chat
+    Real-time PenFight sync for private room lobby & in-game battle.
+    Handles lobby connection, ready state toggling, start countdown, and battle physics sync.
     """
+    ROOM_READY_STATES = {}
 
     async def connect(self):
         self.room_code = self.scope["url_route"]["kwargs"]["code"]
@@ -44,9 +28,21 @@ class BattleConsumer(AsyncJsonWebsocketConsumer):
         self.slot = "player1" if room.host_id == self.user.id else "player2"
         await self.channel_layer.group_add(self.group_name, self.channel_name)
         await self.accept()
+
+        if self.room_code not in BattleConsumer.ROOM_READY_STATES:
+            BattleConsumer.ROOM_READY_STATES[self.room_code] = {"player1": False, "player2": False}
+
+        ready_state = BattleConsumer.ROOM_READY_STATES[self.room_code]
+
         await self.channel_layer.group_send(self.group_name, {
             "type": "broadcast", "payload": {
-                "kind": "player_joined", "slot": self.slot, "username": self.user.username,
+                "kind": "player_joined",
+                "slot": self.slot,
+                "username": self.user.username,
+                "host_username": room.host.username,
+                "guest_username": room.guest.username if room.guest else None,
+                "p1_ready": ready_state["player1"],
+                "p2_ready": ready_state["player2"],
             },
         })
 
@@ -61,15 +57,32 @@ class BattleConsumer(AsyncJsonWebsocketConsumer):
         kind = content.get("kind")
 
         if kind in ("flick", "settle_state", "sync_request"):
-            # Relay simulation events to the opponent as-is; these don't
-            # touch the database or decide anything authoritative.
             content["slot"] = self.slot
             await self.channel_layer.group_send(self.group_name, {"type": "broadcast", "payload": content})
 
-        elif kind == "ready":
+        elif kind in ("ready", "toggle_ready"):
+            ready_state = BattleConsumer.ROOM_READY_STATES.setdefault(self.room_code, {"player1": False, "player2": False})
+            ready_state[self.slot] = not ready_state.get(self.slot, False)
+
+            p1_ready = ready_state["player1"]
+            p2_ready = ready_state["player2"]
+
             await self.channel_layer.group_send(self.group_name, {
-                "type": "broadcast", "payload": {"kind": "player_ready", "slot": self.slot},
+                "type": "broadcast", "payload": {
+                    "kind": "player_ready_state",
+                    "slot": self.slot,
+                    "ready": ready_state[self.slot],
+                    "p1_ready": p1_ready,
+                    "p2_ready": p2_ready,
+                },
             })
+
+            # When both players are ready, trigger match start countdown
+            if p1_ready and p2_ready:
+                await self._start_battle_match()
+                await self.channel_layer.group_send(self.group_name, {
+                    "type": "broadcast", "payload": {"kind": "start_countdown", "seconds": 3},
+                })
 
         elif kind == "select_loadout":
             await self.channel_layer.group_send(self.group_name, {
@@ -80,8 +93,7 @@ class BattleConsumer(AsyncJsonWebsocketConsumer):
             })
 
         elif kind == "pen_out":
-            # Authoritative resolution path.
-            loser_slot = content.get("slot")  # which pen fell
+            loser_slot = content.get("slot")
             result = await self._resolve_match(loser_slot, content.get("pen_ids", {}))
             await self.channel_layer.group_send(self.group_name, {
                 "type": "broadcast", "payload": {"kind": "match_over", **result},
@@ -111,8 +123,24 @@ class BattleConsumer(AsyncJsonWebsocketConsumer):
         return PrivateRoom.objects.filter(code=self.room_code).select_related("host", "guest", "match").first()
 
     @database_sync_to_async
+    def _start_battle_match(self):
+        from multiplayer.models import PrivateRoom, Match
+        room = PrivateRoom.objects.filter(code=self.room_code).first()
+        if room:
+            if not room.match:
+                match = Match.objects.create(
+                    match_type=Match.MatchType.PRIVATE,
+                    arena=room.arena,
+                    status=Match.Status.IN_PROGRESS,
+                    room_code=room.code,
+                )
+                room.match = match
+            room.status = PrivateRoom.Status.IN_PROGRESS
+            room.save(update_fields=["match", "status"])
+            return room.match
+
+    @database_sync_to_async
     def _resolve_match(self, loser_slot, pen_ids):
-        from django.contrib.auth.models import User
         from game.models import Pen, PenSkin
         from multiplayer.models import PrivateRoom
         from multiplayer.services import finish_online_match

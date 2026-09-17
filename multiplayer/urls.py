@@ -18,5 +18,9 @@ urlpatterns = [
     path("quick-match/poll/", views.quick_match_poll, name="quick_match_poll"),
     path("quick-match/cancel/", views.quick_match_cancel, name="quick_match_cancel"),
 
+    path("room/<str:code>/accept/", views.accept_challenge, name="accept_challenge"),
+    path("room/<str:code>/decline/", views.decline_challenge, name="decline_challenge"),
+
     path("challenge/<str:username>/", views.challenge_friend, name="challenge_friend"),
 ]
+

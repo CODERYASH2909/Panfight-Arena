@@ -91,6 +91,8 @@ class PrivateRoom(models.Model):
         READY = "ready", "All players ready"
         IN_PROGRESS = "in_progress", "In progress"
         FINISHED = "finished", "Finished"
+        CANCELLED = "cancelled", "Cancelled"
+
 
     class RoomType(models.TextChoices):
         ONE_V_ONE = "1v1", "1v1"

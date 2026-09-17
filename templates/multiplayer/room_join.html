@@ -1,27 +1,37 @@
 {% extends "base.html" %}
-{% block title %}Join Room — PenFight Arena{% endblock %}
+{% block title %}Join Private Room — PenFight Arena{% endblock %}
+
 {% block content %}
-<div style="max-width:440px; margin:40px auto;">
-  <div class="pf-glass" style="padding:36px;">
+<div style="max-width:460px; margin:40px auto;">
+  <div class="pf-card" style="padding:40px 32px; background:var(--bg-card); border-radius:var(--radius-xl); box-shadow:var(--shadow-md);">
     <div class="pf-center pf-mb-24">
-      <div class="pf-icon-lg" style="color:var(--gold); width:48px; height:48px; margin:0 auto;"><svg><use href="#icon-key"></use></svg></div>
-      <h2 class="pf-mt-8" style="font-family:var(--font-display); font-size:26px; font-weight:800;">JOIN A PRIVATE ROOM</h2>
-      <p class="pf-muted pf-mt-8">Enter the room code your friend shared with you.</p>
-    </div>
-    <form method="post">
-      {% csrf_token %}
-      <div class="pf-field">
-        <label class="pf-label">Room Code</label>
-        <input class="pf-input" type="text" name="code" placeholder="PF-XXXX" style="text-align:center; font-size:22px; letter-spacing:0.12em; text-transform:uppercase; font-family:var(--font-display); font-weight:800;" maxlength="10" required>
+      <div class="pf-mode-icon" style="margin:0 auto 12px; background:rgba(201,154,82,0.15); color:var(--gold); width:48px; height:48px;">
+        <span class="pf-icon-lg"><svg><use href="#icon-key"></use></svg></span>
       </div>
+      <h2 style="font-family:var(--font-display); font-size:26px; font-weight:800; color:var(--brown-dark);">JOIN PRIVATE ROOM</h2>
+      <p class="pf-muted pf-mt-8" style="font-size:14px;">Enter the unique room code shared by your friend.</p>
+    </div>
+
+    <form method="post" action="{% url 'multiplayer:room_join' %}">
+      {% csrf_token %}
+      <div class="pf-field pf-mb-24">
+        <label class="pf-label" style="text-align:center;">ENTER ROOM CODE</label>
+        <input class="pf-input" type="text" name="code" placeholder="PF-7K4M"
+               style="text-align:center; font-size:24px; letter-spacing:0.15em; text-transform:uppercase; font-family:var(--font-display); font-weight:800; background:var(--bg-surface); padding:14px; border-color:var(--border-gold);"
+               maxlength="10" autocomplete="off" required>
+      </div>
+
       <button type="submit" class="pf-btn pf-btn-primary pf-btn-block pf-btn-lg">
         <span class="pf-icon"><svg><use href="#icon-swords"></use></svg></span>
-        <span>JOIN ROOM</span>
+        <span>JOIN BATTLE ROOM</span>
       </button>
     </form>
-    <p class="pf-center pf-muted pf-mt-24" style="font-size:13px;">
-      Don't have a code? <a href="{% url 'multiplayer:room_create' %}" style="color:var(--violet-bright); font-weight:700;">Create your own room</a>
-    </p>
+
+    <div class="pf-center pf-mt-24" style="border-top:1px solid var(--border); padding-top:16px;">
+      <p class="pf-muted" style="font-size:13px;">
+        Want to host your own game? <a href="{% url 'multiplayer:room_create' %}" style="color:var(--copper); font-weight:700;">Create Private Room</a>
+      </p>
+    </div>
   </div>
 </div>
 {% endblock %}
