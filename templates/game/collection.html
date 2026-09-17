@@ -16,7 +16,8 @@
   <div class="pf-progress-fill gold" style="width:{% widthratio owned_count total_count 100 %}%;"></div>
 </div>
 
-<div class="pf-grid pf-grid-4">
+<div class="pf-grid pf-grid-2">
+
   {% for skin in all_skins %}
   <div class="pf-card pen-card-{{ skin.rarity }} {% if skin.id in owned_ids %}pf-card-hover{% else %}pf-muted{% endif %}" style="{% if skin.id not in owned_ids %}opacity:0.45; filter:grayscale(0.6);{% endif %}">
     <div class="pf-flex-between pf-mb-8">

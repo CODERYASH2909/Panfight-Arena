@@ -101,7 +101,7 @@
 
   <!-- Pen Type Selection -->
   <div class="pf-section-title">CHOOSE PEN ARCHETYPE (GAMEPLAY TYPE)</div>
-  <div class="pf-grid pf-grid-5 pf-mb-32">
+  <div class="pf-grid pf-grid-2 pf-mb-32">
     {% for pen in pens %}
     <div class="pf-card pen-type-card {% if pen.id == profile.equipped_pen_id %}selected{% endif %}"
          data-pen-id="{{ pen.id }}"
@@ -118,7 +118,7 @@
 
   <!-- Pen Skin Collection -->
   <div class="pf-section-title">CHOOSE PEN COSMETIC SKIN</div>
-  <div class="pf-grid pf-grid-4">
+  <div class="pf-grid pf-grid-2">
     {% for skin in skins %}
     <div class="pf-card skin-card pen-card-{{ skin.rarity }} {% if skin.id not in owned_skin_ids %}locked{% endif %} {% if skin.id == profile.equipped_skin_id %}selected{% endif %}"
          data-skin-id="{{ skin.id }}" data-owned="{% if skin.id in owned_skin_ids %}1{% else %}0{% endif %}"
@@ -139,11 +139,12 @@
 
       <div style="font-weight:800; font-size:16px;">{{ skin.name }}</div>
       {% if skin.id not in owned_skin_ids %}
-        <a href="{% url 'store:home' %}" class="pf-faint pf-mt-8" style="font-size:11px; display:block;">Unlock in Store →</a>
+        <a href="{% url 'game:my_pen' %}" class="pf-faint pf-mt-8" style="font-size:11px; display:block;">Unlock in Store →</a>
       {% endif %}
     </div>
     {% endfor %}
   </div>
+
 </form>
 {% endblock %}
 

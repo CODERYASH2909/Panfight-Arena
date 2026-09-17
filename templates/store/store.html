@@ -95,7 +95,8 @@
 
 <!-- All Skins Collection Grid -->
 <div class="pf-section-title">ALL PEN COSMETICS</div>
-<div class="pf-grid pf-grid-4" id="store-grid">
+<div class="pf-grid pf-grid-2" id="store-grid">
+
   {% for skin in all_skins %}
   <div class="pf-card pf-card-hover pen-store-card pen-card-{{ skin.rarity }}"
        data-name="{{ skin.name|lower }}" data-rarity="{{ skin.rarity }}" data-price="{{ skin.price_pp }}" data-key="{{ skin.asset_key }}" data-id="{{ skin.id }}" data-desc="{{ skin.description }}" data-owned="{% if skin.id in owned_ids %}1{% else %}0{% endif %}">
