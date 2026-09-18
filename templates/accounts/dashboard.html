@@ -2,147 +2,359 @@
 {% block title %}Home — PenFight Arena{% endblock %}
 
 {% block content %}
-<div class="pf-card" style="padding:28px 32px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:24px; background:var(--bg-card);">
-  <div class="pf-flex pf-gap-16">
-    <div class="pf-avatar-circle" style="width:58px; height:58px; font-size:24px; background:var(--brown-dark);">
-      {{ request.user.username|slice:":1"|upper }}
+<div class="pf-desk-dashboard">
+  <!-- Desk Background Decorative Art Work -->
+  <div class="pf-desk-decorations" aria-hidden="true">
+    <!-- Top Left Leaves -->
+    <div class="pf-decor-leaves-left">
+      <svg viewBox="0 0 160 160" fill="none">
+        <path d="M10 0 C 40 40, 60 90, 20 140 C 70 90, 90 40, 10 0 Z" fill="#4B6E52" opacity="0.4"/>
+        <path d="M0 30 C 50 50, 80 110, 40 160 C 80 110, 100 50, 0 30 Z" fill="#3D5A43" opacity="0.3"/>
+        <path d="M40 0 C 80 30, 110 80, 70 120 C 110 70, 120 20, 40 0 Z" fill="#6B8E70" opacity="0.25"/>
+      </svg>
     </div>
-    <div>
-      <div style="font-family:var(--font-display); font-size:24px; font-weight:800; color:var(--brown-dark);">WELCOME BACK, {{ request.user.username|upper }}</div>
-      <div class="pf-flex pf-gap-8 pf-mt-8">
-        <span class="pf-rank-chip pf-rank-{{ profile.rank_tier }}">{{ profile.get_rank_tier_display }}</span>
-        <span class="pf-muted" style="font-size:12px;">Rating {{ profile.rating }}</span>
+
+    <!-- Floating Cursive Artwork - Left Top -->
+    <div class="pf-decor-cursive-left">
+      <span class="pf-cursive-main">Good Pens</span>
+      <span class="pf-cursive-sub">Better Battles!</span>
+      <svg class="pf-cursive-arrow" viewBox="0 0 50 30" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M5 25 C 20 5, 35 25, 45 10 M 38 10 L 45 10 L 43 17" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <!-- Left Desk Stack of Books -->
+    <div class="pf-decor-books-left">
+      <div class="pf-book-stack">
+        <div class="pf-book book-top">
+          <span class="pf-book-title">PLAY</span>
+          <div class="pf-book-ribbon"></div>
+        </div>
+        <div class="pf-book book-mid">
+          <span class="pf-book-title">IMPROVE</span>
+        </div>
+        <div class="pf-book book-bot">
+          <span class="pf-book-title">DOMINATE</span>
+        </div>
+      </div>
+      <!-- Classroom note paper next to books -->
+      <div class="pf-note-paper-left">
+        <div class="pf-note-lines"></div>
+        <div class="pf-note-text">Same<br>Classroom<br>Different<br>Legends.</div>
+        <div class="pf-pencil-left"></div>
+      </div>
+    </div>
+
+    <!-- Right Top Pinned Polaroid/Post-it -->
+    <div class="pf-decor-postit-right">
+      <div class="pf-postit-pin"></div>
+      <div class="pf-postit-card">
+        <div class="pf-postit-text">IT'S JUST A PEN... RIGHT? <span class="pf-smiley">:-)</span></div>
+      </div>
+    </div>
+
+    <!-- Right Bottom Pen Mug Holder & Leaves -->
+    <div class="pf-decor-penholder-right">
+      <div class="pf-decor-leaves-right">
+        <svg viewBox="0 0 140 180" fill="none">
+          <path d="M30 180 C 10 120, 40 50, 100 0 C 70 60, 80 130, 30 180 Z" fill="#3A5844" opacity="0.4"/>
+          <path d="M60 180 C 50 130, 80 70, 130 20 C 100 80, 100 140, 60 180 Z" fill="#4B6E52" opacity="0.3"/>
+        </svg>
+      </div>
+      <div class="pf-pen-mug">
+        <div class="pf-mug-pens">
+          <div class="pf-mug-pen pen-1"></div>
+          <div class="pf-mug-pen pen-2"></div>
+          <div class="pf-mug-pen pen-3"></div>
+        </div>
+        <div class="pf-mug-body">
+          <div class="pf-mug-label">LEGENDS<br>START<br>HERE 👑</div>
+        </div>
       </div>
     </div>
   </div>
-  <div style="min-width:240px;">
-    <div class="pf-flex-between" style="font-size:11px; margin-bottom:6px; font-weight:700;">
-      <span class="pf-muted">LEVEL {{ profile.level }}</span>
-      <span class="pf-muted">{{ profile.xp }} / {{ profile.xp_to_next_level }} XP</span>
-    </div>
-    <div class="pf-progress"><div class="pf-progress-fill" style="width:{% widthratio profile.xp profile.xp_to_next_level 100 %}%;"></div></div>
-  </div>
-</div>
 
-<div class="pf-mt-32">
-  <div class="pf-section-title">SELECT GAME MODE</div>
-  <div class="pf-grid pf-grid-3">
-    <a href="{% url 'game:ai_setup' %}" class="pf-mode-card mode-local pf-card-hover">
-      <div class="pf-mode-icon"><svg><use href="#icon-monitor"></use></svg></div>
-      <h3>Fight with AI</h3>
-      <p class="pf-muted pf-mt-8">Face off against a real AI opponent in 3 difficulties.</p>
-    </a>
-    <a href="{% url 'multiplayer:quick_match' %}" class="pf-mode-card mode-quick pf-card-hover">
-      <div class="pf-mode-icon"><svg><use href="#icon-zap"></use></svg></div>
-      <h3>Quick Match</h3>
-      <p class="pf-muted pf-mt-8">Automated queue matching your rating rank.</p>
-    </a>
-    <a href="{% url 'multiplayer:room_create' %}" class="pf-mode-card mode-private pf-card-hover">
-      <div class="pf-mode-icon"><svg><use href="#icon-lock"></use></svg></div>
-      <h3>Create Room</h3>
-      <p class="pf-muted pf-mt-8">Host a private match and invite friends with code.</p>
-    </a>
-    <a href="{% url 'multiplayer:room_join' %}" class="pf-mode-card mode-join pf-card-hover">
-      <div class="pf-mode-icon"><svg><use href="#icon-key"></use></svg></div>
-      <h3>Join Room</h3>
-      <p class="pf-muted pf-mt-8">Enter a room code to join an active lobby.</p>
-    </a>
-    <a href="{% url 'game:my_pen' %}" class="pf-mode-card mode-pen pf-card-hover">
-      <div class="pf-mode-icon"><svg><use href="#icon-layers"></use></svg></div>
-      <h3>My Loadout</h3>
-      <p class="pf-muted pf-mt-8">Inspect pen stats and equip owned skins.</p>
-    </a>
-    <a href="{% url 'store:home' %}" class="pf-mode-card mode-store pf-card-hover">
-      <div class="pf-mode-icon"><svg><use href="#icon-store"></use></svg></div>
-      <h3>Pen Store</h3>
-      <p class="pf-muted pf-mt-8">Unlock rare & mythic pen skins with PP.</p>
-    </a>
-  </div>
-</div>
-
-<div class="pf-grid pf-grid-3 pf-mt-32">
-  <div class="pf-card pf-stat">
-    <div class="pf-stat-value" style="color:var(--brown-dark);">{{ profile.wins }}</div>
-    <div class="pf-stat-label">Victories</div>
-  </div>
-  <div class="pf-card pf-stat">
-    <div class="pf-stat-value" style="color:var(--copper);">{{ profile.win_rate }}%</div>
-    <div class="pf-stat-label">Win Rate</div>
-  </div>
-  <div class="pf-card pf-stat">
-    <div class="pf-stat-value" style="color:var(--gold);">{{ achievements_unlocked }}/{{ achievements_total }}</div>
-    <div class="pf-stat-label">Achievements</div>
-  </div>
-</div>
-
-
-<div class="pf-grid pf-grid-2 pf-mt-32">
-  <div class="pf-card">
-    <div class="pf-flex-between pf-mb-16">
-      <div class="pf-section-title" style="margin-bottom:0;">RECENT BATTLES</div>
-      <a href="{% url 'accounts:profile' request.user.username %}" class="pf-faint" style="font-size:12px;">View profile →</a>
-    </div>
-    {% if recent_matches %}
-      {% for mp in recent_matches %}
-      <div class="pf-flex-between" style="padding:10px 0; border-bottom:1px solid var(--border);">
-        <div class="pf-flex pf-gap-12">
-          <span class="pf-icon" style="color:{% if mp.is_winner %}var(--gold){% else %}var(--text-muted){% endif %};">
-            <svg><use href="{% if mp.is_winner %}#icon-trophy{% else %}#icon-skull{% endif %}"></use></svg>
-          </span>
-          <div>
-            <div style="font-weight:700; font-size:13px;">{{ mp.match.get_match_type_display }}</div>
-            <div class="pf-faint" style="font-size:11px;">{{ mp.match.arena.name|default:"Classroom Desk" }}</div>
+  <!-- Main Content Container -->
+  <div class="pf-dashboard-content">
+    
+    <!-- User Welcome Banner Card -->
+    <div class="pf-welcome-banner">
+      <div class="pf-welcome-main">
+        <div class="pf-avatar-wrapper">
+          <div class="pf-welcome-avatar">
+            {{ request.user.username|slice:":1"|upper }}
           </div>
         </div>
-        <span class="pf-faint" style="font-size:11px;">{{ mp.match.created_at|timesince }} ago</span>
+        <div class="pf-welcome-userinfo">
+          <div class="pf-welcome-title">
+            WELCOME BACK, <span class="pf-user-highlight">{{ request.user.username|upper }}</span>
+            <svg class="pf-underline-stroke" viewBox="0 0 120 12" fill="none">
+              <path d="M3 8 C 30 3, 80 10, 117 5 C 90 9, 40 6, 10 9" stroke="#C58F3E" stroke-width="3.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="pf-welcome-meta">
+            <span class="pf-badge-rank pf-rank-{{ profile.rank_tier }}">{{ profile.get_rank_tier_display|default:"BRONZE" }}</span>
+            <span class="pf-rating-text">Rating {{ profile.rating }}</span>
+          </div>
+        </div>
       </div>
-      {% endfor %}
-    {% else %}
-      <div class="pf-empty">
-        <div class="pf-empty-icon"><svg><use href="#icon-swords"></use></svg></div>
-        <div>No battles recorded yet — jump into your first PenFight!</div>
-      </div>
-    {% endif %}
-  </div>
 
-  <div class="pf-card">
-    <div class="pf-flex-between pf-mb-16">
-      <div class="pf-section-title" style="margin-bottom:0;">FRIENDS & CHALLENGES</div>
-      <a href="{% url 'accounts:friends' %}" class="pf-faint" style="font-size:12px;">Manage →</a>
+      <div class="pf-welcome-progress-side">
+        <!-- Floating Keep Fighting Hand Note -->
+        <div class="pf-keep-fighting-note">
+          <svg class="pf-crown-doodle" viewBox="0 0 28 22" fill="none" stroke="#C58F3E" stroke-width="2">
+            <path d="M2 18 L5 4 L11 12 L14 2 L17 12 L23 4 L26 18 Z" stroke-linejoin="round"/>
+            <circle cx="5" cy="4" r="1.5" fill="#C58F3E"/>
+            <circle cx="14" cy="2" r="1.5" fill="#C58F3E"/>
+            <circle cx="23" cy="4" r="1.5" fill="#C58F3E"/>
+          </svg>
+          <span>Keep Fighting!</span>
+        </div>
+
+        <div class="pf-level-header">
+          <span class="pf-level-lbl">LEVEL {{ profile.level }}</span>
+          <span class="pf-xp-val">{{ profile.xp }} / {{ profile.xp_to_next_level }} XP</span>
+        </div>
+        <div class="pf-level-bar">
+          <div class="pf-level-bar-fill" style="width:{% widthratio profile.xp profile.xp_to_next_level 100 %}%;"></div>
+        </div>
+      </div>
     </div>
-    {% if incoming_requests %}
-      {% for fr in incoming_requests %}
-      <div class="pf-flex-between pf-mb-8" style="padding:8px; background:rgba(139,92,246,0.1); border-radius:var(--radius-sm);">
-        <span style="font-size:12px; font-weight:600;">{{ fr.from_user.username }} sent a request</span>
-        <form method="post" action="{% url 'accounts:respond_friend_request' fr.id 'accept' %}">
-          {% csrf_token %}<button class="pf-btn pf-btn-primary pf-btn-sm">Accept</button>
-        </form>
+
+    <!-- Select Game Mode Section -->
+    <div class="pf-mode-section">
+      <div class="pf-section-header-title">
+        <span>SELECT GAME MODE</span>
+        <svg class="pf-title-underline" viewBox="0 0 180 8" fill="none">
+          <path d="M2 5 C 40 2, 120 7, 178 4" stroke="#8C6843" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
       </div>
-      {% endfor %}
-    {% endif %}
-    {% if friends %}
-      {% for f in friends %}
-      <div class="pf-flex-between" style="padding:8px 0; border-bottom:1px solid var(--border);">
-        <a href="{% url 'accounts:profile' f.username %}" class="pf-flex pf-gap-8">
-          <span class="pf-avatar-circle" style="width:26px; height:26px; font-size:11px;">{{ f.username|slice:":1"|upper }}</span>
-          <span style="font-weight:600; font-size:13px;">{{ f.username }}</span>
+
+      <!-- 6 Grid Cards -->
+      <div class="pf-mode-grid">
+
+        <!-- Card 1: Fight with AI -->
+        <a href="{% url 'game:ai_setup' %}" class="pf-gamemode-card card-ai">
+          <div class="pf-gm-icon-box">
+            <svg class="pf-icon"><use href="#icon-monitor"></use></svg>
+          </div>
+          <div class="pf-gm-body">
+            <h3>Fight with AI</h3>
+            <p>Face off against a real AI opponent in 3 difficulties.</p>
+          </div>
+          <!-- Background Line Art Doodle: Robot -->
+          <svg class="pf-gm-doodle" viewBox="0 0 100 100" fill="none" stroke="#A64B38" stroke-width="1.5" opacity="0.25">
+            <rect x="25" y="30" width="50" height="40" rx="8"/>
+            <circle cx="40" cy="45" r="5"/>
+            <circle cx="60" cy="45" r="5"/>
+            <line x1="38" y1="58" x2="62" y2="58" stroke-linecap="round"/>
+            <line x1="50" y1="15" x2="50" y2="30"/>
+            <circle cx="50" cy="12" r="4"/>
+            <rect x="15" y="40" width="10" height="20" rx="3"/>
+            <rect x="75" y="40" width="10" height="20" rx="3"/>
+          </svg>
+          <div class="pf-gm-arrow-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
         </a>
-        <form method="post" action="{% url 'multiplayer:challenge_friend' f.username %}">
-          {% csrf_token %}
-          <button class="pf-btn pf-btn-ghost pf-btn-sm">
-            <span class="pf-icon"><svg><use href="#icon-swords"></use></svg></span>
-            <span>Challenge</span>
-          </button>
-        </form>
+
+        <!-- Card 2: Quick Match -->
+        <a href="{% url 'multiplayer:quick_match' %}" class="pf-gamemode-card card-quick">
+          <div class="pf-gm-icon-box">
+            <svg class="pf-icon"><use href="#icon-bolt"></use></svg>
+          </div>
+          <div class="pf-gm-body">
+            <h3>Quick Match</h3>
+            <p>Automated queue matching your rating rank.</p>
+          </div>
+          <!-- Background Line Art Doodle: Lightning Bolt -->
+          <svg class="pf-gm-doodle" viewBox="0 0 100 100" fill="none" stroke="#4F7654" stroke-width="1.5" opacity="0.25">
+            <path d="M55 10 L25 55 L50 55 L45 90 L75 45 L50 45 Z" stroke-linejoin="round"/>
+          </svg>
+          <div class="pf-gm-arrow-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </a>
+
+        <!-- Card 3: Create Room -->
+        <a href="{% url 'multiplayer:room_create' %}" class="pf-gamemode-card card-create">
+          <div class="pf-gm-icon-box">
+            <svg class="pf-icon"><use href="#icon-lock"></use></svg>
+          </div>
+          <div class="pf-gm-body">
+            <h3>Create Room</h3>
+            <p>Host a private match and invite friends with code.</p>
+          </div>
+          <!-- Background Line Art Doodle: Group Users -->
+          <svg class="pf-gm-doodle" viewBox="0 0 100 100" fill="none" stroke="#6B869B" stroke-width="1.5" opacity="0.25">
+            <circle cx="40" cy="35" r="12"/>
+            <path d="M20 75 C 20 55, 60 55, 60 75"/>
+            <circle cx="68" cy="40" r="9"/>
+            <path d="M55 75 C 55 60, 85 60, 85 75"/>
+          </svg>
+          <div class="pf-gm-arrow-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </a>
+
+        <!-- Card 4: Join Room -->
+        <a href="{% url 'multiplayer:room_join' %}" class="pf-gamemode-card card-join">
+          <div class="pf-gm-icon-box">
+            <svg class="pf-icon"><use href="#icon-key"></use></svg>
+          </div>
+          <div class="pf-gm-body">
+            <h3>Join Room</h3>
+            <p>Enter a room code to join an active lobby.</p>
+          </div>
+          <!-- Background Line Art Doodle: Ticket 1234 -->
+          <svg class="pf-gm-doodle" viewBox="0 0 100 100" fill="none" stroke="#C58F3E" stroke-width="1.5" opacity="0.25">
+            <rect x="15" y="28" width="70" height="44" rx="6" stroke-dasharray="4 2"/>
+            <path d="M15 50 A 6 6 0 0 0 27 50 A 6 6 0 0 0 15 50 Z" fill="none"/>
+            <text x="50" y="55" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="16" fill="#C58F3E" text-anchor="middle" stroke="none">1234</text>
+          </svg>
+          <div class="pf-gm-arrow-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </a>
+
+        <!-- Card 5: My Loadout -->
+        <a href="{% url 'game:my_pen' %}" class="pf-gamemode-card card-loadout">
+          <div class="pf-gm-icon-box">
+            <svg class="pf-icon"><use href="#icon-layers"></use></svg>
+          </div>
+          <div class="pf-gm-body">
+            <h3>My Loadout</h3>
+            <p>Inspect pen stats and equip owned skins.</p>
+          </div>
+          <!-- Background Line Art Doodle: Pen with sparkle -->
+          <svg class="pf-gm-doodle" viewBox="0 0 100 100" fill="none" stroke="#B86C3F" stroke-width="1.5" opacity="0.25">
+            <path d="M25 75 L65 35 L75 45 L35 85 Z"/>
+            <path d="M25 75 L15 85 L35 85 Z" fill="#B86C3F" fill-opacity="0.1"/>
+            <path d="M70 30 L80 20 M85 35 L75 25"/>
+          </svg>
+          <div class="pf-gm-arrow-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </a>
+
+        <!-- Card 6: Pen Store -->
+        <a href="{% url 'store:home' %}" class="pf-gamemode-card card-store">
+          <div class="pf-gm-icon-box">
+            <svg class="pf-icon"><use href="#icon-store"></use></svg>
+          </div>
+          <div class="pf-gm-body">
+            <h3>Pen Store</h3>
+            <p>Unlock rare & mythic pen skins with PP.</p>
+          </div>
+          <!-- Background Line Art Doodle: Storefront -->
+          <svg class="pf-gm-doodle" viewBox="0 0 100 100" fill="none" stroke="#456950" stroke-width="1.5" opacity="0.25">
+            <path d="M20 40 L80 40 L75 20 L25 20 Z"/>
+            <rect x="25" y="40" width="50" height="40"/>
+            <rect x="42" y="55" width="16" height="25"/>
+            <path d="M20 40 Q25 48 30 40 Q35 48 40 40 Q45 48 50 40 Q55 48 60 40 Q65 48 70 40 Q75 48 80 40"/>
+          </svg>
+          <div class="pf-gm-arrow-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </a>
+
       </div>
-      {% endfor %}
-    {% else %}
-      <div class="pf-empty">
-        <div class="pf-empty-icon"><svg><use href="#icon-users"></use></svg></div>
-        <div>No friends added yet — find opponents in Leaderboards!</div>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="pf-desk-stats-row">
+      <div class="pf-desk-stat-card">
+        <div class="pf-desk-stat-num">{{ profile.wins }}</div>
+        <div class="pf-desk-stat-lbl">Victories</div>
       </div>
-    {% endif %}
+      <div class="pf-desk-stat-card">
+        <div class="pf-desk-stat-num">{{ profile.win_rate }}%</div>
+        <div class="pf-desk-stat-lbl">Win Rate</div>
+      </div>
+      <div class="pf-desk-stat-card">
+        <div class="pf-desk-stat-num">{{ achievements_unlocked }}/{{ achievements_total }}</div>
+        <div class="pf-desk-stat-lbl">Achievements</div>
+      </div>
+    </div>
+
+    <!-- Recent Battles & Friends Section -->
+    <div class="pf-desk-bottom-row">
+      <!-- Recent Battles Panel -->
+      <div class="pf-desk-panel">
+        <div class="pf-desk-panel-head">
+          <span class="pf-panel-title">RECENT BATTLES</span>
+          <a href="{% url 'accounts:profile' request.user.username %}" class="pf-panel-link">View profile →</a>
+        </div>
+        <div class="pf-desk-panel-body">
+          {% if recent_matches %}
+            {% for mp in recent_matches %}
+            <div class="pf-match-item">
+              <div class="pf-flex pf-gap-12">
+                <span class="pf-match-icon {% if mp.is_winner %}winner{% else %}loser{% endif %}">
+                  <svg><use href="{% if mp.is_winner %}#icon-trophy{% else %}#icon-skull{% endif %}"></use></svg>
+                </span>
+                <div>
+                  <div class="pf-match-title">{{ mp.match.get_match_type_display }}</div>
+                  <div class="pf-match-arena">{{ mp.match.arena.name|default:"Classroom Desk" }}</div>
+                </div>
+              </div>
+              <span class="pf-match-time">{{ mp.match.created_at|timesince }} ago</span>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="pf-empty-state">
+              <div class="pf-empty-icon"><svg><use href="#icon-swords"></use></svg></div>
+              <div>No battles recorded yet — jump into your first PenFight!</div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Friends & Challenges Panel -->
+      <div class="pf-desk-panel">
+        <div class="pf-desk-panel-head">
+          <span class="pf-panel-title">FRIENDS & CHALLENGES</span>
+          <a href="{% url 'accounts:friends' %}" class="pf-panel-link">Manage →</a>
+        </div>
+        <div class="pf-desk-panel-body">
+          {% if incoming_requests %}
+            {% for fr in incoming_requests %}
+            <div class="pf-friend-req-box">
+              <span><strong>{{ fr.from_user.username }}</strong> sent a request</span>
+              <form method="post" action="{% url 'accounts:respond_friend_request' fr.id 'accept' %}">
+                {% csrf_token %}
+                <button class="pf-desk-btn pf-btn-sm">Accept</button>
+              </form>
+            </div>
+            {% endfor %}
+          {% endif %}
+
+          {% if friends %}
+            {% for f in friends %}
+            <div class="pf-friend-item">
+              <a href="{% url 'accounts:profile' f.username %}" class="pf-friend-info">
+                <span class="pf-friend-avatar">{{ f.username|slice:":1"|upper }}</span>
+                <span class="pf-friend-name">{{ f.username }}</span>
+              </a>
+              <form method="post" action="{% url 'multiplayer:challenge_friend' f.username %}">
+                {% csrf_token %}
+                <button class="pf-challenge-btn">
+                  <svg><use href="#icon-swords"></use></svg>
+                  <span>Challenge</span>
+                </button>
+              </form>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="pf-empty-state">
+              <div class="pf-empty-icon"><svg><use href="#icon-users"></use></svg></div>
+              <div>No friends added yet — find opponents in Leaderboards!</div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 {% endblock %}
-

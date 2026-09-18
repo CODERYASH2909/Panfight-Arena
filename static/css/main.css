@@ -125,27 +125,26 @@ button { font-family: inherit; cursor: pointer; }
   background: var(--bg-cream);
 }
 
-.pf-global-nav {
+.pf-global-nav-wrap {
   position: sticky;
-  top: 0;
+  top: 12px;
   z-index: 500;
-  height: var(--nav-h);
-  background: rgba(237, 226, 208, 0.94);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
-  box-shadow: 0 2px 12px rgba(53, 37, 28, 0.05);
+  padding: 0 16px;
 }
 
-.pf-nav-container {
-  max-width: 1320px;
+.pf-global-nav {
+  max-width: 1260px;
   margin: 0 auto;
-  padding: 0 24px;
-  height: 100%;
+  height: 58px;
+  background: #FFFFFF;
+  border-radius: 9999px;
+  border: 1px solid rgba(217, 203, 185, 0.6);
+  box-shadow: 0 4px 20px rgba(53, 37, 28, 0.08);
+  padding: 0 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 16px;
 }
 
 .pf-brand-logo {
@@ -156,23 +155,36 @@ button { font-family: inherit; cursor: pointer; }
   flex-shrink: 0;
 }
 .pf-brand-mark {
-  width: 38px; height: 38px;
-  border-radius: var(--radius-md);
-  background: var(--brown-dark);
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: #1C3829;
   display: flex; align-items: center; justify-content: center;
-  color: var(--bg-surface);
-  box-shadow: 0 2px 8px rgba(53, 37, 28, 0.15);
+  color: #72E299;
+  box-shadow: 0 2px 8px rgba(28, 56, 41, 0.2);
 }
-.pf-brand-mark svg { width: 20px; height: 20px; }
+.pf-brand-mark svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; }
+
+.pf-brand-text-wrapper {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
 .pf-brand-text {
-  font-family: var(--font-display);
+  font-family: 'Space Grotesk', var(--font-display);
   font-weight: 800;
-  font-size: 17px;
+  font-size: 15px;
   letter-spacing: -0.01em;
-  color: var(--brown-dark);
+  color: #1C3829;
 }
 .pf-brand-text span {
-  color: var(--copper);
+  color: #1C3829;
+}
+.pf-brand-subtext {
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #8C6843;
+  text-transform: uppercase;
 }
 
 .pf-nav-links {
@@ -184,39 +196,36 @@ button { font-family: inherit; cursor: pointer; }
 .pf-nav-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  border-radius: var(--radius-md);
-  color: var(--text-secondary);
-  font-weight: 600;
+  gap: 7px;
+  padding: 7px 15px;
+  border-radius: 9999px;
+  color: #4A3D34;
+  font-weight: 700;
   font-size: 13px;
   transition: all 0.15s ease;
   border: 1px solid transparent;
   text-decoration: none;
 }
 .pf-nav-item svg {
-  width: 16px; height: 16px;
-  opacity: 0.75;
+  width: 15px; height: 15px;
+  opacity: 0.8;
   transition: opacity 0.15s;
 }
 .pf-nav-item:hover {
-  color: var(--brown-dark);
-  background: rgba(90, 62, 43, 0.06);
-  border-color: rgba(90, 62, 43, 0.12);
+  color: #1C3829;
+  background: rgba(140, 81, 56, 0.08);
 }
-.pf-nav-item:hover svg { opacity: 1; }
 .pf-nav-item.active {
-  color: var(--brown-dark);
-  background: var(--bg-card);
-  border-color: var(--border);
-  box-shadow: 0 2px 6px rgba(53, 37, 28, 0.04);
+  color: #FFFFFF;
+  background: #8C5138;
+  box-shadow: 0 2px 10px rgba(140, 81, 56, 0.3);
 }
-.pf-nav-item.active svg { opacity: 1; color: var(--copper); }
+.pf-nav-item.active svg { opacity: 1; color: #FFFFFF; }
 
 .pf-nav-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-shrink: 0;
 }
 
@@ -1545,4 +1554,734 @@ select option {
   .pf-ref-bottom-bar { padding: 8px 12px; gap: 10px; }
   .pf-ref-sublabel { display: none; }
 }
+
+/* =========================================================================
+   DESK DASHBOARD & REFERENCE UI THEME STYLES
+   ========================================================================= */
+
+body {
+  background-color: #EDE5D5 !important;
+  background-image: 
+    radial-gradient(ellipse at 15% 10%, rgba(200, 180, 150, 0.25), transparent 60%),
+    radial-gradient(ellipse at 85% 90%, rgba(180, 160, 130, 0.2), transparent 60%) !important;
+}
+
+.pf-desk-dashboard {
+  position: relative;
+  max-width: 1260px;
+  margin: 0 auto;
+  padding: 24px 16px 80px;
+}
+
+/* ------------------------------------------------ Desk Background Art & Doodles */
+.pf-desk-decorations {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+/* Hanging Leaves - Left Top */
+.pf-decor-leaves-left {
+  position: absolute;
+  top: -10px;
+  left: -20px;
+  width: 160px;
+  height: 160px;
+}
+
+/* Floating Cursive Note - Left Top */
+.pf-decor-cursive-left {
+  position: absolute;
+  top: 100px;
+  left: 20px;
+  display: flex;
+  flex-direction: column;
+  transform: rotate(-6deg);
+  font-family: 'Caveat', 'Kalam', cursive;
+  color: #3A2E26;
+  line-height: 1;
+}
+.pf-cursive-main {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.pf-cursive-sub {
+  font-size: 36px;
+  font-weight: 700;
+  color: #2E251F;
+  margin-top: 4px;
+}
+.pf-cursive-arrow {
+  width: 48px;
+  height: 30px;
+  margin-top: -6px;
+  margin-left: 20px;
+  color: #3A2E26;
+}
+
+/* Stack of Books - Left Side */
+.pf-decor-books-left {
+  position: absolute;
+  bottom: 120px;
+  left: 0px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+.pf-book-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  transform: rotate(2deg);
+}
+.pf-book {
+  height: 24px;
+  border-radius: 3px 6px 6px 3px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+.pf-book.book-top {
+  width: 130px;
+  background: #2E4C3E;
+  color: #FFFFFF;
+}
+.pf-book.book-mid {
+  width: 145px;
+  background: #A24738;
+  color: #FFFFFF;
+}
+.pf-book.book-bot {
+  width: 160px;
+  background: #B87B4A;
+  color: #FFFFFF;
+}
+.pf-book-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+}
+.pf-book-ribbon {
+  position: absolute;
+  right: 12px;
+  top: 0;
+  width: 6px;
+  height: 32px;
+  background: #E8D098;
+  border-radius: 0 0 2px 2px;
+}
+
+/* Classroom Note Paper - Left Bottom */
+.pf-note-paper-left {
+  width: 140px;
+  padding: 16px 12px;
+  background: #FAF8F2;
+  border: 1px solid #E5DEC9;
+  border-radius: 4px;
+  box-shadow: 3px 6px 14px rgba(0, 0, 0, 0.08);
+  transform: rotate(-4deg);
+  position: relative;
+  margin-top: 20px;
+}
+.pf-note-lines {
+  position: absolute;
+  top: 10px; left: 10px; right: 10px; bottom: 10px;
+  background-image: repeating-linear-gradient(transparent, transparent 15px, #D0D8E8 15px, #D0D8E8 16px);
+  pointer-events: none;
+  opacity: 0.7;
+}
+.pf-note-text {
+  position: relative;
+  font-family: 'Kalam', 'Caveat', cursive;
+  font-size: 16px;
+  font-weight: 700;
+  color: #2E251F;
+  line-height: 1.25;
+}
+.pf-pencil-left {
+  position: absolute;
+  bottom: -10px;
+  right: -24px;
+  width: 80px;
+  height: 8px;
+  background: linear-gradient(90deg, #F0C040, #E0A020);
+  border-radius: 4px 1px 1px 4px;
+  transform: rotate(35deg);
+  box-shadow: 2px 3px 6px rgba(0,0,0,0.2);
+}
+
+/* Pinned Post-it - Right Top */
+.pf-decor-postit-right {
+  position: absolute;
+  top: 40px;
+  right: 20px;
+  transform: rotate(5deg);
+}
+.pf-postit-card {
+  width: 150px;
+  padding: 20px 16px;
+  background: #FDF9E7;
+  border: 1px solid #EDE4C4;
+  box-shadow: 4px 8px 18px rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+  position: relative;
+}
+.pf-postit-text {
+  font-family: 'Kalam', cursive;
+  font-size: 15px;
+  font-weight: 700;
+  color: #332B25;
+  line-height: 1.3;
+}
+.pf-smiley {
+  display: inline-block;
+  font-size: 18px;
+}
+.pf-postit-pin {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 14px;
+  background: #C44536;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  z-index: 2;
+}
+
+/* Pen Holder & Mug - Right Bottom */
+.pf-decor-penholder-right {
+  position: absolute;
+  bottom: 80px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.pf-decor-leaves-right {
+  position: absolute;
+  bottom: 60px;
+  right: -20px;
+  width: 140px;
+  height: 180px;
+  z-index: 0;
+}
+.pf-pen-mug {
+  position: relative;
+  z-index: 2;
+}
+.pf-mug-pens {
+  position: relative;
+  height: 60px;
+  width: 90px;
+  margin: 0 auto;
+}
+.pf-mug-pen {
+  position: absolute;
+  bottom: 0;
+  width: 10px;
+  border-radius: 3px 3px 0 0;
+  box-shadow: 1px 2px 5px rgba(0,0,0,0.2);
+}
+.pf-mug-pen.pen-1 {
+  left: 15px;
+  height: 75px;
+  background: linear-gradient(180deg, #2E251F, #4A3D34);
+  transform: rotate(-10deg);
+}
+.pf-mug-pen.pen-2 {
+  left: 38px;
+  height: 85px;
+  background: linear-gradient(180deg, #A24738, #803022);
+  transform: rotate(2deg);
+}
+.pf-mug-pen.pen-3 {
+  left: 60px;
+  height: 70px;
+  background: linear-gradient(180deg, #C58F3E, #A06E20);
+  transform: rotate(12deg);
+}
+.pf-mug-body {
+  width: 100px;
+  height: 105px;
+  background: #F2EADA;
+  border: 2px solid #D6CAAF;
+  border-radius: 12px 12px 18px 18px;
+  box-shadow: 4px 8px 20px rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 12px;
+}
+.pf-mug-label {
+  font-family: 'Kalam', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: #7A6959;
+  line-height: 1.2;
+}
+
+/* ------------------------------------------------ Main Dashboard Content Layout */
+.pf-dashboard-content {
+  position: relative;
+  z-index: 10;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+/* ------------------------------------------------ Welcome Banner Card */
+.pf-welcome-banner {
+  background: #FAF5EB;
+  border: 1px solid #E2D7C3;
+  border-radius: 24px;
+  padding: 24px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+  box-shadow: 0 4px 20px rgba(53, 37, 28, 0.05);
+}
+
+.pf-welcome-main {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.pf-welcome-avatar {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: #1C3829;
+  color: #FFFFFF;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 800;
+  font-size: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(28, 56, 41, 0.2);
+}
+
+.pf-welcome-title {
+  font-family: 'Space Grotesk', var(--font-display);
+  font-size: 24px;
+  font-weight: 800;
+  color: #1C3829;
+  letter-spacing: -0.01em;
+  position: relative;
+  display: inline-block;
+  line-height: 1.2;
+}
+
+.pf-user-highlight {
+  color: #1C3829;
+}
+
+.pf-underline-stroke {
+  position: absolute;
+  bottom: -6px;
+  right: 0;
+  width: 110px;
+  height: 10px;
+}
+
+.pf-welcome-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.pf-badge-rank {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 14px;
+  border-radius: 9999px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: #C58F3E;
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(197, 143, 62, 0.25);
+}
+
+.pf-rating-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6E6156;
+}
+
+.pf-welcome-progress-side {
+  position: relative;
+  min-width: 260px;
+}
+
+.pf-keep-fighting-note {
+  position: absolute;
+  top: -34px;
+  right: -10px;
+  font-family: 'Caveat', cursive;
+  font-size: 22px;
+  font-weight: 700;
+  color: #B87B4A;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transform: rotate(3deg);
+}
+
+.pf-crown-doodle {
+  width: 22px;
+  height: 18px;
+}
+
+.pf-level-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 800;
+  color: #7A6959;
+  margin-bottom: 8px;
+  letter-spacing: 0.04em;
+}
+
+.pf-level-bar {
+  height: 10px;
+  border-radius: 9999px;
+  background: #EAE3D2;
+  overflow: hidden;
+  position: relative;
+}
+
+.pf-level-bar-fill {
+  height: 100%;
+  border-radius: 9999px;
+  background: #1C3829;
+  transition: width 0.5s ease;
+}
+
+/* ------------------------------------------------ Game Mode Cards Grid */
+.pf-mode-section {
+  margin-top: 32px;
+}
+
+.pf-section-header-title {
+  position: relative;
+  display: inline-block;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: #7A6959;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.pf-title-underline {
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 6px;
+}
+
+.pf-mode-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.pf-gamemode-card {
+  position: relative;
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 160px;
+  text-decoration: none;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  transition: transform 0.22s cubic-bezier(.2,.9,.3,1), box-shadow 0.22s ease;
+}
+
+.pf-gamemode-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+}
+
+.pf-gm-icon-box {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+.pf-gm-icon-box svg {
+  width: 20px;
+  height: 20px;
+  color: #FFFFFF;
+}
+
+.pf-gm-body h3 {
+  font-family: 'Space Grotesk', var(--font-display);
+  font-weight: 800;
+  font-size: 18px;
+  color: #2B211B;
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
+}
+
+.pf-gm-body p {
+  font-size: 12.5px;
+  color: #6E6156;
+  line-height: 1.4;
+  margin: 0;
+  max-width: 82%;
+  font-weight: 500;
+}
+
+.pf-gm-doodle {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 90px;
+  height: 90px;
+  pointer-events: none;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.pf-gamemode-card:hover .pf-gm-doodle {
+  transform: scale(1.08) rotate(-4deg);
+  opacity: 0.45;
+}
+
+.pf-gm-arrow-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 16px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s ease;
+}
+.pf-gm-arrow-btn svg {
+  width: 16px;
+  height: 16px;
+  color: #FFFFFF;
+}
+.pf-gamemode-card:hover .pf-gm-arrow-btn {
+  transform: translateX(3px);
+}
+
+/* Specific Card Styling matching Reference */
+.card-ai {
+  background: #F8E7E3;
+}
+.card-ai .pf-gm-icon-box, .card-ai .pf-gm-arrow-btn {
+  background: #A64B38;
+}
+
+.card-quick {
+  background: #E3ECE2;
+}
+.card-quick .pf-gm-icon-box, .card-quick .pf-gm-arrow-btn {
+  background: #4F7654;
+}
+
+.card-create {
+  background: #E1E8EE;
+}
+.card-create .pf-gm-icon-box, .card-create .pf-gm-arrow-btn {
+  background: #6B869B;
+}
+
+.card-join {
+  background: #F8EFE0;
+}
+.card-join .pf-gm-icon-box, .card-join .pf-gm-arrow-btn {
+  background: #C58F3E;
+}
+
+.card-loadout {
+  background: #F7EFE4;
+}
+.card-loadout .pf-gm-icon-box, .card-loadout .pf-gm-arrow-btn {
+  background: #B86C3F;
+}
+
+.card-store {
+  background: #E2ECE1;
+}
+.card-store .pf-gm-icon-box, .card-store .pf-gm-arrow-btn {
+  background: #456950;
+}
+
+/* ------------------------------------------------ Desk Stats & Bottom Section */
+.pf-desk-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-top: 32px;
+}
+
+.pf-desk-stat-card {
+  background: #FAF5EB;
+  border: 1px solid #E2D7C3;
+  border-radius: 18px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 4px 14px rgba(53, 37, 28, 0.04);
+}
+
+.pf-desk-stat-num {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 800;
+  font-size: 32px;
+  color: #2E251F;
+}
+
+.pf-desk-stat-lbl {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #8C7B6C;
+  margin-top: 4px;
+}
+
+.pf-desk-bottom-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-top: 32px;
+}
+
+.pf-desk-panel {
+  background: #FAF5EB;
+  border: 1px solid #E2D7C3;
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: 0 4px 14px rgba(53, 37, 28, 0.04);
+}
+
+.pf-desk-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.pf-panel-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: #7A6959;
+  text-transform: uppercase;
+}
+
+.pf-panel-link {
+  font-size: 12px;
+  font-weight: 700;
+  color: #A24738;
+  text-decoration: none;
+}
+.pf-panel-link:hover {
+  text-decoration: underline;
+}
+
+.pf-match-item, .pf-friend-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #EAE3D2;
+}
+.pf-match-item:last-child, .pf-friend-item:last-child {
+  border-bottom: none;
+}
+
+.pf-match-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pf-match-icon.winner { background: rgba(197, 143, 62, 0.15); color: #C58F3E; }
+.pf-match-icon.loser { background: rgba(122, 105, 89, 0.15); color: #7A6959; }
+.pf-match-icon svg { width: 18px; height: 18px; }
+
+.pf-match-title { font-weight: 700; font-size: 13px; color: #2B211B; }
+.pf-match-arena { font-size: 11px; color: #8C7B6C; }
+.pf-match-time { font-size: 11px; color: #8C7B6C; }
+
+.pf-friend-info { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.pf-friend-avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: #1C3829;
+  color: #FFFFFF;
+  font-weight: 800;
+  font-size: 12px;
+  display: flex; align-items: center; justify-content: center;
+}
+.pf-friend-name { font-weight: 700; font-size: 13px; color: #2B211B; }
+
+.pf-challenge-btn {
+  background: #1C3829;
+  color: #FFFFFF;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.pf-challenge-btn svg { width: 14px; height: 14px; }
+.pf-challenge-btn:hover { background: #2E5841; }
+
+.pf-empty-state {
+  text-align: center;
+  padding: 32px 16px;
+  color: #8C7B6C;
+  font-size: 13px;
+}
+.pf-empty-icon svg { width: 36px; height: 36px; color: #C5B8A5; margin-bottom: 8px; }
+
+@media (max-width: 900px) {
+  .pf-mode-grid { grid-template-columns: repeat(2, 1fr); }
+  .pf-decor-cursive-left, .pf-decor-books-left, .pf-decor-penholder-right, .pf-decor-postit-right { display: none; }
+  .pf-desk-bottom-row { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+  .pf-mode-grid { grid-template-columns: 1fr; }
+  .pf-desk-stats-row { grid-template-columns: 1fr; }
+  .pf-welcome-banner { padding: 20px; }
+}
+
 
