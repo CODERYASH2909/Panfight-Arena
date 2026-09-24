@@ -1,242 +1,260 @@
-# PenFight Arena
+<div align="center">
 
-> Your pen. Your bench. Your fight.
+# 🖊️ PenFight Arena
 
-PenFight Arena is a multiplayer, turn-based physics game inspired by the classic classroom pen fight. Choose a pen, aim your flick, and knock your opponent off the bench. The project combines a Django web application with real-time battles, player progression, cosmetic rewards, and a dark gaming-focused interface.
+> **Your Pen. Your Bench. Your Fight.**
 
-## Highlights
+A real-time multiplayer & local hotseat physics battle game inspired by classic classroom pen fights.  
+Built with **Django**, **Django Channels**, **WebSockets**, and **HTML5 Canvas**.
 
-- **Local battle** — two-player hotseat matches on one device.
-- **Online battle** — private rooms, friend challenges, and quick matchmaking.
-- **Physics gameplay** — aim by dragging your pen backwards and releasing to flick it.
-- **Progression** — earn Pen Points, XP, levels, ranks, achievements, and match history.
-- **Cosmetics** — collect pens and skins without pay-to-win gameplay advantages.
-- **Social features** — accounts, profiles, friends, notifications, and leaderboards.
-- **Admin tools** — manage content, arenas, skins, achievements, and player data through Django Admin.
+[![Django](https://img.shields.io/badge/Django-5.0+-092E20?style=for-the-badge&logo=django&logoColor=white)](https://www.djangoproject.com/)
+[![WebSockets](https://img.shields.io/badge/WebSockets-Real--Time-4169E1?style=for-the-badge&logo=socketdotio&logoColor=white)](https://channels.readthedocs.io/)
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![Database](https://img.shields.io/badge/Database-PostgreSQL%20%7C%20SQLite-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](#license)
 
-## Quick start
+---
 
-The fastest way to run the project locally is with SQLite. You only need Python and pip.
+</div>
 
-### 1. Create and activate a virtual environment
+## 🌟 Overview
+
+**PenFight Arena** brings back nostalgia with a modern competitive twist! Choose your legendary pen, customize it with cosmetics, adjust your flick trajectory, and knock your opponent off the bench. 
+
+The application features a sleek dark UI, custom 2D physics engine running on HTML5 Canvas, instant online matchmaking over WebSockets, friend challenges, progression leveling, cosmetic store, and achievement systems.
+
+---
+
+## 🚀 Key Features
+
+<table>
+  <tr>
+    <td width="50%">
+      <h3>🎮 Battle Modes</h3>
+      <ul>
+        <li><b>Local Hotseat:</b> Two players battle on a single device with custom physics and arenas.</li>
+        <li><b>Private Rooms:</b> Create lobby rooms with custom codes (<code>PF-XXXX</code>) to challenge friends.</li>
+        <li><b>Quick Matchmaking:</b> ELO/rating-based real-time queue pairing.</li>
+        <li><b>Friend Challenges:</b> Direct battle invites sent seamlessly via player profiles.</li>
+      </ul>
+    </td>
+    <td width="50%">
+      <h3>⚙️ Physics & Gameplay</h3>
+      <ul>
+        <li><b>Interactive Canvas Engine:</b> Real-time vector dragging, tension preview, and angular velocity.</li>
+        <li><b>Friction & Collisions:</b> Realistic mass-based momentum, surface friction, and boundary edge detection.</li>
+        <li><b>Cosmetics without P2W:</b> Pens have subtle stat variations; skins are purely cosmetic.</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <h3>🏆 Progression & Rewards</h3>
+      <ul>
+        <li><b>XP & Leveling System:</b> Rank up from Novice to Grandmaster as you win matches.</li>
+        <li><b>Pen Points (PP) Economy:</b> Earn in-game currency through battles and achievements.</li>
+        <li><b>Achievements & Trophies:</b> Complete challenges to unlock exclusive badges and bonus PP.</li>
+      </ul>
+    </td>
+    <td width="50%">
+      <h3>🛍️ Store & Social Hub</h3>
+      <ul>
+        <li><b>Cosmetic Store:</b> Unlock unique pen designs, custom textures, and visual effects.</li>
+        <li><b>Friends & Socials:</b> Add friends, inspect player profiles, and track online status.</li>
+        <li><b>Leaderboards:</b> Compete on global rankings and track match history.</li>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+---
+
+## 🏗️ Architecture & Tech Stack
+
+PenFight Arena uses an asynchronous ASGI pipeline powered by **Daphne** and **Django Channels** to deliver low-latency multiplayer over WebSockets alongside standard HTTP request handling.
+
+```mermaid
+graph TD
+    Client[🖥️ Browser / Canvas Engine] <-->|WebSockets / WSS| Daphne[⚡ Daphne ASGI Server]
+    Client <-->|HTTP / Static HTML| Daphne
+    Daphne <--> Channels[📡 Django Channels Layer]
+    Channels <-->|In-Memory / Redis| Worker[🔄 Event Consumers & Matchmaking]
+    Daphne <--> Django[🐍 Django Backend & ORM]
+    Django <--> DB[(💾 PostgreSQL / SQLite Database)]
+```
+
+### Stack Breakdown
+
+| Layer | Technologies Used |
+| :--- | :--- |
+| **Backend Framework** | Python, Django |
+| **Real-Time Communications** | Django Channels, Daphne, WebSockets |
+| **Database** | SQLite *(Local Dev)* / PostgreSQL *(Production)* |
+| **Channel Layer** | In-Memory *(Single Server)* / Redis *(Distributed)* |
+| **Frontend & Graphics** | Django Templates, HTML5 Canvas 2D Engine, Vanilla JavaScript, CSS3 |
+
+---
+
+## ⚡ Quick Start (Local Setup)
+
+Get PenFight Arena running locally in under **2 minutes**.
+
+### Prerequisites
+- **Python 3.10+** installed on your system.
+
+### 1️⃣ Clone the Repository
+```bash
+git clone https://github.com/CODERYASH2909/Panfight-Arena.git
+cd penfight-arena
+```
+
+### 2️⃣ Create & Activate Virtual Environment
 
 ```bash
 # macOS / Linux
 python3 -m venv venv
 source venv/bin/activate
 
-# Windows PowerShell
+# Windows (PowerShell)
 py -m venv venv
-.\\venv\\Scripts\\Activate.ps1
+.\venv\Scripts\Activate.ps1
 ```
 
-### 2. Install dependencies
-
+### 3️⃣ Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Configure the environment
-
-Copy the example settings file and use SQLite for a zero-setup local database.
+### 4️⃣ Configure Environment
+Copy `.env.example` to `.env`:
 
 ```bash
 # macOS / Linux
 cp .env.example .env
 
-# Windows PowerShell
+# Windows (PowerShell)
 Copy-Item .env.example .env
 ```
 
-Ensure your `.env` contains:
-
+Ensure your `.env` is set for local zero-config testing:
 ```env
 USE_SQLITE=True
 DEBUG=True
 ```
 
-### 4. Prepare game data and database
-
+### 5️⃣ Database Migration & Game Data Seeding
+Initialize database schema and populate default pens, skins, arenas, and achievements:
 ```bash
 python manage.py migrate
 python manage.py seed_penfight
 ```
 
-`seed_penfight` creates or refreshes the default pens, skins, arenas, and achievements. It is safe to run more than once.
+> 💡 **Note:** `seed_penfight` is idempotent and can be safely executed multiple times.
 
-### 5. Start the server
-
+### 6️⃣ Launch the Development Server
 ```bash
 python manage.py runserver
 ```
 
-Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) in your browser. Create an account to receive the starter pen, starter skin, and Pen Points.
-
-## How to play
-
-### Local battle
-
-1. Sign in and choose **Play → Local Battle**.
-2. Set each player's name, pen, skin, and arena.
-3. Drag your pen backwards, then release to flick it forward.
-4. Take turns until one pen falls off the bench.
-
-The signed-in first player receives the match rewards; the second player can be a guest.
-
-### Online battle
-
-Choose one of these from the dashboard:
-
-- **Private Room:** create a room, share its `PF-XXXX` code, then start when your opponent joins.
-- **Quick Match:** enter the matchmaking queue and the app pairs nearby ratings automatically.
-- **Friend Challenge:** send a direct challenge from a friend's profile or the Friends page.
-
-Online matches use WebSockets at `/ws/battle/<room-code>/`. The regular `runserver` command runs through Daphne/ASGI, so one local server supports both web pages and WebSockets.
-
-## Technology
-
-| Area | Used in this project |
-| --- | --- |
-| Backend | Python, Django |
-| Real-time | Django Channels, Daphne, WebSockets |
-| Database | PostgreSQL, with SQLite for local development |
-| Frontend | Django templates, vanilla JavaScript, HTML Canvas, CSS |
-| Media | Pillow for uploaded avatars |
-
-## Project layout
-
-```text
-penfight-arena/
-├── manage.py                 # Django commands
-├── requirements.txt          # Python dependencies
-├── .env.example              # Configuration template
-├── penfight/                 # Django settings, URLs, ASGI entry point
-├── accounts/                 # Authentication, profiles, friends, notifications
-├── game/                     # Pens, skins, arenas, achievements, local battles
-├── multiplayer/              # Rooms, matchmaking, matches, WebSocket consumer
-├── rewards/                  # Pen Points, XP, ranks, and reward rules
-├── store/                    # Cosmetic store and purchase logic
-├── templates/                # Server-rendered HTML
-└── static/                   # CSS, game engine, battle scripts, audio
-```
-
-Useful files:
-
-- `static/js/engine.js` — shared browser physics engine.
-- `multiplayer/consumers/battle_consumer.py` — live battle WebSocket handling.
-- `multiplayer/services.py` — server-side online match completion and rewards.
-- `rewards/services.py` — centralized Pen Point and XP reward logic.
-- `game/management/commands/seed_penfight.py` — default game-content seed command.
-
-## Configuration
-
-All settings are read from `.env`. Start with `.env.example`.
-
-| Variable | Purpose | Local recommendation |
-| --- | --- | --- |
-| `SECRET_KEY` | Django cryptographic key | Use a unique secret outside local development |
-| `DEBUG` | Enables Django debug mode | `True` locally; `False` in production |
-| `ALLOWED_HOSTS` | Hosts Django accepts | `127.0.0.1,localhost` locally |
-| `USE_SQLITE` | Uses SQLite instead of PostgreSQL | `True` for a quick start |
-| `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT` | PostgreSQL connection settings | Required when `USE_SQLITE=False` |
-| `USE_REDIS_CHANNEL_LAYER` | Shares Channels messages across processes | `False` locally; `True` for multi-process deployment |
-| `REDIS_URL` | Redis connection URL | Required when Redis channel layer is enabled |
-| `CSRF_TRUSTED_ORIGINS` | Allowed browser origins for CSRF requests | Add your deployed HTTPS domain |
-
-## PostgreSQL and Redis setup
-
-SQLite is ideal for trying the game locally. For a production-like configuration, create a PostgreSQL database and set `USE_SQLITE=False`.
-
-```sql
-CREATE DATABASE penfight_arena;
-CREATE USER penfight WITH PASSWORD 'choose-a-strong-password';
-GRANT ALL PRIVILEGES ON DATABASE penfight_arena TO penfight;
-```
-
-Set the matching `DB_*` variables in `.env`, then run migrations again:
-
-```bash
-python manage.py migrate
-python manage.py seed_penfight
-```
-
-For multiple server processes, enable Redis:
-
-```env
-USE_REDIS_CHANNEL_LAYER=True
-REDIS_URL=redis://127.0.0.1:6379/0
-```
-
-The default in-memory channel layer is suitable only for a single local server process.
-
-## Admin
-
-Create an administrator account:
-
-```bash
-python manage.py createsuperuser
-```
-
-Then visit [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/) to manage:
-
-- pens, skins, prices, rarity, and featured items;
-- arenas and unlock requirements;
-- achievements and their rewards;
-- matches, purchases, Pen Point transactions, and notifications.
-
-## Game rules and implementation notes
-
-- The first pen to leave the bench loses.
-- Pen types have intentionally small stat differences. Skins are cosmetic and do not affect stats.
-- Pen Points, XP, inventory updates, and match rewards are calculated on the server to avoid client-controlled payouts.
-- Store purchases and online match completion use database transactions to prevent duplicate purchases or rewards.
-- Online clients exchange flick inputs and replay the shared deterministic physics in the browser. The server finalizes the reported match result and rewards, but it does not run a server-side physics replay or anti-cheat simulation.
-- Weekly and monthly leaderboard views currently reuse the all-time rating data; seasonal snapshots are not yet implemented.
-- The featured store is admin-controlled rather than automatically rotating, and tournaments are not yet implemented.
-
-## Common commands
-
-```bash
-# Apply migrations
-python manage.py migrate
-
-# Generate migrations after changing models
-python manage.py makemigrations
-
-# Populate or refresh game content
-python manage.py seed_penfight
-
-# Run development server (HTTP + WebSockets)
-python manage.py runserver
-
-# Create an admin user
-python manage.py createsuperuser
-
-# Run Django diagnostics
-python manage.py check
-```
-
-## Troubleshooting
-
-| Problem | What to check |
-| --- | --- |
-| Database connection error | Set `USE_SQLITE=True` for local testing, or confirm PostgreSQL is running and all `DB_*` values are correct. |
-| New accounts have no starter items | Run `python manage.py seed_penfight` before creating the accounts. |
-| Online battle stays on “Connecting” | Use `python manage.py runserver`, not a WSGI-only server. Also check the browser console for the WebSocket error. |
-| Two server processes cannot share live updates | Run Redis and set `USE_REDIS_CHANNEL_LAYER=True`. |
-| CSS or JavaScript is missing in development | Confirm the server is in debug mode and that `static/` exists in the project root. |
-| Port 8000 is already in use | Run `python manage.py runserver 8001` and open `http://127.0.0.1:8001/`. |
-
-## Contributing
-
-Before opening a change, run the project checks and test the relevant player flow:
-
-```bash
-python manage.py check
-```
-
-When changing data models, include the generated migration. When changing game balance or rewards, keep the logic centralized in the relevant services rather than duplicating values in views or JavaScript.
+Visit **[http://127.0.0.1:8000/](http://127.0.0.1:8000/)** in your browser to start playing!
 
 ---
 
-Built with Django and Django Channels.
+## 🕹️ How to Play
+
+### 🥊 Local Battle
+1. Go to **Play → Local Battle**.
+2. Select player names, pens, skins, and arena.
+3. Click & drag backward on your pen to set angle and power, then release to flick!
+4. Alternate turns until one pen is knocked off the bench.
+
+### 🌐 Online Battle
+- **Private Room:** Create a room to get a unique code (e.g., `PF-9482`). Share it with a friend to join!
+- **Quick Match:** Join the matchmaking queue to be matched automatically with players of similar rating.
+- **Friend Challenge:** Click **Challenge** on any friend's profile to issue a direct battle request.
+
+---
+
+## 📁 Project Structure
+
+```text
+penfight-arena/
+├── manage.py                 # Django CLI entry point
+├── requirements.txt          # Python packages & dependencies
+├── .env.example              # Environment variables template
+├── penfight/                 # Project configuration, ASGI/WSGI, root URLs
+├── accounts/                 # Auth, user profiles, friends, notifications
+├── game/                     # Pens, skins, arenas, achievements & local engine
+├── multiplayer/              # Rooms, matchmaking, WebSockets & consumers
+├── rewards/                  # XP, Pen Points (PP), leveling & reward engine
+├── store/                    # Cosmetic shop & inventory management
+├── templates/                # Modular HTML5 templates
+└── static/                   # CSS, audio, assets, & JS physics engine
+```
+
+---
+
+## 🔧 Environment Configuration
+
+| Variable | Description | Recommended (Local) |
+| :--- | :--- | :--- |
+| `SECRET_KEY` | Django secret key | Any random string |
+| `DEBUG` | Enables detailed error logs | `True` |
+| `ALLOWED_HOSTS` | Accepted host headers | `127.0.0.1,localhost` |
+| `USE_SQLITE` | Switch between SQLite & Postgres | `True` |
+| `USE_REDIS_CHANNEL_LAYER` | Redis WebSockets layer | `False` *(Single process)* |
+| `REDIS_URL` | Redis server connection URI | `redis://127.0.0.1:6379/0` |
+
+---
+
+## 🛠️ Useful Management Commands
+
+```bash
+# Run migrations
+python manage.py migrate
+
+# Create new migrations after schema changes
+python manage.py makemigrations
+
+# Refresh game data (Pens, Skins, Arenas, Achievements)
+python manage.py seed_penfight
+
+# Create Admin Superuser
+python manage.py createsuperuser
+
+# Run Django diagnostic check
+python manage.py check
+```
+
+---
+
+## ❓ Troubleshooting
+
+<details>
+<summary><b>Online battle hangs on "Connecting..."</b></summary>
+<br>
+Ensure you are starting the server using <code>python manage.py runserver</code> so Daphne handles ASGI WebSockets. WSGI-only servers will fail to accept WebSocket connections.
+</details>
+
+<details>
+<summary><b>New accounts are missing starter pens/skins</b></summary>
+<br>
+Run <code>python manage.py seed_penfight</code> to populate default inventory items before registering new users.
+</details>
+
+<details>
+<summary><b>WebSockets across multiple processes fail</b></summary>
+<br>
+When running multiple worker processes, set <code>USE_REDIS_CHANNEL_LAYER=True</code> in your <code>.env</code> and run a Redis instance.
+</details>
+
+---
+
+## 📜 License
+
+Distributed under the **MIT License**. See `LICENSE` for details.
+
+<div align="center">
+  <sub>Built with ❤️ using Django & HTML5 Canvas</sub>
+</div>
+
