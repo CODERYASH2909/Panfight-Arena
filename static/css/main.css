@@ -1594,43 +1594,45 @@ body {
 /* Floating Cursive Note - Left Top */
 .pf-decor-cursive-left {
   position: absolute;
-  top: 100px;
+  top: 4px;
   left: 20px;
   display: flex;
   flex-direction: column;
-  transform: rotate(-6deg);
+  transform: rotate(-3deg);
   font-family: 'Caveat', 'Kalam', cursive;
   color: #3A2E26;
   line-height: 1;
+  z-index: 2;
 }
 .pf-cursive-main {
-  font-size: 32px;
+  font-size: 24px;
   font-weight: 700;
   letter-spacing: -0.02em;
 }
 .pf-cursive-sub {
-  font-size: 36px;
+  font-size: 26px;
   font-weight: 700;
   color: #2E251F;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 .pf-cursive-arrow {
-  width: 48px;
-  height: 30px;
-  margin-top: -6px;
-  margin-left: 20px;
+  width: 40px;
+  height: 24px;
+  margin-top: -2px;
+  margin-left: 24px;
   color: #3A2E26;
 }
 
 /* Stack of Books - Left Side */
 .pf-decor-books-left {
   position: absolute;
-  bottom: 120px;
-  left: 0px;
+  top: 420px;
+  left: 10px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 16px;
+  z-index: 1;
 }
 .pf-book-stack {
   display: flex;
@@ -1720,13 +1722,14 @@ body {
 /* Pinned Post-it - Right Top */
 .pf-decor-postit-right {
   position: absolute;
-  top: 40px;
+  top: 4px;
   right: 20px;
-  transform: rotate(5deg);
+  transform: rotate(4deg);
+  z-index: 2;
 }
 .pf-postit-card {
   width: 150px;
-  padding: 20px 16px;
+  padding: 14px 16px;
   background: #FDF9E7;
   border: 1px solid #EDE4C4;
   box-shadow: 4px 8px 18px rgba(0, 0, 0, 0.1);
@@ -1735,14 +1738,14 @@ body {
 }
 .pf-postit-text {
   font-family: 'Kalam', cursive;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: #332B25;
-  line-height: 1.3;
+  line-height: 1.25;
 }
 .pf-smiley {
   display: inline-block;
-  font-size: 18px;
+  font-size: 16px;
 }
 .pf-postit-pin {
   position: absolute;
@@ -1760,11 +1763,12 @@ body {
 /* Pen Holder & Mug - Right Bottom */
 .pf-decor-penholder-right {
   position: absolute;
-  bottom: 80px;
+  top: 420px;
   right: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  z-index: 1;
 }
 .pf-decor-leaves-right {
   position: absolute;
@@ -1835,7 +1839,7 @@ body {
   position: relative;
   z-index: 10;
   max-width: 960px;
-  margin: 0 auto;
+  margin: 54px auto 0;
 }
 
 /* ------------------------------------------------ Welcome Banner Card */
@@ -2272,10 +2276,18 @@ body {
 }
 .pf-empty-icon svg { width: 36px; height: 36px; color: #C5B8A5; margin-bottom: 8px; }
 
+@media (max-width: 1240px) {
+  .pf-decor-books-left, .pf-decor-penholder-right { display: none; }
+}
+
 @media (max-width: 900px) {
   .pf-mode-grid { grid-template-columns: repeat(2, 1fr); }
-  .pf-decor-cursive-left, .pf-decor-books-left, .pf-decor-penholder-right, .pf-decor-postit-right { display: none; }
   .pf-desk-bottom-row { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .pf-decor-cursive-left, .pf-decor-postit-right, .pf-decor-leaves-left { display: none; }
+  .pf-dashboard-content { margin-top: 0; }
 }
 
 @media (max-width: 600px) {

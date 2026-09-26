@@ -291,42 +291,51 @@
 <span class="conn-pill bad" id="conn-pill">Connecting...</span>
 
 <div class="pf-ref-battle-container">
-  <!-- Top-Left Player 1 HUD Card -->
-  <div class="pf-ref-hud-card p1" id="hud-p1">
-    <div class="pf-ref-player-header">
-      <div class="pf-ref-avatar" id="hud-p1-avatar">{{ room.host.username|slice:":1"|upper }}</div>
-      <div class="pf-ref-meta">
-        <div class="pf-ref-name" id="hud-p1-name">{{ room.host.username }}</div>
-        <div class="pf-ref-rank" id="hud-p1-rank">HOST</div>
+  <!-- Dynamic Top HUD Bar for All Joined Players (2-5 Players) -->
+  <div style="position:absolute; top:12px; left:18px; right:18px; z-index:20; display:flex; justify-content:space-between; align-items:flex-start; pointer-events:none;">
+    <!-- Left / Player HUD Cards Container -->
+    <div id="hud-players-left" style="display:flex; gap:10px; flex-wrap:wrap; pointer-events:auto;">
+      <div class="pf-ref-hud-card p1" id="hud-player1">
+        <div class="pf-ref-player-header">
+          <div class="pf-ref-avatar" id="avatar-player1">{{ room.host.username|slice:":1"|upper }}</div>
+          <div class="pf-ref-meta">
+            <div class="pf-ref-name" id="name-player1">{{ room.host.username }}</div>
+            <div class="pf-ref-rank" id="role-player1">HOST</div>
+          </div>
+        </div>
+        <div class="pf-ref-dots" id="dots-player1">
+          <div class="pf-ref-dot" id="dot-player1-1"></div>
+          <div class="pf-ref-dot" id="dot-player1-2"></div>
+        </div>
       </div>
     </div>
-    <div class="pf-ref-dots" id="p1-wins-dots">
-      <div class="pf-ref-dot" id="p1-dot-1"></div>
-      <div class="pf-ref-dot" id="p1-dot-2"></div>
-    </div>
-  </div>
 
-  <!-- Top-Center Match & Round Header -->
-  <div class="pf-ref-hud-center">
-    <div class="pf-ref-center-box">
-      <div class="pf-ref-round-label" id="round-label">ROUND 1</div>
-      <div class="pf-ref-score" id="score-text">0 — 0</div>
-    </div>
-    <div class="pf-ref-turn-pill" id="turn-pill">{{ room.host.username|upper }}'S TURN</div>
-  </div>
-
-  <!-- Top-Right Player 2 HUD Card -->
-  <div class="pf-ref-hud-card p2" id="hud-p2">
-    <div class="pf-ref-player-header">
-      <div class="pf-ref-avatar" id="hud-p2-avatar">{{ room.guest.username|slice:":1"|upper }}</div>
-      <div class="pf-ref-meta">
-        <div class="pf-ref-name" id="hud-p2-name">{{ room.guest.username }}</div>
-        <div class="pf-ref-rank" id="hud-p2-rank">GUEST</div>
+    <!-- Top-Center Match & Round Header -->
+    <div class="pf-ref-hud-center" style="pointer-events:auto;">
+      <div class="pf-ref-center-box">
+        <div class="pf-ref-round-label" id="round-label">ROUND 1</div>
+        <div class="pf-ref-score" id="score-text">BENCH DUEL</div>
       </div>
+      <div class="pf-ref-turn-pill" id="turn-pill">{{ room.host.username|upper }}'S TURN</div>
     </div>
-    <div class="pf-ref-dots" id="p2-wins-dots">
-      <div class="pf-ref-dot" id="p2-dot-1"></div>
-      <div class="pf-ref-dot" id="p2-dot-2"></div>
+
+    <!-- Right / Additional Player HUD Cards Container -->
+    <div id="hud-players-right" style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; pointer-events:auto;">
+      {% if room.guest %}
+      <div class="pf-ref-hud-card p2" id="hud-player2">
+        <div class="pf-ref-player-header">
+          <div class="pf-ref-avatar" id="avatar-player2">{{ room.guest.username|slice:":1"|upper }}</div>
+          <div class="pf-ref-meta">
+            <div class="pf-ref-name" id="name-player2">{{ room.guest.username }}</div>
+            <div class="pf-ref-rank" id="role-player2">PLAYER 2</div>
+          </div>
+        </div>
+        <div class="pf-ref-dots" id="dots-player2">
+          <div class="pf-ref-dot" id="dot-player2-1"></div>
+          <div class="pf-ref-dot" id="dot-player2-2"></div>
+        </div>
+      </div>
+      {% endif %}
     </div>
   </div>
 
@@ -386,8 +395,8 @@
 <div class="pf-overlay" id="disconnect-overlay" style="display:none;">
   <div class="pf-center">
     <div class="pf-icon-lg" style="color:var(--warning); width:48px; height:48px; margin:0 auto 12px;"><svg><use href="#icon-alert-triangle"></use></svg></div>
-    <h2 style="font-family:var(--font-display); font-size:28px; font-weight:800;">OPPONENT DISCONNECTED</h2>
-    <p class="pf-muted pf-mt-8">Your opponent has left the room.</p>
+    <h2 style="font-family:var(--font-display); font-size:28px; font-weight:800;">PLAYER DISCONNECTED</h2>
+    <p class="pf-muted pf-mt-8">A player has left the battle room.</p>
     <a href="{% url 'accounts:dashboard' %}" class="pf-btn pf-btn-primary pf-btn-lg pf-mt-24">BACK TO ARENA</a>
   </div>
 </div>
@@ -401,26 +410,13 @@
   };
   window.PF_ROOM_CODE = "{{ room.code }}";
   window.PF_MY_SLOT = "{{ my_slot }}";
+  window.PF_ROOM_PLAYERS = {{ players_config_json|safe }};
   window.PF_HOST_NAME = "{{ room.host.username }}";
-  window.PF_GUEST_NAME = "{{ room.guest.username }}";
-  window.PF_HOST_PEN = {
-    mass: {{ room.host.profile.equipped_pen.mass|default:1.0 }}, friction: {{ room.host.profile.equipped_pen.friction|default:1.0 }},
-    power: {{ room.host.profile.equipped_pen.max_power|default:1.0 }},
-    color: "{{ room.host.profile.equipped_skin.body_color|default:'#3b82f6' }}", accent: "{{ room.host.profile.equipped_skin.accent_color|default:'#93c5fd' }}",
-    trail: "{{ room.host.profile.equipped_skin.trail_color|default:'#60a5fa' }}", glow: {{ room.host.profile.equipped_skin.glow|yesno:"true,false" }},
-    assetKey: "{{ room.host.profile.equipped_skin.asset_key|default:'classic-blue' }}",
-    penId: {{ room.host.profile.equipped_pen_id|default:"null" }}, skinId: {{ room.host.profile.equipped_skin_id|default:"null" }}
-  };
-  window.PF_GUEST_PEN = {
-    mass: {{ room.guest.profile.equipped_pen.mass|default:1.0 }}, friction: {{ room.guest.profile.equipped_pen.friction|default:1.0 }},
-    power: {{ room.guest.profile.equipped_pen.max_power|default:1.0 }},
-    color: "{{ room.guest.profile.equipped_skin.body_color|default:'#f87171' }}", accent: "{{ room.guest.profile.equipped_skin.accent_color|default:'#fecaca' }}",
-    trail: "{{ room.guest.profile.equipped_skin.trail_color|default:'#fca5a5' }}", glow: {{ room.guest.profile.equipped_skin.glow|yesno:"true,false" }},
-    assetKey: "{{ room.guest.profile.equipped_skin.asset_key|default:'sunset-blaze' }}",
-    penId: {{ room.guest.profile.equipped_pen_id|default:"null" }}, skinId: {{ room.guest.profile.equipped_skin_id|default:"null" }}
-  };
+  window.PF_GUEST_NAME = "{% if room.guest %}{{ room.guest.username }}{% else %}Guest{% endif %}";
+  window.PF_HOST_PEN = (window.PF_ROOM_PLAYERS.find(p => p.slot === "player1") || {}).pen || {};
+  window.PF_GUEST_PEN = (window.PF_ROOM_PLAYERS.find(p => p.slot === "player2") || {}).pen || {};
 </script>
-<script src="{% static 'js/engine.js' %}?v=15.0"></script>
-<script src="{% static 'js/audio.js' %}?v=15.0"></script>
-<script src="{% static 'js/battle_online.js' %}?v=15.0"></script>
+<script src="{% static 'js/engine.js' %}?v=16.0"></script>
+<script src="{% static 'js/audio.js' %}?v=16.0"></script>
+<script src="{% static 'js/battle_online.js' %}?v=16.0"></script>
 {% endblock %}

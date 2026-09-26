@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Create Private Room — PenFight Arena{% endblock %}
+
+{% block extra_css %}
+<style>
+  .create-room-card {
+    max-width: 540px;
+    margin: 40px auto;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 40px 32px;
+    box-shadow: var(--shadow-md);
+  }
+
+  .player-selector-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+    margin-bottom: 24px;
+  }
+
+  .player-option-card {
+    background: var(--bg-surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+  .player-option-card:hover {
+    border-color: var(--copper);
+    transform: translateY(-2px);
+  }
+  .player-option-card.selected {
+    border-color: var(--gold);
+    background: rgba(197, 143, 62, 0.12);
+    box-shadow: 0 0 16px rgba(197, 143, 62, 0.2);
+  }
+  .player-option-num {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--brown-dark);
+    line-height: 1;
+  }
+  .player-option-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="create-room-card">
+  <div class="pf-center pf-mb-24">
+    <div class="pf-mode-icon" style="margin:0 auto 12px; background:rgba(201,154,82,0.15); color:var(--gold); width:54px; height:54px;">
+      <span class="pf-icon-lg"><svg><use href="#icon-lock"></use></svg></span>
+    </div>
+    <h2 style="font-family:var(--font-display); font-size:28px; font-weight:800; color:var(--brown-dark);">CREATE PRIVATE ROOM</h2>
+    <p class="pf-muted pf-mt-8" style="font-size:14px;">Host a match and invite your friends with a room code.</p>
+  </div>
+
+  <form method="post" action="{% url 'multiplayer:room_create' %}">
+    {% csrf_token %}
+    <input type="hidden" name="max_players" id="max_players_input" value="2">
+
+    <div class="pf-mb-24">
+      <label class="pf-label" style="text-align:center; display:block; margin-bottom:10px;">NUMBER OF PLAYERS</label>
+      <div class="player-selector-grid">
+        <div class="player-option-card selected" data-value="2" onclick="selectPlayerCount(2)">
+          <div class="player-option-num">2</div>
+          <div class="player-option-label">PLAYERS</div>
+        </div>
+        <div class="player-option-card" data-value="3" onclick="selectPlayerCount(3)">
+          <div class="player-option-num">3</div>
+          <div class="player-option-label">PLAYERS</div>
+        </div>
+        <div class="player-option-card" data-value="4" onclick="selectPlayerCount(4)">
+          <div class="player-option-num">4</div>
+          <div class="player-option-label">PLAYERS</div>
+        </div>
+        <div class="player-option-card" data-value="5" onclick="selectPlayerCount(5)">
+          <div class="player-option-num">5</div>
+          <div class="player-option-label">PLAYERS</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pf-center pf-mb-24" style="background:var(--bg-surface); padding:12px; border-radius:var(--radius-md); border:1px solid var(--border);">
+      <span class="pf-muted" style="font-size:13px;">Selected Room Capacity: <strong id="selected-capacity-text" style="color:var(--brown-dark);">2 Players</strong></span>
+    </div>
+
+    <button type="submit" class="pf-btn pf-btn-primary pf-btn-block pf-btn-lg">
+      <span class="pf-icon"><svg><use href="#icon-plus"></use></svg></span>
+      <span>CREATE ROOM</span>
+    </button>
+  </form>
+
+  <div class="pf-center pf-mt-24" style="border-top:1px solid var(--border); padding-top:16px;">
+    <p class="pf-muted" style="font-size:13px;">
+      Have a code from a friend? <a href="{% url 'multiplayer:room_join' %}" style="color:var(--copper); font-weight:700;">Join Room</a>
+    </p>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function selectPlayerCount(val) {
+    document.getElementById('max_players_input').value = val;
+    document.querySelectorAll('.player-option-card').forEach(card => {
+      if (parseInt(card.dataset.value) === val) {
+        card.classList.add('selected');
+      } else {
+        card.classList.remove('selected');
+      }
+    });
+    document.getElementById('selected-capacity-text').textContent = val + " Players";
+  }
+</script>
+{% endblock %}

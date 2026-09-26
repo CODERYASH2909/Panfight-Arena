@@ -15,10 +15,27 @@ from .services import try_pair_quick_match
 
 @login_required
 def private_room_create(request):
-    arena = Arena.objects.filter(is_active=True).first()
-    room = PrivateRoom.objects.create(host=request.user, arena=arena, status=PrivateRoom.Status.WAITING)
-    messages.success(request, f"Private battle room created! Room Code: {room.code}")
-    return redirect("multiplayer:room_lobby", code=room.code)
+    if request.method == "POST":
+        try:
+            max_players = int(request.POST.get("max_players", 2))
+        except (ValueError, TypeError):
+            max_players = 2
+
+        if max_players not in [2, 3, 4, 5]:
+            messages.error(request, "Invalid room size. Supported values are 2, 3, 4, or 5 players.")
+            return render(request, "multiplayer/room_create.html")
+
+        arena = Arena.objects.filter(is_active=True).first()
+        room = PrivateRoom.objects.create(
+            host=request.user,
+            arena=arena,
+            max_players=max_players,
+            status=PrivateRoom.Status.WAITING,
+        )
+        messages.success(request, f"Private battle room created ({max_players} Players)! Room Code: {room.code}")
+        return redirect("multiplayer:room_lobby", code=room.code)
+
+    return render(request, "multiplayer/room_create.html")
 
 
 @login_required
@@ -38,16 +55,18 @@ def private_room_join(request):
             messages.error(request, "Battle room is no longer available.")
             return redirect("multiplayer:room_join")
 
-        if room.host == request.user:
+        if request.user in room.all_players:
             return redirect("multiplayer:room_lobby", code=room.code)
 
-        if room.guest and room.guest != request.user:
-            messages.error(request, "Room is already full.")
+        if room.is_full or room.player_count >= room.max_players:
+            messages.error(request, "Room is full.")
             return redirect("multiplayer:room_join")
 
-        room.guest = request.user
-        room.status = PrivateRoom.Status.READY
-        room.save(update_fields=["guest", "status"])
+        success = room.add_player(request.user)
+        if not success:
+            messages.error(request, "Room is full.")
+            return redirect("multiplayer:room_join")
+
         messages.success(request, f"Joined battle room {room.code}!")
         return redirect("multiplayer:room_lobby", code=room.code)
 
@@ -65,23 +84,36 @@ def room_lobby(request, code):
         messages.error(request, "Battle room is no longer available.")
         return redirect("accounts:friends")
 
-    # If guest visits room link directly when slot is open
-    if request.user != room.host and not room.guest and room.status == PrivateRoom.Status.WAITING:
-        room.guest = request.user
-        room.status = PrivateRoom.Status.READY
-        room.save(update_fields=["guest", "status"])
-
-    if request.user not in [room.host, room.guest]:
-        messages.error(request, "You're not part of this battle room.")
-        return redirect("accounts:dashboard")
+    if request.user not in room.all_players:
+        if not room.is_full and room.status in [PrivateRoom.Status.WAITING, PrivateRoom.Status.READY]:
+            joined = room.add_player(request.user)
+            if not joined:
+                messages.error(request, "Room is full.")
+                return redirect("accounts:dashboard")
+        else:
+            messages.error(request, "You're not part of this battle room or room is full.")
+            return redirect("accounts:dashboard")
 
     arenas = Arena.objects.filter(is_active=True)
-    my_slot = "player1" if request.user == room.host else "player2"
+    my_slot = room.slot_for_user(request.user)
+
+    slots_info = []
+    for i in range(1, room.max_players + 1):
+        slot_key = f"player{i}"
+        player_user = room.get_user_by_slot(slot_key)
+        slots_info.append({
+            "slot_key": slot_key,
+            "slot_number": i,
+            "user": player_user,
+            "is_host": (player_user == room.host) if player_user else False,
+            "is_me": (player_user == request.user) if player_user else False,
+        })
 
     return render(request, "multiplayer/room_lobby.html", {
         "room": room,
         "arenas": arenas,
         "my_slot": my_slot,
+        "slots_info": slots_info,
     })
 
 
@@ -99,8 +131,12 @@ def room_set_arena(request, code):
 @require_POST
 def room_start(request, code):
     room = get_object_or_404(PrivateRoom, code__iexact=code)
-    if not room.guest:
-        messages.error(request, "Waiting for an opponent to join before starting.")
+    if request.user != room.host:
+        messages.error(request, "Only the host can start the match.")
+        return redirect("multiplayer:room_lobby", code=code)
+
+    if room.player_count < 2:
+        messages.error(request, "Waiting for at least 1 more player to join before starting.")
         return redirect("multiplayer:room_lobby", code=code)
 
     if not room.match:
@@ -121,25 +157,74 @@ def room_status(request, code):
     room = PrivateRoom.objects.filter(code__iexact=code).first()
     if not room:
         return JsonResponse({"exists": False, "status": "not_found"}, status=404)
+
+    players_data = []
+    for i in range(1, room.max_players + 1):
+        slot_key = f"player{i}"
+        p = room.get_user_by_slot(slot_key)
+        if p:
+            players_data.append({
+                "slot": slot_key,
+                "username": p.username,
+                "is_host": (p == room.host),
+            })
+
     return JsonResponse({
         "exists": True,
         "status": room.status,
-        "has_guest": bool(room.guest_id),
+        "max_players": room.max_players,
+        "current_players": room.player_count,
+        "is_full": room.is_full,
+        "players": players_data,
         "host": room.host.username,
-        "guest": room.guest.username if room.guest else None,
     })
 
 
 @login_required
 def online_battle(request, code):
     room = get_object_or_404(PrivateRoom, code__iexact=code)
-    if request.user not in [room.host, room.guest]:
+    if request.user not in room.all_players:
         messages.error(request, "You're not part of this battle room.")
         return redirect("accounts:dashboard")
-    my_slot = "player1" if request.user == room.host else "player2"
-    opponent = room.guest if my_slot == "player1" else room.host
+
+    my_slot = room.slot_for_user(request.user)
+
+    players_config = []
+    colors = ["#3b82f6", "#ef4444", "#10b981", "#facc15", "#a855f7"]
+    accents = ["#93c5fd", "#fca5a5", "#6ee7b7", "#fef08a", "#e9d5ff"]
+    trails = ["#60a5fa", "#f87171", "#34d399", "#fde047", "#c084fc"]
+    asset_keys = ["classic-blue", "sunset-blaze", "neon-matrix", "golden-dragon", "cyber-phantom"]
+
+    for i in range(1, room.max_players + 1):
+        slot_key = f"player{i}"
+        user = room.get_user_by_slot(slot_key)
+        if user:
+            equipped_pen = getattr(user.profile, "equipped_pen", None)
+            equipped_skin = getattr(user.profile, "equipped_skin", None)
+            idx = (i - 1) % 5
+            players_config.append({
+                "slot": slot_key,
+                "username": user.username,
+                "is_me": (user == request.user),
+                "is_host": (user == room.host),
+                "pen": {
+                    "mass": equipped_pen.mass if equipped_pen else 1.0,
+                    "friction": equipped_pen.friction if equipped_pen else 1.0,
+                    "power": equipped_pen.max_power if equipped_pen else 1.0,
+                    "color": equipped_skin.body_color if (equipped_skin and equipped_skin.body_color) else colors[idx],
+                    "accent": equipped_skin.accent_color if (equipped_skin and equipped_skin.accent_color) else accents[idx],
+                    "trail": equipped_skin.trail_color if (equipped_skin and equipped_skin.trail_color) else trails[idx],
+                    "glow": equipped_skin.glow if equipped_skin else False,
+                    "assetKey": equipped_skin.asset_key if (equipped_skin and equipped_skin.asset_key) else asset_keys[idx],
+                    "penId": getattr(user.profile, "equipped_pen_id", None),
+                    "skinId": getattr(user.profile, "equipped_skin_id", None),
+                }
+            })
+
     return render(request, "multiplayer/battle_online.html", {
-        "room": room, "my_slot": my_slot, "opponent": opponent,
+        "room": room,
+        "my_slot": my_slot,
+        "players_config_json": json.dumps(players_config),
     })
 
 
@@ -208,6 +293,7 @@ def challenge_friend(request, username):
         host=request.user,
         guest=friend,
         arena=arena,
+        max_players=2,
         status=PrivateRoom.Status.WAITING
     )
     Notification.objects.create(

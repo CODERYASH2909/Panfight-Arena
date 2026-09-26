@@ -30,7 +30,7 @@ def try_pair_quick_match(ticket: MatchmakingTicket):
             arena = Arena.objects.filter(is_active=True).order_by("?").first()
             match = Match.objects.create(match_type=Match.MatchType.QUICK, arena=arena, status=Match.Status.PENDING)
             room = PrivateRoom.objects.create(
-                host=other.user, guest=ticket.user, arena=arena,
+                host=other.user, guest=ticket.user, arena=arena, max_players=2,
                 status=PrivateRoom.Status.READY, match=match,
             )
             ticket.status = MatchmakingTicket.Status.MATCHED

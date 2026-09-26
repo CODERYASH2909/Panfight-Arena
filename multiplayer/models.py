@@ -60,6 +60,9 @@ class MatchPlayer(models.Model):
     SLOT_CHOICES = [
         ("player1", "Player 1"),
         ("player2", "Player 2"),
+        ("player3", "Player 3"),
+        ("player4", "Player 4"),
+        ("player5", "Player 5"),
         ("t1p1", "Team 1 Player 1"),
         ("t1p2", "Team 1 Player 2"),
         ("t2p1", "Team 2 Player 1"),
@@ -87,12 +90,11 @@ class MatchPlayer(models.Model):
 class PrivateRoom(models.Model):
     class Status(models.TextChoices):
         WAITING = "waiting", "Waiting for players"
-        FILLING = "filling", "Filling slots"  # 2v2: some but not all players joined
+        FILLING = "filling", "Filling slots"
         READY = "ready", "All players ready"
         IN_PROGRESS = "in_progress", "In progress"
         FINISHED = "finished", "Finished"
         CANCELLED = "cancelled", "Cancelled"
-
 
     class RoomType(models.TextChoices):
         ONE_V_ONE = "1v1", "1v1"
@@ -100,9 +102,19 @@ class PrivateRoom(models.Model):
 
     code = models.CharField(max_length=10, unique=True, default=generate_room_code)
     room_type = models.CharField(max_length=3, choices=RoomType.choices, default=RoomType.ONE_V_ONE)
+    max_players = models.IntegerField(default=2, null=True, blank=True)
     host = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="hosted_rooms")
     guest = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="joined_rooms"
+    )
+    player3 = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="joined_rooms_p3"
+    )
+    player4 = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="joined_rooms_p4"
+    )
+    player5 = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="joined_rooms_p5"
     )
     # Extra slots for 2v2 team battles
     team1_player2 = models.ForeignKey(
@@ -116,29 +128,39 @@ class PrivateRoom(models.Model):
     match = models.OneToOneField(Match, null=True, blank=True, on_delete=models.SET_NULL, related_name="room")
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return self.code
+    def save(self, *args, **kwargs):
+        if not self.max_players:
+            self.max_players = 2
+        super().save(*args, **kwargs)
 
-    @property
-    def max_players(self):
-        return 4 if self.room_type == self.RoomType.TWO_V_TWO else 2
+    def __str__(self):
+        return f"{self.code} ({self.player_count}/{self.max_players or 2})"
 
     @property
     def is_full(self):
         if self.room_type == self.RoomType.TWO_V_TWO:
             return all([self.host_id, self.guest_id, self.team1_player2_id, self.team2_player2_id])
-        return bool(self.host_id and self.guest_id)
+        return len(self.all_players) >= (self.max_players or 2)
 
     @property
     def all_players(self):
-        """Returns a list of all non-None player users."""
-        players = [self.host]
+        """Returns a list of all non-None player users in join order."""
+        players = []
+        if self.host:
+            players.append(self.host)
         if self.guest:
             players.append(self.guest)
-        if self.team1_player2:
-            players.append(self.team1_player2)
-        if self.team2_player2:
-            players.append(self.team2_player2)
+        if self.player3:
+            players.append(self.player3)
+        if self.player4:
+            players.append(self.player4)
+        if self.player5:
+            players.append(self.player5)
+        if self.room_type == self.RoomType.TWO_V_TWO:
+            if self.team1_player2 and self.team1_player2 not in players:
+                players.append(self.team1_player2)
+            if self.team2_player2 and self.team2_player2 not in players:
+                players.append(self.team2_player2)
         return players
 
     @property
@@ -146,16 +168,59 @@ class PrivateRoom(models.Model):
         return len(self.all_players)
 
     def slot_for_user(self, user):
-        """Returns the slot name for a given user in a 2v2 room."""
+        """Returns the slot name for a given user."""
+        if not user or not user.is_authenticated:
+            return None
         if user.id == self.host_id:
-            return "t1p1"
+            return "player1" if self.room_type != self.RoomType.TWO_V_TWO else "t1p1"
+        if user.id == self.guest_id:
+            return "player2" if self.room_type != self.RoomType.TWO_V_TWO else "t2p1"
+        if user.id == self.player3_id:
+            return "player3"
+        if user.id == self.player4_id:
+            return "player4"
+        if user.id == self.player5_id:
+            return "player5"
         if user.id == self.team1_player2_id:
             return "t1p2"
-        if user.id == self.guest_id:
-            return "t2p1"
         if user.id == self.team2_player2_id:
             return "t2p2"
         return None
+
+    def get_user_by_slot(self, slot):
+        mapping = {
+            "player1": self.host,
+            "player2": self.guest,
+            "player3": self.player3,
+            "player4": self.player4,
+            "player5": self.player5,
+            "t1p1": self.host,
+            "t2p1": self.guest,
+            "t1p2": self.team1_player2,
+            "t2p2": self.team2_player2,
+        }
+        return mapping.get(slot)
+
+    def add_player(self, user):
+        """Adds user to the first open slot if capacity allows."""
+        if user in self.all_players:
+            return True
+        if len(self.all_players) >= self.max_players:
+            return False
+        if not self.guest_id:
+            self.guest = user
+        elif not self.player3_id and self.max_players >= 3:
+            self.player3 = user
+        elif not self.player4_id and self.max_players >= 4:
+            self.player4 = user
+        elif not self.player5_id and self.max_players >= 5:
+            self.player5 = user
+        else:
+            return False
+        if len(self.all_players) >= self.max_players:
+            self.status = PrivateRoom.Status.READY
+        self.save()
+        return True
 
 
 class MatchmakingTicket(models.Model):
