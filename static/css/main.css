@@ -133,7 +133,7 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 .pf-global-nav {
-  max-width: 1260px;
+  max-width: 1360px;
   margin: 0 auto;
   height: 58px;
   background: #FFFFFF;
@@ -249,8 +249,8 @@ button { font-family: inherit; cursor: pointer; }
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  background: rgba(183, 122, 74, 0.12);
-  border: 1px solid rgba(183, 122, 74, 0.35);
+  background: rgba(201, 154, 82, 0.12);
+  border: 1px solid rgba(201, 154, 82, 0.35);
   border-radius: 999px;
   font-weight: 700;
   font-size: 13px;
@@ -546,9 +546,9 @@ svg {
   flex-direction: column;
 }
 .pf-container {
-  max-width: 1100px;
+  max-width: 1360px;
   margin: 0 auto;
-  padding: 0 40px;
+  padding: 0 24px;
   width: 100%;
 }
 .pf-main {
@@ -1568,12 +1568,12 @@ body {
 
 .pf-desk-dashboard {
   position: relative;
-  max-width: 1260px;
+  max-width: 1360px;
   margin: 0 auto;
-  padding: 24px 16px 80px;
+  padding: 16px 20px 40px;
+  min-height: 650px;
 }
 
-/* ------------------------------------------------ Desk Background Art & Doodles */
 .pf-desk-decorations {
   position: absolute;
   inset: 0;
@@ -1594,8 +1594,8 @@ body {
 /* Floating Cursive Note - Left Top */
 .pf-decor-cursive-left {
   position: absolute;
-  top: 4px;
-  left: 20px;
+  top: 65px;
+  left: 25px;
   display: flex;
   flex-direction: column;
   transform: rotate(-3deg);
@@ -1603,6 +1603,7 @@ body {
   color: #3A2E26;
   line-height: 1;
   z-index: 2;
+  transform-origin: top left;
 }
 .pf-cursive-main {
   font-size: 24px;
@@ -1626,13 +1627,14 @@ body {
 /* Stack of Books - Left Side */
 .pf-decor-books-left {
   position: absolute;
-  top: 420px;
-  left: 10px;
+  bottom: 25px;
+  left: 20px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 16px;
   z-index: 1;
+  transform-origin: bottom left;
 }
 .pf-book-stack {
   display: flex;
@@ -1690,7 +1692,7 @@ body {
   box-shadow: 3px 6px 14px rgba(0, 0, 0, 0.08);
   transform: rotate(-4deg);
   position: relative;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 .pf-note-lines {
   position: absolute;
@@ -1722,10 +1724,11 @@ body {
 /* Pinned Post-it - Right Top */
 .pf-decor-postit-right {
   position: absolute;
-  top: 4px;
-  right: 20px;
+  top: 55px;
+  right: 25px;
   transform: rotate(4deg);
   z-index: 2;
+  transform-origin: top right;
 }
 .pf-postit-card {
   width: 150px;
@@ -1763,12 +1766,13 @@ body {
 /* Pen Holder & Mug - Right Bottom */
 .pf-decor-penholder-right {
   position: absolute;
-  top: 420px;
-  right: 10px;
+  bottom: 25px;
+  right: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   z-index: 1;
+  transform-origin: bottom right;
 }
 .pf-decor-leaves-right {
   position: absolute;
@@ -1834,12 +1838,32 @@ body {
   line-height: 1.2;
 }
 
+@media (max-width: 1340px) {
+  .pf-decor-cursive-left { transform: scale(0.88) rotate(-3deg); left: 12px; top: 45px; }
+  .pf-decor-books-left { transform: scale(0.82); left: 10px; bottom: 15px; }
+  .pf-decor-postit-right { transform: scale(0.88) rotate(4deg); right: 12px; top: 40px; }
+  .pf-decor-penholder-right { transform: scale(0.82); right: 10px; bottom: 15px; }
+}
+
+@media (max-width: 1160px) {
+  .pf-decor-cursive-left { transform: scale(0.72) rotate(-3deg); left: 4px; top: 35px; }
+  .pf-decor-books-left { transform: scale(0.70); left: 2px; bottom: 10px; }
+  .pf-decor-postit-right { transform: scale(0.72) rotate(4deg); right: 4px; top: 35px; }
+  .pf-decor-penholder-right { transform: scale(0.70); right: 2px; bottom: 10px; }
+}
+
+@media (max-width: 960px) {
+  .pf-desk-decorations {
+    display: none !important;
+  }
+}
+
 /* ------------------------------------------------ Main Dashboard Content Layout */
 .pf-dashboard-content {
   position: relative;
   z-index: 10;
-  max-width: 960px;
-  margin: 54px auto 0;
+  max-width: 860px;
+  margin: 12px auto 0;
 }
 
 /* ------------------------------------------------ Welcome Banner Card */
@@ -2276,17 +2300,12 @@ body {
 }
 .pf-empty-icon svg { width: 36px; height: 36px; color: #C5B8A5; margin-bottom: 8px; }
 
-@media (max-width: 1240px) {
-  .pf-decor-books-left, .pf-decor-penholder-right { display: none; }
-}
-
 @media (max-width: 900px) {
   .pf-mode-grid { grid-template-columns: repeat(2, 1fr); }
   .pf-desk-bottom-row { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 768px) {
-  .pf-decor-cursive-left, .pf-decor-postit-right, .pf-decor-leaves-left { display: none; }
   .pf-dashboard-content { margin-top: 0; }
 }
 
