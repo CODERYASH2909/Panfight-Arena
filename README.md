@@ -253,6 +253,6 @@ When running multiple worker processes, set <code>USE_REDIS_CHANNEL_LAYER=True</
 Distributed under the **MIT License**. See `LICENSE` for details.
 
 <div align="center">
-  <sub>Built with ❤️ using Django & HTML5 Canvas</sub>
+  <sub>Built using Django & HTML5 Canvas</sub>
 </div>
 
