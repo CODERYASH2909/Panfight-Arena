@@ -9,7 +9,7 @@ from django.views.decorators.http import require_POST
 from game.models import Achievement, UserAchievement
 from multiplayer.models import Match, MatchPlayer
 from .forms import ProfileEditForm, SignUpForm
-from .models import FriendRequest, Friendship, Notification, Profile
+from .models import FriendRequest, Friendship, Notification, Profile, get_profile
 
 
 def signup(request):
@@ -29,7 +29,9 @@ def signup(request):
 
 @login_required
 def dashboard(request):
-    profile = request.user.profile
+    # Repair accounts created before Profile's post-save signal was available.
+    # Without this, a successful login can redirect to a 500 on the dashboard.
+    profile = get_profile(request.user)
     recent_matches = (
         MatchPlayer.objects.filter(user=request.user)
         .select_related("match", "match__arena", "pen", "skin")

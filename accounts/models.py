@@ -127,6 +127,18 @@ class Profile(models.Model):
         return reverse("accounts:profile", args=[self.user.username])
 
 
+def get_profile(user):
+    """Return a user's game profile, repairing legacy accounts when needed.
+
+    Profiles are normally created by the ``User`` post-save signal.  This
+    fallback matters for users that existed before that signal/migration was
+    deployed, as the authenticated dashboard and navigation both require a
+    profile.
+    """
+    profile, _ = Profile.objects.get_or_create(user=user)
+    return profile
+
+
 class Friendship(models.Model):
     """A confirmed, symmetric friendship between two users (one row per pair)."""
 
