@@ -16,6 +16,7 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 media/
+staticfiles/
 
 # Environment variables
 .env
@@ -29,3 +30,7 @@ media/
 # OS
 .DS_Store
 Thumbs.db
+
+# Build artifacts
+penfight-arena.zip
+*.zip

@@ -3,6 +3,11 @@ PenFight Arena — Django settings.
 
 Environment-driven configuration. Copy `.env.example` to `.env` and adjust
 values for your machine before running the server.
+
+Production deployment:
+  - Database  → Supabase PostgreSQL (set DATABASE_URL env var)
+  - WebSocket → Railway (Daphne/ASGI), Redis channel layer
+  - Storage   → Supabase Storage (optional, set SUPABASE_URL + SUPABASE_KEY)
 """
 from pathlib import Path
 import environ
@@ -39,6 +44,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",   # serves staticfiles in prod
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -70,11 +76,22 @@ WSGI_APPLICATION = "penfight.wsgi.application"
 ASGI_APPLICATION = "penfight.asgi.application"
 
 # ---------------------------------------------------------------------------
-# Database — PostgreSQL by default. Falls back to SQLite automatically if
-# USE_SQLITE=True is set in .env, which is handy for a quick local trial run
-# without installing/configuring Postgres first.
+# Database — Priority order:
+#   1. DATABASE_URL env var (Supabase connection string — production)
+#   2. Individual DB_* vars (local Postgres)
+#   3. SQLite (USE_SQLITE=True in .env — quick local dev, no Postgres needed)
 # ---------------------------------------------------------------------------
-if env.bool("USE_SQLITE", default=False):
+_database_url = env("DATABASE_URL", default="")
+
+if _database_url:
+    # Supabase / Railway / any Postgres connection string
+    # django-environ parses postgres:// and postgresql:// correctly.
+    DATABASES = {
+        "default": env.db_url("DATABASE_URL")
+    }
+    # Supabase transaction pooler (port 6543) requires disable_server_side_cursors
+    DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
+elif env.bool("USE_SQLITE", default=False):
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -125,6 +142,8 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+# WhiteNoise compressed static file storage for production
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -136,7 +155,31 @@ LOGIN_REDIRECT_URL = "accounts:dashboard"
 LOGOUT_REDIRECT_URL = "game:landing"
 
 # CSRF / security niceties for local dev over plain HTTP.
-CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=["http://127.0.0.1:8000", "http://localhost:8000"])
+CSRF_TRUSTED_ORIGINS = env.list(
+    "CSRF_TRUSTED_ORIGINS",
+    default=["http://127.0.0.1:8000", "http://localhost:8000"],
+)
+
+# ---------------------------------------------------------------------------
+# Production security settings — only active when DEBUG=False
+# ---------------------------------------------------------------------------
+if not DEBUG:
+    SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=True)
+    SECURE_HSTS_SECONDS = 31536000          # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# ---------------------------------------------------------------------------
+# Supabase Storage (optional — replaces local filesystem for avatar uploads).
+# If SUPABASE_URL is set, configure django-storages to use Supabase's
+# S3-compatible API. Requires: pip install django-storages boto3
+# ---------------------------------------------------------------------------
+SUPABASE_URL = env("SUPABASE_URL", default="")
+SUPABASE_KEY = env("SUPABASE_KEY", default="")
+SUPABASE_BUCKET = env("SUPABASE_BUCKET", default="penfight-avatars")
 
 # ---------------------------------------------------------------------------
 # PenFight Arena game-balance constants — centralised so reward numbers are
