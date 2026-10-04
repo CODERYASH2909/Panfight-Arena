@@ -20,8 +20,8 @@
 </div>
 
 <!-- Controls & Filter Bar -->
-<div class="pf-glass pf-mb-32" style="padding:16px 24px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px;">
-  <div class="pf-flex pf-gap-8" style="flex-wrap:wrap;" id="rarity-filters">
+<div class="pf-glass pf-mb-32" style="padding:14px 18px; display:flex; flex-direction:column; gap:14px;">
+  <div class="pf-flex pf-gap-8" id="rarity-filters">
     <button class="pf-btn pf-btn-ghost pf-btn-sm active-filter" data-rarity="all">ALL PENS</button>
     <button class="pf-btn pf-btn-ghost pf-btn-sm" data-rarity="common">COMMON</button>
     <button class="pf-btn pf-btn-ghost pf-btn-sm" data-rarity="uncommon">UNCOMMON</button>
@@ -31,9 +31,9 @@
     <button class="pf-btn pf-btn-ghost pf-btn-sm" data-rarity="mythic">MYTHIC</button>
   </div>
 
-  <div class="pf-flex pf-gap-12" style="flex:1; max-width:400px;">
-    <input type="text" id="store-search" placeholder="Search pens..." class="pf-input" style="padding:8px 14px; font-size:13px;">
-    <select id="store-sort" class="pf-select" style="padding:8px 14px; font-size:13px; width:auto;">
+  <div class="pf-flex pf-gap-12" style="width:100%; flex-wrap:wrap;">
+    <input type="text" id="store-search" placeholder="Search pens..." class="pf-input" style="padding:8px 14px; font-size:14px; flex:1; min-width:180px;">
+    <select id="store-sort" class="pf-select" style="padding:8px 14px; font-size:14px; width:auto;">
       <option value="price-asc">Price: Low to High</option>
       <option value="price-desc">Price: High to Low</option>
       <option value="name">Name</option>

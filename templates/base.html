@@ -70,8 +70,8 @@
             <span class="pf-pp-lbl">PP</span>
           </div>
 
-          <!-- Rating Badge -->
-          <div class="pf-rating-pill" title="Competitive Rating">
+          <!-- Rating Badge (desktop only) -->
+          <div class="pf-rating-pill pf-desktop-only" title="Competitive Rating">
             <span class="pf-icon" style="color:var(--gold);"><svg><use href="#icon-star"></use></svg></span>
             <span>{{ user.profile.rating }}</span>
           </div>
@@ -96,7 +96,6 @@
                       <a href="{{ n.link }}" class="pf-btn pf-btn-primary pf-btn-sm" style="padding:4px 10px; font-size:11px;">ACCEPT</a>
                       <a href="javascript:void(0)" onclick="window.location.href='{{ n.link }}'.replace('/accept/', '/decline/')" class="pf-btn pf-btn-ghost pf-btn-sm" style="padding:4px 10px; font-size:11px;">DECLINE</a>
                     </div>
-
                   {% else %}
                     <form method="post" action="{% url 'accounts:mark_notification_read' n.id %}">
                       {% csrf_token %}
@@ -113,7 +112,6 @@
                 <div class="pf-dropdown-item pf-muted pf-center" style="padding:16px;">All caught up!</div>
               {% endif %}
             </div>
-
           </div>
 
           <!-- Profile Link -->
@@ -127,8 +125,13 @@
             </div>
           </a>
 
-          <!-- Logout Button -->
-          <form method="post" action="{% url 'accounts:logout' %}" style="display:inline;">
+          <!-- Mobile Hamburger Menu Button -->
+          <button class="pf-nav-icon-btn pf-mobile-toggle" onclick="document.getElementById('pf-mobile-drawer').classList.toggle('open'); document.getElementById('pf-drawer-backdrop').classList.toggle('open');" type="button" aria-label="Toggle Mobile Menu">
+            <span class="pf-icon"><svg><use href="#icon-menu"></use></svg></span>
+          </button>
+
+          <!-- Logout Button (desktop) -->
+          <form method="post" action="{% url 'accounts:logout' %}" class="pf-desktop-only" style="display:inline;">
             {% csrf_token %}
             <button class="pf-nav-icon-btn" type="submit" title="Logout">
               <span class="pf-icon"><svg><use href="#icon-log-out"></use></svg></span>
@@ -143,6 +146,94 @@
         {% endif %}
       </div>
     </header>
+
+    {% if user.is_authenticated %}
+    <!-- Mobile Slide Drawer -->
+    <div class="pf-drawer-backdrop" id="pf-drawer-backdrop" onclick="document.getElementById('pf-mobile-drawer').classList.remove('open'); this.classList.remove('open');"></div>
+    <aside class="pf-mobile-drawer" id="pf-mobile-drawer">
+      <div class="pf-drawer-header">
+        <div class="pf-drawer-user">
+          <div class="pf-avatar-circle" style="width:36px; height:36px; font-size:14px;">{{ user.username|slice:":1"|upper }}</div>
+          <div>
+            <div style="font-weight:800; font-size:14px; color:var(--brown-dark);">{{ user.username }}</div>
+            <div style="font-size:11px; color:var(--text-muted);">Lv.{{ user.profile.level }} • {{ user.profile.rank_title }}</div>
+          </div>
+        </div>
+        <button class="pf-nav-icon-btn" onclick="document.getElementById('pf-mobile-drawer').classList.remove('open'); document.getElementById('pf-drawer-backdrop').classList.remove('open');">
+          <span class="pf-icon"><svg><use href="#icon-x"></use></svg></span>
+        </button>
+      </div>
+
+      <nav class="pf-drawer-links">
+        <a class="pf-drawer-link {% if request.resolver_match.url_name == 'dashboard' or request.resolver_match.url_name == 'landing' %}active{% endif %}" href="{% url 'accounts:dashboard' %}">
+          <span class="pf-icon"><svg><use href="#icon-home"></use></svg></span>
+          <span>Home</span>
+        </a>
+        <a class="pf-drawer-link {% if request.resolver_match.url_name == 'ai_setup' or 'battle' in request.path or 'room' in request.path or 'quick-match' in request.path %}active{% endif %}" href="{% url 'game:ai_setup' %}">
+          <span class="pf-icon"><svg><use href="#icon-swords"></use></svg></span>
+          <span>Play Arena</span>
+        </a>
+        <a class="pf-drawer-link {% if request.resolver_match.url_name == 'my_pen' %}active{% endif %}" href="{% url 'game:my_pen' %}">
+          <span class="pf-icon"><svg><use href="#icon-layers"></use></svg></span>
+          <span>My Pen Loadout</span>
+        </a>
+        <a class="pf-drawer-link {% if 'store' in request.path %}active{% endif %}" href="{% url 'store:home' %}">
+          <span class="pf-icon"><svg><use href="#icon-store"></use></svg></span>
+          <span>Cosmetic Store</span>
+        </a>
+        <a class="pf-drawer-link {% if request.resolver_match.url_name == 'collection' %}active{% endif %}" href="{% url 'game:collection' %}">
+          <span class="pf-icon"><svg><use href="#icon-grid"></use></svg></span>
+          <span>My Collection</span>
+        </a>
+        <a class="pf-drawer-link {% if request.resolver_match.url_name == 'leaderboard' %}active{% endif %}" href="{% url 'accounts:leaderboard' %}">
+          <span class="pf-icon"><svg><use href="#icon-trophy"></use></svg></span>
+          <span>Leaderboard</span>
+        </a>
+        <a class="pf-drawer-link {% if request.resolver_match.url_name == 'friends' %}active{% endif %}" href="{% url 'accounts:friends' %}">
+          <span class="pf-icon"><svg><use href="#icon-users"></use></svg></span>
+          <span>Friends List</span>
+        </a>
+        <a class="pf-drawer-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" href="{% url 'accounts:profile' user.username %}">
+          <span class="pf-icon"><svg><use href="#icon-user"></use></svg></span>
+          <span>Profile Settings</span>
+        </a>
+      </nav>
+
+      <div class="pf-drawer-footer">
+        <form method="post" action="{% url 'accounts:logout' %}">
+          {% csrf_token %}
+          <button class="pf-btn pf-btn-danger pf-btn-block" type="submit">
+            <span class="pf-icon"><svg><use href="#icon-log-out"></use></svg></span>
+            <span>Log Out</span>
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    <!-- Mobile Fixed Bottom Navigation Bar -->
+    <nav class="pf-mobile-bottom-nav">
+      <a href="{% url 'accounts:dashboard' %}" class="pf-mobile-nav-btn {% if request.resolver_match.url_name == 'dashboard' or request.resolver_match.url_name == 'landing' %}active{% endif %}">
+        <span class="pf-icon"><svg><use href="#icon-home"></use></svg></span>
+        <span>Home</span>
+      </a>
+      <a href="{% url 'game:ai_setup' %}" class="pf-mobile-nav-btn {% if request.resolver_match.url_name == 'ai_setup' or 'battle' in request.path or 'room' in request.path or 'quick-match' in request.path %}active{% endif %}">
+        <span class="pf-icon"><svg><use href="#icon-swords"></use></svg></span>
+        <span>Play</span>
+      </a>
+      <a href="{% url 'game:my_pen' %}" class="pf-mobile-nav-btn {% if request.resolver_match.url_name == 'my_pen' %}active{% endif %}">
+        <span class="pf-icon"><svg><use href="#icon-layers"></use></svg></span>
+        <span>Loadout</span>
+      </a>
+      <a href="{% url 'store:home' %}" class="pf-mobile-nav-btn {% if 'store' in request.path %}active{% endif %}">
+        <span class="pf-icon"><svg><use href="#icon-store"></use></svg></span>
+        <span>Store</span>
+      </a>
+      <a href="{% url 'accounts:leaderboard' %}" class="pf-mobile-nav-btn {% if request.resolver_match.url_name == 'leaderboard' %}active{% endif %}">
+        <span class="pf-icon"><svg><use href="#icon-trophy"></use></svg></span>
+        <span>Ranks</span>
+      </a>
+    </nav>
+    {% endif %}
 
     <!-- Main Container Content -->
     <main class="pf-app-body">

@@ -340,6 +340,28 @@
     .pf-ref-bottom-bar { padding: 8px 12px; gap: 10px; bottom: 8px; }
     .pf-ref-sublabel { display: none; }
   }
+
+  @media (max-width: 600px) {
+    .pf-ref-hud-card { min-width: 100px !important; padding: 4px 6px !important; top: 6px !important; gap: 2px !important; }
+    .pf-ref-hud-card.p1 { left: 6px !important; }
+    .pf-ref-hud-card.p2 { right: 6px !important; }
+    .pf-ref-avatar { width: 24px !important; height: 24px !important; font-size: 10px !important; }
+    .pf-ref-name { font-size: 10px !important; max-width: 55px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pf-ref-rank { display: none !important; }
+    .pf-ref-dots { gap: 3px !important; margin-top: 1px !important; }
+    .pf-ref-dot { width: 8px !important; height: 8px !important; border-width: 1px !important; }
+    .pf-ref-hud-center { top: 4px !important; }
+    .pf-ref-center-box { padding: 3px 10px !important; }
+    .pf-ref-round-label { font-size: 8px !important; letter-spacing: 0.06em !important; }
+    .pf-ref-score { font-size: 18px !important; }
+    .pf-ref-turn-pill { padding: 2px 8px !important; font-size: 8px !important; letter-spacing: 0.06em !important; }
+    .pf-ref-bottom-bar { width: 96% !important; bottom: 6px !important; padding: 6px 10px !important; gap: 6px !important; flex-wrap: wrap !important; border-radius: 12px !important; }
+    .pf-ref-ctrl-group { flex: 1 1 45% !important; min-width: 110px !important; gap: 2px !important; }
+    .pf-ref-ctrl-header { font-size: 10px !important; }
+    .pf-ref-slider { height: 8px !important; }
+    .pf-ref-sublabel { display: none !important; }
+    .pf-ref-flick-btn { padding: 8px 14px !important; font-size: 12px !important; border-radius: 6px !important; flex: 1 1 100% !important; order: 3; text-align: center; justify-content: center; }
+  }
 </style>
 {% endblock %}
 

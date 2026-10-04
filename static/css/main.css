@@ -2315,4 +2315,458 @@ body {
   .pf-welcome-banner { padding: 20px; }
 }
 
+/* =========================================================================
+   COMPREHENSIVE MOBILE RESPONSIVENESS & TOUCH OPTIMIZATION STYLES
+   ========================================================================= */
+
+/* Desktop only utility */
+.pf-mobile-toggle { display: none !important; }
+.pf-mobile-bottom-nav { display: none !important; }
+.pf-drawer-backdrop, .pf-mobile-drawer { display: none; }
+
+@media (max-width: 768px) {
+  .pf-desktop-only { display: none !important; }
+  .pf-mobile-toggle { display: flex !important; }
+
+  /* Header mobile adjustments */
+  .pf-global-nav-wrap {
+    padding: 0 8px;
+    top: 6px;
+  }
+
+  .pf-global-nav {
+    height: 52px;
+    padding: 0 10px;
+    gap: 8px;
+  }
+
+  .pf-brand-mark {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+  }
+  .pf-brand-mark svg { width: 15px; height: 15px; }
+  .pf-brand-text { font-size: 13px; }
+  .pf-brand-subtext { display: none; }
+
+  .pf-nav-links { display: none !important; }
+
+  .pf-nav-right {
+    gap: 6px;
+  }
+
+  .pf-pp-pill {
+    padding: 4px 8px;
+    font-size: 11px;
+    gap: 4px;
+  }
+  .pf-pp-val { font-size: 13px; }
+  .pf-pp-lbl { display: none; }
+
+  .pf-nav-user {
+    padding: 3px;
+  }
+  .pf-nav-user .pf-user-meta { display: none; }
+  .pf-nav-user .pf-avatar-circle { width: 28px; height: 28px; font-size: 11px; }
+
+  .pf-nav-icon-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  /* Main Container Padding for Mobile Bottom Bar */
+  .pf-app-body {
+    padding: 16px 0 80px;
+  }
+
+  /* Fixed Bottom Mobile Navigation */
+  .pf-mobile-bottom-nav {
+    display: flex !important;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 58px;
+    background: rgba(255, 249, 240, 0.96);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border);
+    z-index: 900;
+    padding: 4px 8px;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -4px 20px rgba(53, 37, 28, 0.08);
+  }
+
+  .pf-mobile-nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    flex: 1;
+    color: var(--text-secondary);
+    font-size: 10px;
+    font-weight: 700;
+    text-decoration: none;
+    padding: 6px 0;
+    border-radius: var(--radius-md);
+    transition: all 0.15s;
+  }
+  .pf-mobile-nav-btn svg {
+    width: 18px; height: 18px;
+    color: var(--text-secondary);
+  }
+  .pf-mobile-nav-btn.active {
+    color: #1C3829;
+    font-weight: 800;
+  }
+  .pf-mobile-nav-btn.active svg {
+    color: #1C3829;
+  }
+
+  /* Slide-out Mobile Drawer */
+  .pf-drawer-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 998;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .pf-drawer-backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .pf-mobile-drawer {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: 280px;
+    max-width: 85vw;
+    background: #FFF9F0;
+    border-left: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    z-index: 999;
+    transform: translateX(100%);
+    transition: transform 0.25s cubic-bezier(.2, .9, .3, 1);
+  }
+  .pf-mobile-drawer.open {
+    transform: translateX(0);
+  }
+
+  .pf-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .pf-drawer-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .pf-drawer-links {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .pf-drawer-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    color: var(--brown-dark);
+    font-weight: 700;
+    font-size: 13px;
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+  .pf-drawer-link:hover, .pf-drawer-link.active {
+    background: rgba(140, 81, 56, 0.12);
+    color: #1C3829;
+  }
+  .pf-drawer-link svg {
+    width: 18px; height: 18px;
+    color: var(--text-secondary);
+  }
+
+  .pf-drawer-footer {
+    padding: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* General Layout Padding */
+  .pf-container {
+    padding: 0 14px;
+  }
+
+  .pf-page-title {
+    font-size: 20px;
+  }
+  .pf-page-sub {
+    font-size: 12px;
+  }
+  .pf-page-head {
+    margin-bottom: 20px;
+  }
+}
+
+/* Screen width < 600px enhancements */
+@media (max-width: 600px) {
+  /* Prevent iOS zoom on input focus */
+  input[type="text"], input[type="password"], input[type="email"], input[type="number"],
+  input[type="search"], select, textarea, .pf-input, .pf-select {
+    font-size: 16px !important;
+  }
+
+  /* Grid Fallbacks */
+  .pf-grid-2, .pf-grid-3, .pf-grid-4, .pf-grid-5 {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+
+  /* Dashboard mobile layout fixes */
+  .pf-welcome-banner {
+    padding: 16px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  .pf-welcome-main {
+    gap: 12px;
+  }
+  .pf-welcome-avatar {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+  .pf-welcome-title {
+    font-size: 18px;
+  }
+  .pf-underline-stroke {
+    width: 80px;
+    height: 8px;
+    bottom: -4px;
+  }
+  .pf-welcome-progress-side {
+    min-width: 100%;
+    margin-top: 4px;
+  }
+  .pf-keep-fighting-note {
+    display: none;
+  }
+
+  .pf-mode-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+  .pf-gamemode-card {
+    padding: 16px;
+    min-height: 120px;
+  }
+  .pf-gm-doodle {
+    width: 64px;
+    height: 64px;
+    right: 8px;
+    bottom: 8px;
+  }
+  .pf-gm-body h3 {
+    font-size: 16px;
+  }
+  .pf-gm-body p {
+    font-size: 11.5px;
+    max-width: 100%;
+  }
+
+  .pf-desk-stats-row {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+  }
+  .pf-desk-stat-card {
+    padding: 12px;
+  }
+  .pf-desk-stat-num {
+    font-size: 24px;
+  }
+
+  .pf-desk-bottom-row {
+    grid-template-columns: 1fr !important;
+    gap: 14px;
+  }
+  .pf-desk-panel {
+    padding: 16px;
+  }
+
+  /* Cosmetic Store Mobile Filters & Grid */
+  #rarity-filters {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    padding-bottom: 6px;
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  #rarity-filters::-webkit-scrollbar { display: none; }
+  #rarity-filters button {
+    flex-shrink: 0;
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+
+  /* Store Preview Modal Mobile Layout */
+  .pf-modal-box {
+    width: 95% !important;
+    padding: 16px !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    border-radius: 16px !important;
+  }
+  .pf-modal-box .pf-grid-2 {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+  .pf-preview-hero-stage {
+    height: 160px !important;
+  }
+  .pf-modal-box div[style*="padding-left:16px"] {
+    padding-left: 0 !important;
+  }
+  #modal-pen-name {
+    font-size: 22px !important;
+  }
+
+  /* My Loadout Mobile Layout */
+  .pen-hero-container {
+    padding: 16px !important;
+  }
+  .pen-hero-container .pf-grid-2 {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+  .pen-hero-container div[style*="padding-left:16px"] {
+    padding-left: 0 !important;
+  }
+  .pen-pedestal {
+    height: 160px !important;
+  }
+  #hero-skin-name {
+    font-size: 24px !important;
+  }
+  .pen-hero-container .pf-glass[style*="justify-content:space-around"] {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+    padding: 12px !important;
+  }
+
+  /* Leaderboard Mobile Styling */
+  .pf-card .pf-flex-between[style*="font-size:11px"] {
+    font-size: 10px !important;
+  }
+}
+
+/* =========================================================================
+   BATTLE SCREEN MOBILE RESPONSIVE HUD & CONTROLS
+   ========================================================================= */
+
+@media (max-width: 600px) {
+  /* Canvas scale adjustments */
+  #battle-canvas {
+    width: 100vw !important;
+    height: auto !important;
+    max-height: 65vh !important;
+  }
+
+  /* Top HUD Cards on Mobile */
+  .pf-ref-hud-card {
+    min-width: 110px !important;
+    padding: 4px 8px !important;
+    top: 8px !important;
+    gap: 2px !important;
+  }
+  .pf-ref-hud-card.p1 { left: 8px !important; }
+  .pf-ref-hud-card.p2 { right: 8px !important; }
+
+  .pf-ref-avatar {
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 10px !important;
+  }
+  .pf-ref-name {
+    font-size: 11px !important;
+    max-width: 65px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .pf-ref-rank { display: none !important; }
+  .pf-ref-dots { gap: 3px !important; margin-top: 1px !important; }
+  .pf-ref-dot { width: 8px !important; height: 8px !important; border-width: 1px !important; }
+
+  /* Top-Center Score Box on Mobile */
+  .pf-ref-hud-center {
+    top: 6px !important;
+  }
+  .pf-ref-center-box {
+    padding: 3px 12px !important;
+  }
+  .pf-ref-round-label {
+    font-size: 8px !important;
+    letter-spacing: 0.08em !important;
+  }
+  .pf-ref-score {
+    font-size: 18px !important;
+  }
+  .pf-ref-turn-pill {
+    padding: 2px 10px !important;
+    font-size: 8px !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  /* Bottom Control Bar on Mobile */
+  .pf-ref-bottom-bar {
+    width: 96% !important;
+    bottom: 6px !important;
+    padding: 8px 10px !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+    border-radius: 12px !important;
+  }
+
+  .pf-ref-ctrl-group {
+    flex: 1 1 45% !important;
+    min-width: 120px !important;
+    gap: 2px !important;
+  }
+  .pf-ref-ctrl-header {
+    font-size: 10px !important;
+  }
+  .pf-ref-slider {
+    height: 8px !important;
+  }
+  .pf-ref-sublabel { display: none !important; }
+
+  .pf-ref-flick-btn {
+    padding: 8px 16px !important;
+    font-size: 12px !important;
+    border-radius: 6px !important;
+    flex: 1 1 100% !important;
+    order: 3;
+    text-align: center;
+    justify-content: center;
+  }
+}
+
+
 
