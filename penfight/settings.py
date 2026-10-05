@@ -23,7 +23,7 @@ environ.Env.read_env(BASE_DIR / ".env", overwrite=True)
 
 SECRET_KEY = env("SECRET_KEY", default="dev-insecure-secret-key-change-me-in-prod")
 DEBUG = env.bool("DEBUG", default=True)
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["127.0.0.1", "localhost", "testserver"])
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["127.0.0.1", "localhost", "testserver", ".railway.app", ".up.railway.app", "*"])
 
 INSTALLED_APPS = [
     "daphne",
@@ -144,6 +144,14 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 # WhiteNoise compressed static file storage for production
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -154,10 +162,15 @@ LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "accounts:dashboard"
 LOGOUT_REDIRECT_URL = "game:landing"
 
-# CSRF / security niceties for local dev over plain HTTP.
+# CSRF / security niceties for local dev & production over HTTP/HTTPS.
 CSRF_TRUSTED_ORIGINS = env.list(
     "CSRF_TRUSTED_ORIGINS",
-    default=["http://127.0.0.1:8000", "http://localhost:8000"],
+    default=[
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
+        "https://*.railway.app",
+        "https://*.up.railway.app",
+    ],
 )
 
 # ---------------------------------------------------------------------------

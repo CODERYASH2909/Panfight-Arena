@@ -30,14 +30,7 @@ fi
 
 # ── 3. Seed initial game data (idempotent fixtures) ───────────────────────────
 echo "▶  Seeding game fixtures (pens, skins, arenas, achievements)..."
-python manage.py shell -c "
-from game.management.commands.seed_game_data import Command
-try:
-    Command().handle()
-    print('  Game data seeded.')
-except Exception as e:
-    print(f'  Seed skipped or already exists: {e}')
-" 2>/dev/null || echo "  No seed command found — skipping."
+python manage.py seed_penfight || echo "  Seed failed or skipped."
 
 # ── 4. Start Daphne (ASGI — HTTP + WebSocket) ─────────────────────────────────
 echo ""
