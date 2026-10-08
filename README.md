@@ -52,7 +52,7 @@ The application features a sleek dark UI, custom 2D physics engine running on HT
       <h3>🏆 Progression & Rewards</h3>
       <ul>
         <li><b>XP & Leveling System:</b> Rank up from Novice to Grandmaster as you win matches.</li>
-        <li><b>Pen Points (PP) Economy:</b> Earn in-game currency through battles and achievements.</li>
+        <li><b>Pen Points(PP) Economy:</b> Earn in-game currency through battles and achievements.</li>
         <li><b>Achievements & Trophies:</b> Complete challenges to unlock exclusive badges and bonus PP.</li>
       </ul>
     </td>
@@ -255,4 +255,3 @@ Distributed under the **MIT License**. See `LICENSE` for detail.
 <div align="center">
   <sub>Built using Django & HTML5 Canvas</sub>
 </div>
-
