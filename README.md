@@ -49,7 +49,7 @@ The application features a sleek dark UI, custom 2D physics engine running on HT
   </tr>
   <tr>
     <td width="50%">
-      <h3>🏆 Progression & Rewards</h3>
+      <h3>Progression & Rewards</h3>
       <ul>
         <li><b>XP & Leveling System:</b> Rank up from Novice to Grandmaster as you win matches.</li>
         <li><b>Pen Points(PP) Economy:</b> Earn in-game currency through battles and achievements.</li>
